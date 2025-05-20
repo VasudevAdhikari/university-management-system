@@ -13,7 +13,7 @@ class Gender(models.TextChoices):
 class AdminLevel(models.TextChoices):
     ROOT = 'R', 'Root'
     SENIOR = 'S', 'Senior'
-    JUNIOR = 'J', 'Junior'
+    JUNIOR = 'J', 'Junior' 
     VIEWER = 'V', 'Viewer'
 
 class EmploymentStatus(models.TextChoices):

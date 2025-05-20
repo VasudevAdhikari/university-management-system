@@ -1,7 +1,7 @@
 from django.shortcuts import render
-from authorization.models import Student, User, MailboxPost
+from authorization.models import Student, User, MailboxPost, MailboxReport
 from django.http import JsonResponse
-from django.views.decorators.http import require_http_methods
+from django.views.decorators.http import require_http_methods, require_POST
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
 from django.conf import settings
 from django.utils import timezone
@@ -262,8 +262,8 @@ def handle_comment(request):
         print("Error in handle_comment:", str(e))
         return JsonResponse({
             'status': 'error',
-            'message': str(e)
-        }, status=400)
+            'message': str(e)}
+        , status=400)
 
 @require_http_methods(["GET"])
 def get_comments(request, post_id):
@@ -312,8 +312,8 @@ def get_comments(request, post_id):
         print("Error in get_comments:", str(e))
         return JsonResponse({
             'status': 'error',
-            'message': str(e)
-        }, status=400)
+            'message': str(e)}
+        , status=400)
 
 def get_comment_level(comment):
     """Calculate the nesting level of a comment"""
@@ -468,6 +468,52 @@ def manage_posts_edit(request, post_id):
         post.post = json.dumps(post_data)
         post.updated_at = timezone.now()
         post.save()
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+
+
+@csrf_exempt  # Use this only if you are sure about the security implications
+@require_POST
+def increment_post_view(request):
+    try:
+        data = json.loads(request.body)
+        post_id = data.get('post_id')
+        post = get_object_or_404(MailboxPost, id=post_id)
+        # Parse the post JSON field
+        post_data = json.loads(post.post)
+        # Use 'views' as the key (not 'view')
+        if 'views' in post_data:
+            post_data['views'] += 1
+        else:
+            post_data['views'] = 1
+        # Save back to the model
+        post.post = json.dumps(post_data)
+        post.save()
+        print(f"Post ID {post_id} view count incremented to {post_data['views']}")
+        return JsonResponse({'success': True, 'view_count': post_data['views']})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+@require_http_methods(["POST"])
+@csrf_exempt
+def report_post(request):
+    try:
+        data = json.loads(request.body)
+        post_id = data.get('post_id')
+        report_text = data.get('report_text')
+        user = get_current_user(request)
+        if not user:
+            return JsonResponse({'status': 'error', 'message': 'User not authenticated'}, status=401)
+        post = get_object_or_404(MailboxPost, id=post_id)
+        # Store reports as a list of dicts in a JSONField or TextField
+        MailboxReport.objects.create(
+            post=post,
+            reporter=Student.objects.get(user=user),
+            report_text=report_text,
+            created_at=timezone.now(),
+            updated_at=timezone.now(),
+        )
         return JsonResponse({'status': 'success'})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=400)

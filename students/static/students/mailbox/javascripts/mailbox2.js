@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let currentGallery = null;
     let currentIndex = 0;
-    let mediaItems = [];
+    let mediaItems = []; 
  
     function pauseAllVideos(exceptVideo = null) {
         // Pause all videos in the DOM except the one passed as exceptVideo
@@ -201,7 +201,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 <div class="comment-button">
                     <img src="${STATIC_URLS.commentsImage}">Comment
                 </div>
-                <div>
+                <div class"report-img">
                     <img src="${STATIC_URLS.shareImage}">Report
                 </div>
             </div>
@@ -238,19 +238,25 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         // --- Report Popup trigger (fix) ---
-        const reportBtn = postContainer.querySelector('.post-row > div:last-child');
+        console.log("Post container:", postContainer);
+        const reportBtn = postContainer.querySelector('img[src="/static/students/mailbox/images/share.png"]');
+        console.log("Report button:", reportBtn);
         if (reportBtn) {
             reportBtn.style.cursor = "pointer";
-            reportBtn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                // --- Ensure report popup is shown ---
-                const popup = document.getElementById('report-popup');
-                if (popup) {
-                    popup.style.display = 'flex';
-                    popup.classList.add('active');
-                }
-                openReportPopup(post.id);
-            });
+            // Only trigger popup when clicking the report icon itself
+            const reportIcon = reportBtn;
+            if (reportIcon) {
+                reportIcon.style.cursor = "pointer";
+                reportIcon.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const popup = document.getElementById('report-popup');
+                    if (popup) {
+                        popup.style.display = 'flex';
+                        popup.classList.add('active');
+                    }
+                    openReportPopup(post.id);
+                });
+            }
         }
 
         // --- Reinitialize view tracking for this post ---
@@ -266,9 +272,48 @@ document.addEventListener('DOMContentLoaded', function () {
         const listDiv = lightbox.querySelector('.reaction-list');
         listDiv.innerHTML = '';
 
+        // --- Style the lightbox for overlay, background, border radius, shadow, scroll ---
+        lightbox.style.position = 'fixed';
+        lightbox.style.top = '0';
+        lightbox.style.left = '0';
+        lightbox.style.width = '100vw';
+        lightbox.style.height = '100vh';
+        lightbox.style.background = 'rgba(255,255,255,0.96)';
+        lightbox.style.zIndex = '99999';
+        lightbox.style.display = 'flex';
+        lightbox.style.alignItems = 'center';
+        lightbox.style.justifyContent = 'center';
+
+        const content = lightbox.querySelector('.reaction-lightbox-content');
+        if (content) {
+            content.style.background = '#fff';
+            content.style.borderRadius = '18px';
+            content.style.boxShadow = '0 8px 32px rgba(0,0,0,0.18)';
+            content.style.padding = '32px 24px 24px 24px';
+            content.style.maxWidth = '400px';
+            content.style.width = '90vw';
+            content.style.maxHeight = '70vh';
+            content.style.overflow = 'hidden';
+            content.style.position = 'relative';
+            content.style.display = 'flex';
+            content.style.flexDirection = 'column';
+        }
+        if (listDiv) {
+            listDiv.style.overflowY = 'auto';
+            listDiv.style.maxHeight = '40vh';
+            listDiv.style.marginTop = '16px';
+        }
+        if (closeBtn) {
+            closeBtn.style.position = 'absolute';
+            closeBtn.style.top = '12px';
+            closeBtn.style.right = '18px';
+            closeBtn.style.cursor = 'pointer';
+            closeBtn.style.fontSize = '2em';
+            closeBtn.style.color = '#888';
+        }
+
         // reactions: { user_id: {reaction, reactor, profile_picture:{url}} }
         if (reactions && Object.keys(reactions).length > 0) {
-            // Sort by time not available, so just show in object order (or add time if available)
             Object.values(reactions).forEach(r => {
                 const row = document.createElement('div');
                 row.style.display = 'flex';
@@ -285,7 +330,10 @@ document.addEventListener('DOMContentLoaded', function () {
             listDiv.innerHTML = '<div>No reactions yet.</div>';
         }
 
-        lightbox.style.display = 'block';
+        // Show the lightbox
+        lightbox.style.display = 'flex';
+
+        // Close logic
         closeBtn.onclick = function() {
             lightbox.style.display = 'none';
         };
@@ -649,10 +697,85 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // Add a circular progress bar overlay to the write-post-container (not global)
+    function ensureUploadProgressBarOverlay() {
+        let container = document.querySelector('.write-post-container');
+        if (!container) return;
+        if (container.querySelector('#upload-progress-bar')) return;
+        const bar = document.createElement('div');
+        bar.id = 'upload-progress-bar';
+        bar.style.position = 'absolute';
+        bar.style.top = '0';
+        bar.style.left = '0';
+        bar.style.width = '100%';
+        bar.style.height = '100%';
+        bar.style.display = 'none';
+        bar.style.background = 'rgba(255,255,255,0.7)';
+        bar.style.zIndex = '10';
+        bar.style.justifyContent = 'center';
+        bar.style.alignItems = 'center';
+        bar.style.transition = 'opacity 0.2s';
+        bar.style.pointerEvents = 'none';
+        bar.innerHTML = `
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;">
+                <svg width="60" height="60" viewBox="0 0 40 40">
+                    <circle cx="20" cy="20" r="18" stroke="#eee" stroke-width="4" fill="none"/>
+                    <circle id="upload-progress-circle" cx="20" cy="20" r="18" stroke="#1876f2" stroke-width="4" fill="none"
+                        stroke-dasharray="113.097" stroke-dashoffset="113.097" style="transition:stroke-dashoffset 0.2s;"/>
+                </svg>
+                <span id="upload-progress-text" style="margin-top:8px;font-weight:bold;">0%</span>
+                <span style="font-size:12px;color:#555;">Uploading...</span>
+            </div>
+        `;
+        bar.style.position = 'absolute';
+        bar.style.top = '0';
+        bar.style.left = '0';
+        bar.style.width = '100%';
+        bar.style.height = '100%';
+        bar.style.display = 'none';
+        container.style.position = 'relative';
+        container.appendChild(bar);
+    }
+    ensureUploadProgressBarOverlay();
+
+    function showUploadProgressBar(percent) {
+        const container = document.querySelector('.write-post-container');
+        const bar = container ? container.querySelector('#upload-progress-bar') : null;
+        const circle = bar ? bar.querySelector('#upload-progress-circle') : null;
+        const text = bar ? bar.querySelector('#upload-progress-text') : null;
+        if (bar && circle && text) {
+            bar.style.display = 'flex';
+            // Fade the write-post-container except the overlay
+            container.style.opacity = '0.5';
+            bar.style.pointerEvents = 'auto';
+            // Circle circumference = 2 * PI * r = ~113.097
+            const offset = 113.097 - (113.097 * percent / 100);
+            circle.setAttribute('stroke-dashoffset', offset);
+            text.textContent = `${Math.round(percent)}%`;
+        }
+    }
+    function hideUploadProgressBar() {
+        const container = document.querySelector('.write-post-container');
+        const bar = container ? container.querySelector('#upload-progress-bar') : null;
+        if (bar) bar.style.display = 'none';
+        if (container) container.style.opacity = '1';
+        if (bar) bar.style.pointerEvents = 'none';
+    }
+
     if (postSubmitBtn) {
         postSubmitBtn.addEventListener('click', async function() {
             const postText = postInput.value.trim();
             if (!postText && selectedMediaPreview.children.length === 0) return;
+
+            // --- Hide controls and disable input during upload ---
+            const writePostContainer = document.querySelector('.write-post-container');
+            const videoIcon = writePostContainer.querySelector('.video-upload');
+            const photoIcon = writePostContainer.querySelector('.photo-upload');
+            postSubmitBtn.style.display = 'none';
+            if (videoIcon) videoIcon.style.display = 'none';
+            if (photoIcon) photoIcon.style.display = 'none';
+            postCancelBtn.style.display = 'none';
+            postInput.disabled = true;
 
             try {
                 const formData = new FormData();
@@ -670,36 +793,80 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 });
 
-                const response = await fetch('/students/mailbox/post/', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': csrftoken
-                    },
-                    body: formData
+                // --- Show progress bar before upload ---
+                showUploadProgressBar(0);
+
+                // Use XMLHttpRequest for progress events
+                await new Promise((resolve, reject) => {
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('POST', '/students/mailbox/post/', true);
+                    xhr.setRequestHeader('X-CSRFToken', csrftoken);
+
+                    xhr.upload.onprogress = function(e) {
+                        if (e.lengthComputable) {
+                            const percent = (e.loaded / e.total) * 100;
+                            showUploadProgressBar(percent);
+                        }
+                    };
+                    xhr.onload = function() {
+                        hideUploadProgressBar();
+                        // Restore controls
+                        if (videoIcon) videoIcon.style.display = '';
+                        if (photoIcon) photoIcon.style.display = '';
+                        postSubmitBtn.style.display = '';
+                        postCancelBtn.style.display = '';
+                        postInput.disabled = false;
+                        if (xhr.status >= 200 && xhr.status < 300) {
+                            try {
+                                const data = JSON.parse(xhr.responseText);
+                                if (data.status === 'success') {
+                                    alert('Post uploaded successfully!');
+                                    // Clear the input and media preview
+                                    postInput.value = '';
+                                    selectedMediaPreview.innerHTML = '';
+                                    postButtons.style.display = 'none';
+                                    // Clear file inputs
+                                    fileInputs.forEach(input => { input.value = ''; });
+                                    // Reload the page to show the new post
+                                    window.location.reload();
+                                    resolve();
+                                } else {
+                                    alert(data.message || 'Failed to create post');
+                                    reject();
+                                }
+                            } catch (err) {
+                                alert('Error parsing server response.');
+                                reject();
+                            }
+                        } else {
+                            alert('Error creating post. Please try again.');
+                            reject();
+                        }
+                    };
+                    xhr.onerror = function() {
+                        hideUploadProgressBar();
+                        // Restore controls
+                        if (videoIcon) videoIcon.style.display = '';
+                        if (photoIcon) photoIcon.style.display = '';
+                        postSubmitBtn.style.display = '';
+                        postCancelBtn.style.display = '';
+                        postInput.disabled = false;
+                        alert('Error creating post. Please try again.');
+                        reject();
+                    };
+                    xhr.send(formData);
                 });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const data = await response.json();
-                if (data.status === 'success') {
-                    // Clear the input and media preview
-                    postInput.value = '';
-                    selectedMediaPreview.innerHTML = '';
-                    postButtons.style.display = 'none';
-                    
-                    // Clear file inputs
-                    fileInputs.forEach(input => {
-                        input.value = '';
-                    });
-                    
-                    // Reload the page to show the new post
-                    window.location.reload();
-                } else {
-                    throw new Error(data.message || 'Failed to create post');
-                }
             } catch (error) {
+                hideUploadProgressBar();
+                // Restore controls
+                const writePostContainer = document.querySelector('.write-post-container');
+                const videoIcon = writePostContainer.querySelector('.video-upload');
+                const photoIcon = writePostContainer.querySelector('.photo-upload');
+                if (videoIcon) videoIcon.style.display = '';
+                if (photoIcon) photoIcon.style.display = '';
+                postSubmitBtn.style.display = '';
+                postCancelBtn.style.display = '';
+                postInput.disabled = false;
                 console.error('Error creating post:', error);
                 alert('Error creating post. Please try again.');
             }

@@ -24,7 +24,7 @@ function trackPostViews() {
             if (!timer && !window._mailboxViewedPosts.has(postId)) {
                 timer = setTimeout(() => {
                     window._mailboxViewedPosts.add(postId);
-                    fetch('/students/mailbox/increment_post_view/', {
+                    fetch('/students/increment_post_view/', { // FIXED URL
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
