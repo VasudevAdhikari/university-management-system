@@ -1,0 +1,171 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Mailbox</title>
+    <link rel="stylesheet" href="{% static 'students/mailbox/styles/mailbox.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Add CSRF Token -->
+    <script>
+        const csrftoken = '{{ csrf_token }}';
+    </script>
+</head>
+
+<body>
+    <div class="mailbox-banner">
+        <img src="{% static 'students/mailbox/images/feed-image-1.png' %}" alt="Mailbox Banner">
+        <div class="banner-overlay">
+            <h1>Student Mailbox</h1>
+        </div>
+    </div>
+    <br>
+
+    <!-- Description Section -->
+    <div class="mailbox-description">
+        <p class="description-text">
+            Welcome to the Student Mailbox - your central hub for academic discussions, resource sharing, and community
+            engagement. Connect with fellow students, share your thoughts, and stay updated with the latest campus
+            activities. This platform is designed to foster meaningful interactions and collaborative learning among
+            students.
+            <span class="more-text" style="display: none;">
+                Whether you're looking to discuss course materials, organize study groups, or simply connect with peers,
+                the Student Mailbox provides a safe and inclusive space for all academic-related conversations. Join our
+                growing community and be part of an enriching educational experience.
+            </span>
+        </p>
+        <button class="show-more-btn">Show More</button>
+    </div>
+
+    <!-- Active Members Section -->
+    <div class="active-members">
+        <h3>Most Active Members</h3>
+        <div class="member-profiles">
+            {% for student in most_active %}
+            <div class="member-profile">
+              <img src="{{student.user.profile_picture.url}}" alt="Member 1 {{student.user.full_name}}">
+              <span>{{student.user.full_name}}</span>
+          </div>
+            {% endfor %}
+            <!-- <div class="member-profile">
+                <img src="{% static 'students/mailbox/images/profile-pic.png' %}" alt="Member 1">
+                <span>Vasudev</span>
+            </div>
+            <div class="member-profile">
+                <img src="{% static 'students/mailbox/images/member-1.png' %}" alt="Member 2">
+                <span>Riya</span>
+            </div>
+            <div class="member-profile">
+                <img src="{% static 'students/mailbox/images/member-2.png' %}" alt="Member 3">
+                <span>Sneha</span>
+            </div>
+            <div class="member-profile">
+                <img src="{% static 'students/mailbox/images/member-3.png' %}" alt="Member 4">
+                <span>Aarav</span>
+            </div> -->
+        </div>
+    </div>
+    <div class="container">
+
+        <div class="main-content">
+            <div class="write-post-container">
+                <div class="post-row">
+                    <div class="user-profile">
+                        <img src="{{ user.user.profile_picture.url }}" alt="profile-pic">
+                        <div>
+                            <p>{{user.user.full_name}}</p>
+                            <small>Semester V <i class="fas fa-caret-down"></i></small>
+                        </div>
+                    </div>
+                    <a href="#"><i class="fas fa-ellipsis-v"></i></a>
+                </div>
+                <div class="post-input-container">
+                    <textarea rows="3" id="post-input-text"
+                        placeholder="What's on your mind? {{user.user.full_name}}!!"></textarea>
+                    <div class="selected-media-preview"></div>
+                    <div class="post-buttons" style="display: none;">
+                        <button id="post-submit-btn" class="post-submit-btn">Post</button>
+                        <button class="post-cancel-btn">Cancel</button>
+                    </div>
+                    <div class="add-post-links">
+                        <label class="video-upload">
+                            <input type="file" accept=".mp4,.mkv,.avi,.mov" multiple style="display: none;">
+                            <img src="{% static 'students/mailbox/images/live-video.png' %}" alt="video">Video
+                        </label>
+                        <label class="photo-upload">
+                            <input type="file" accept="image/*" multiple style="display: none;">
+                            <img src="{% static 'students/mailbox/images/photo.png' %}" alt="photo">Photo
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <!-- Posts will be loaded here dynamically by JS -->
+        </div>
+    </div>
+
+    <!-- Reaction Lightbox -->
+    <div id="reaction-lightbox" class="reaction-lightbox" style="display:none;">
+        <div class="reaction-lightbox-content">
+            <span class="reaction-lightbox-close" style="cursor:pointer;float:right;font-size:2em;">&times;</span>
+            <h2>All Reactions</h2>
+            <div class="reaction-list"></div>
+        </div>
+    </div>
+
+    <div class="copyright-footer">
+        <p>Copyright 2021 MM Logic Gallery Youtube Channel</p>
+    </div>
+    <div id="image-lightbox" class="image-lightbox" style="display:none;">
+        <span class="lightbox-close">&times;</span>
+        <div class="lightbox-content">
+            <img class="lightbox-img" src="" alt="Gallery Image" style="display: none;">
+            <video class="lightbox-video" controls style="display: none;">
+                <source src="" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+        <span class="lightbox-prev">&#10094;</span>
+        <span class="lightbox-next">&#10095;</span>
+        <div class="lightbox-counter"></div>
+    </div>
+
+    <!-- Report Popup -->
+    <div id="report-popup" class="report-popup">
+        <div class="report-popup-content">
+            <h2>Report this post</h2>
+            <textarea placeholder="Enter your report details here..." rows="3"></textarea>
+            <div class="report-buttons">
+                <button class="report-submit-btn">Report</button>
+                <button class="report-cancel-btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reply Popup -->
+    <div id="reply-popup" class="reply-popup">
+        <div class="reply-popup-content">
+            <h2>Write a reply</h2>
+            <textarea placeholder="Write your reply here..." rows="3"></textarea>
+            <div class="reply-buttons">
+                <button class="reply-submit-btn">Reply</button>
+                <button class="reply-cancel-btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Add static URLs as JavaScript variables
+        const STATIC_URLS = {
+            likeImage: "{% static 'students/mailbox/images/like.png' %}",
+            commentsImage: "{% static 'students/mailbox/images/comments.png' %}",
+            shareImage: "{% static 'students/mailbox/images/share.png' %}"
+        };
+    </script>
+    <script src="{% static 'students/mailbox/javascripts/mailbox_views.js' %}"></script>
+    <script src="{% static 'students/mailbox/javascripts/mailbox1.js' %}"></script>
+    <script src="{% static 'students/mailbox/javascripts/mailbox2.js' %}"></script>
+    <script src="{% static 'students/mailbox/javascripts/comments.js' %}"></script>
+</body>
+
+</html>

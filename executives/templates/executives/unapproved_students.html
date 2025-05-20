@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beautiful DataTable Example</title>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/2.2.2/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .profile-pic {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .details-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .details-button:hover {
+            background-color: #0056b3;
+        }
+
+        .hidden-data {
+            display: none;
+            background-color: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <table id="myTable" class="display">
+        <thead>
+            <tr>
+                <th>Profile</th>
+                <th>Full Name</th>
+                <th>Registered Date</th>
+                <th>Email</th>
+                <th colspan="2">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in unapproved_students %}
+            <tr>
+                <td><img src="/media/{{student.user.profile_picture}}" class="profile-pic"
+                        alt="media/{{student.profile_picture}}"></td>
+                <td>{{student.user.full_name}}</td>
+                <td>{{student.user.created_at}}</td>
+                <td>{{student.user.email}}{{student.student_number}}</td>
+                <td style="display: none;" id="student-{{forloop.counter}}">{{student.student_number}}</td>
+                <td><button class="details-button">Details</button></td>
+                <td><button class="details-button" id="approve-button" onclick="approveStudent({{forloop.counter}})">Approve</button></td>
+            </tr>
+            <tr class="hidden-data">
+                <td colspan="5">
+                    <strong>Phone:</strong> 123-456-7890<br>
+                    <strong>City:</strong> New York<br>
+                    <strong>Date of Birth:</strong> 1990-01-01<br>
+                    <strong>Age:</strong> 33<br>
+                    <strong>Gender:</strong> Male<br>
+                    <strong>Emergency Contact Name:</strong> Jane Doe<br>
+                    <strong>Emergency Contact Email:</strong> jane.doe@example.com<br>
+                    <strong>Emergency Contact Phone:</strong> 098-765-4321<br>
+                    <strong>Relation:</strong> Sister
+                </td>
+            </tr>
+            {% endfor %}
+            <!-- Add more rows as needed -->
+        </tbody>
+    </table>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/2.2.2/js/jquery.dataTables.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            var table = $('#myTable').DataTable({
+                "columnDefs": [
+                    {
+                        "targets": 0,
+                        "orderable": false
+                    },
+                    {
+                        "targets": 4,
+                        "orderable": false
+                    }
+                ]
+            });
+
+            // Toggle hidden data on button click
+            $('#myTable tbody').on(' click', '.details-button', function () {
+                var row = $(this).closest('tr').next('.hidden-data');
+                row.toggle();
+            });
+        });
+
+        function approveStudent(s_id) {
+            console.log('Approve student with ID:', s_id);
+            student_number = document.getElementById(`student-${s_id}`).innerText;
+            console.log(student_number);
+            if (confirm('Are you sure you want to approve this student?')) {
+                fetch('/executives/approve_student/', { // Replace '/approve_student/' with your actual Django URL
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'), // Include CSRF token for Django
+                        'Content-Type': 'application/json' // Or other appropriate content type
+                    },
+                    // You might need to send some data, like the student ID
+                    body: JSON.stringify({
+                        student_id: student_number // Replace 'studentId' with the actual variable
+                    })
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json(); // Or response.text() if your Django view returns plain text
+                    })
+                    .then(data => {
+                        // Handle the successful response from Django
+                        if (data.success) {
+                            alert('Student approved successfully!');
+                            // Optionally, update the UI to reflect the approval
+                        } else {
+                            alert('Failed to approve student.');
+                            console.error('Approval failed:', data.error); // Log the error for debugging
+                        }
+                    })
+                    .catch(error => {
+                        alert('Failed to approve student.');
+                        console.error('There was an error sending the request:', error);
+                    });
+            }
+        }
+
+        // Helper function to get the CSRF token from cookies
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    let cookie = cookies[i].trimStart();
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.startsWith(name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+</body>
+
+</html>

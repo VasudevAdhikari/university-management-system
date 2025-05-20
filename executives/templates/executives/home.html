@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Executive Dashboard{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'executives/css/footer.css' %}">
+<link rel="stylesheet" href="{% static 'executives/css/home.css' %}">
+
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-2 bg-light sidebar p-0">
+            <div class="position-sticky">
+                <div class="p-3">
+                    <h5 class="text-primary">Executive Panel</h5>
+                    <hr>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" href="#">
+                                <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" href="#">
+                                <i class="fas fa-university me-2"></i>University Info
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" href="#">
+                                <i class="fas fa-users me-2"></i>Faculty Management
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" href="#">
+                                <i class="fas fa-graduation-cap me-2"></i>Degrees
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" href="#">
+                                <i class="fas fa-building me-2"></i>Departments
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" href="#">
+                                <i class="fas fa-calendar-alt me-2"></i>Terms
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" href="#">
+                                <i class="fas fa-book me-2"></i>Courses
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" href="#">
+                                <i class="fas fa-bell me-2"></i>Notices
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" href="#">
+                                <i class="fas fa-user-check me-2"></i>Approvals
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-10 main-content p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="text-primary">Welcome, {{ request.user.first_name }}</h2>
+                <div>
+                    <a href="#" class="btn btn-outline-primary">
+                        <i class="fas fa-user-circle me-2"></i>My Profile
+                    </a>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <!-- Quick Actions Cards -->
+                <div class="col-md-3">
+                    <div class="card dashboard-card">
+                        <div class="card-body text-center">
+                            <i class="fas fa-university card-icon"></i>
+                            <h5 class="card-title">University Info</h5>
+                            <p class="card-text">Manage university details and settings</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="card dashboard-card">
+                        <div class="card-body text-center">
+                            <i class="fas fa-users card-icon"></i>
+                            <h5 class="card-title">Faculty</h5>
+                            <p class="card-text">Manage faculty members and departments</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="card dashboard-card">
+                        <div class="card-body text-center">
+                            <i class="fas fa-book card-icon"></i>
+                            <h5 class="card-title">Courses</h5>
+                            <p class="card-text">Manage course offerings and schedules</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="card dashboard-card">
+                        <div class="card-body text-center">
+                            <i class="fas fa-bell card-icon"></i>
+                            <h5 class="card-title">Notices</h5>
+                            <p class="card-text">Manage and approve notices</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activities Section -->
+                <div class="col-12 mt-4">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Recent Activities</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="list-group">
+                                <a href="/executives/unapproved_students/" class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">Student Registration Requests</h6>
+                                        <small>3 hours ago</small>
+                                    </div>
+                                    <p class="mb-1">{{unapproved_student_count}} new student registration requests pending approval</p>
+                                </a>
+                                <a href="#" class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">Instructor Registration Requests</h6>
+                                        <small>3 hours ago</small>
+                                    </div>
+                                    <p class="mb-1">{{unapproved_instructor_count}} new instructor registration requests pending approval</p>
+                                </a>
+                                <a href="#" class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">Notice Updates</h6>
+                                        <small>1 day ago</small>
+                                    </div>
+                                    <p class="mb-1">2 notices pending approval from faculty members</p>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include 'executives/footer.html' %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Add smooth scrolling
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.querySelector(this.getAttribute('href')).scrollIntoView({
+                behavior: 'smooth'
+            });
+        });
+    });
+
+    // Add card click handlers
+    document.querySelectorAll('.dashboard-card').forEach(card => {
+        card.addEventListener('click', function() {
+            // Add navigation logic here based on the card clicked
+            const title = this.querySelector('.card-title').textContent;
+            switch(title) {
+                case 'University Info':
+                    // window.location.href = '';
+                    break;
+                case 'Faculty':
+                    // window.location.href = '';
+                    break;
+                case 'Courses':
+                    // window.location.href = '';
+                    break;
+                case 'Notices':
+                    // window.location.href = '';
+                    break;
+            }
+        });
+    });
+</script>
+{% endblock %}

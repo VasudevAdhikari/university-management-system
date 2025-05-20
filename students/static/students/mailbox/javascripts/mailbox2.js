@@ -1,0 +1,750 @@
+document.addEventListener('DOMContentLoaded', function () {
+    // Lightbox variables
+    const lightbox = document.getElementById('image-lightbox');
+    const lightboxImg = lightbox.querySelector('.lightbox-img');
+    const lightboxVideo = lightbox.querySelector('.lightbox-video');
+    const closeBtn = lightbox.querySelector('.lightbox-close');
+    const prevBtn = lightbox.querySelector('.lightbox-prev');
+    const nextBtn = lightbox.querySelector('.lightbox-next');
+    const counter = lightbox.querySelector('.lightbox-counter');
+
+    let currentGallery = null;
+    let currentIndex = 0;
+    let mediaItems = [];
+ 
+    function pauseAllVideos(exceptVideo = null) {
+        // Pause all videos in the DOM except the one passed as exceptVideo
+        document.querySelectorAll('video').forEach(video => {
+            if (video !== exceptVideo) {
+                video.pause();
+            }
+        });
+        // Also pause the lightbox video if it's not the exceptVideo
+        if (lightboxVideo && lightboxVideo !== exceptVideo) {
+            lightboxVideo.pause();
+        }
+    }
+
+    function showMedia(index) {
+        try {
+            if (!mediaItems || !mediaItems[index]) {
+                console.error('Invalid media item at index:', index);
+                return;
+            }
+
+            const item = mediaItems[index];
+            // Pause all other videos except the lightbox video
+            pauseAllVideos(lightboxVideo);
+
+            lightboxImg.style.display = 'none';
+            lightboxVideo.style.display = 'none';
+
+            if (item.type === 'video') {
+                lightboxVideo.style.display = 'block';
+                const source = lightboxVideo.querySelector('source');
+                source.src = item.src;
+                lightboxVideo.load();
+                lightboxVideo.currentTime = 0;
+            } else {
+                lightboxImg.style.display = 'block';
+                lightboxImg.src = item.src;
+            }
+
+            counter.textContent = `${index + 1} / ${mediaItems.length}`;
+        } catch (error) {
+            console.error('Error showing media:', error);
+        }
+    }
+
+    function nextMedia() {
+        if (!mediaItems || mediaItems.length === 0) return;
+        if (lightboxVideo.style.display === 'block') {
+            lightboxVideo.pause();
+        }
+        currentIndex = (currentIndex + 1) % mediaItems.length;
+        showMedia(currentIndex);
+    }
+
+    function prevMedia() {
+        if (!mediaItems || mediaItems.length === 0) return;
+        if (lightboxVideo.style.display === 'block') {
+            lightboxVideo.pause();
+        }
+        currentIndex = (currentIndex - 1 + mediaItems.length) % mediaItems.length;
+        showMedia(currentIndex);
+    }
+
+    // Lightbox event listeners
+    closeBtn.addEventListener('click', () => {
+        if (lightboxVideo.style.display === 'block') {
+            lightboxVideo.pause();
+        }
+        lightbox.style.display = 'none';
+    });
+
+    prevBtn.addEventListener('click', prevMedia);
+    nextBtn.addEventListener('click', nextMedia);
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+        if (lightbox.style.display === 'block') {
+            if (e.key === 'ArrowLeft') prevMedia();
+            if (e.key === 'ArrowRight') nextMedia();
+            if (e.key === 'Escape') {
+                if (lightboxVideo.style.display === 'block') {
+                    lightboxVideo.pause();
+                }
+                lightbox.style.display = 'none';
+            }
+        }
+    });
+
+    // Close lightbox when clicking outside
+    lightbox.addEventListener('click', (e) => {
+        if (e.target === lightbox) {
+            if (lightboxVideo.style.display === 'block') {
+                lightboxVideo.pause();
+            }
+            lightbox.style.display = 'none';
+        }
+    });
+
+    let currentPage = 1;
+    const postsPerPage = 5;
+    const mainContent = document.querySelector('.main-content');
+    let isLoading = false;
+    let allLoaded = false;
+
+    function renderPost(post) {
+        const postContainer = document.createElement('div');
+        postContainer.className = 'post-container';
+        postContainer.dataset.postId = post.id || post.post.id || post.post_id;
+        const filesData = JSON.stringify(post.post.post_files || []);
+        // --- Determine user's reaction ---
+        const userReaction = post.user_reaction;
+        const distinctReactions =  (post.reactions)?[...new Set(Object.values(post.reactions).map(r => r.reaction))]:[];
+        topTwoReactors = Object.values(post.reactions).slice(0,2).map(r => r.reactor);
+        reactionEmojis = ""
+        for (let i = 0; i < distinctReactions.length; i++) {
+            reactionEmojis += getReactionEmoji(distinctReactions[i]);
+        }
+        topTwoReactorNames = ""
+        for (let i=0; i < topTwoReactors.length; i++) {
+            topTwoReactorNames += topTwoReactors[i]+", ";  
+        }
+        remainingReactorCount = Object.keys(post.reactions).length - topTwoReactors.length;
+        postContainer.innerHTML = `
+            <div class="user-profile">
+                <img src="${post.uploaded_by.user.profile_picture.url}" alt="${post.uploaded_by.user.full_name}">
+                <div>
+                    <p>${post.uploaded_by.user.full_name}</p>
+                    <span>${post.updated_at}</span>
+                </div>
+            </div>
+            <p class="post-text">
+                ${post.post.post_text}
+            </p>
+            <div class="multi-image-gallery" data-files='${filesData}'>
+                ${(post.post.post_files || []).slice(0, 3).map((file, index) => {
+            const isVideo = /\.(mp4|mkv|avi|mov)$/i.test(file);
+            const showOverlay = index === 2 && post.post.post_files.length > 3;
+            return `
+                        <div class="gallery-img ${showOverlay ? 'gallery-img-overlay' : ''}" 
+                             data-index="${index}" 
+                             data-type="${isVideo ? 'video' : 'image'}"
+                             data-src="/media/${file}">
+                            ${isVideo ? `
+                                <video class="gallery-media" controls>
+                                    <source src="/media/${file}" type="video/mp4">
+                                    Your browser does not support the video tag.
+                                </video>
+                                <div class="play-button">▶</div>
+                            ` : `
+                                <img class="gallery-media" src="/media/${file}" alt="Post image" loading="lazy">
+                            `}
+                            ${showOverlay ? `
+                                <div class="gallery-overlay-text">+${post.post.post_files.length - 2}</div>
+                            ` : ''}
+                        </div>
+                    `;
+        }).join('')}
+            </div>
+            <div class="post-row">
+                <div class="reacts">
+                    ${reactionEmojis?reactionEmojis + " " + topTwoReactorNames:"No reactions yet"}${remainingReactorCount!=0?" + " + remainingReactorCount+" others": ""}
+                </div>
+                <div class="react-details">
+                    ${post.post.views?post.post.views:0} views &nbsp;&nbsp; ${post.comment_count} comments
+                </div>
+            </div>
+            <div class="post-row">
+                <div class="reaction-picker">
+                    <span class="reaction" value="Like">👍</span>
+                    <span class="reaction" value="Love">❤️</span>
+                    <span class="reaction" value="Care">🤗</span>
+                    <span class="reaction" value="Sad">😢</span>
+                    <span class="reaction" value="Disgusted">🤮</span>
+                </div>
+            </div>
+            <hr>
+            <div class="post-row">
+                <div class="img-parent">
+                    <span class="to-react">${userReaction ? getReactionEmoji(userReaction.reaction) : '👍'}</span>${userReaction ? userReaction.reaction : 'React'}
+                    <div class="reaction-picker">
+                        <span class="reaction" value="Like">👍</span>
+                        <span class="reaction" value="Love">❤️</span>
+                        <span class="reaction" value="Care">🤗</span>
+                        <span class="reaction" value="Sad">😢</span>
+                        <span class="reaction" value="Disgusted">🤮</span>
+                    </div>
+                </div>
+                <div class="comment-button">
+                    <img src="${STATIC_URLS.commentsImage}">Comment
+                </div>
+                <div>
+                    <img src="${STATIC_URLS.shareImage}">Report
+                </div>
+            </div>
+            <div class="post-row comments" style="display: none;">
+                <div class="comment-input">
+                    <textarea placeholder="Write a comment"></textarea>
+                </div>
+                <div class="comment-buttons">
+                    <button class="comment-btn">Comment</button>
+                    <button class="cancel-btn">Cancel</button>
+                </div>
+                <hr>
+                <div class="comment-thread">
+                    <!-- Comments will be loaded here -->
+                </div>
+            </div>
+        `;
+        mainContent.appendChild(postContainer);
+        initializePostEvents(postContainer);
+        if (window.MailboxComments) {
+            window.MailboxComments.initializeCommentFunctionality(postContainer);
+            window.MailboxComments.loadComments(postContainer);
+        }
+        // --- Truncate post text to 50 chars with show more/less ---
+        truncatePostText50(postContainer);
+
+        // --- Reaction Lightbox trigger ---
+        const reactsDiv = postContainer.querySelector('.reacts');
+        if (reactsDiv) {
+            reactsDiv.style.cursor = "pointer";
+            reactsDiv.addEventListener('click', function() {
+                openReactionLightbox(post.reactions);
+            });
+        }
+
+        // --- Report Popup trigger (fix) ---
+        const reportBtn = postContainer.querySelector('.post-row > div:last-child');
+        if (reportBtn) {
+            reportBtn.style.cursor = "pointer";
+            reportBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                // --- Ensure report popup is shown ---
+                const popup = document.getElementById('report-popup');
+                if (popup) {
+                    popup.style.display = 'flex';
+                    popup.classList.add('active');
+                }
+                openReportPopup(post.id);
+            });
+        }
+
+        // --- Reinitialize view tracking for this post ---
+        if (window.trackPostViews) {
+            window.trackPostViews();
+        }
+    }
+
+    // --- Reaction Lightbox logic ---
+    function openReactionLightbox(reactions) {
+        const lightbox = document.getElementById('reaction-lightbox');
+        const closeBtn = lightbox.querySelector('.reaction-lightbox-close');
+        const listDiv = lightbox.querySelector('.reaction-list');
+        listDiv.innerHTML = '';
+
+        // reactions: { user_id: {reaction, reactor, profile_picture:{url}} }
+        if (reactions && Object.keys(reactions).length > 0) {
+            // Sort by time not available, so just show in object order (or add time if available)
+            Object.values(reactions).forEach(r => {
+                const row = document.createElement('div');
+                row.style.display = 'flex';
+                row.style.alignItems = 'center';
+                row.style.marginBottom = '10px';
+                row.innerHTML = `
+                    <img src="${r.profile_picture.url}" alt="profile" style="width:32px;height:32px;border-radius:50%;margin-right:10px;">
+                    <span style="font-weight:bold;margin-right:10px;">${r.reactor}</span>
+                    <span style="font-size:1.5em;">${getReactionEmoji(r.reaction)}</span>
+                `;
+                listDiv.appendChild(row);
+            });
+        } else {
+            listDiv.innerHTML = '<div>No reactions yet.</div>';
+        }
+
+        lightbox.style.display = 'block';
+        closeBtn.onclick = function() {
+            lightbox.style.display = 'none';
+        };
+        lightbox.onclick = function(e) {
+            if (e.target === lightbox) lightbox.style.display = 'none';
+        };
+    }
+
+    // --- Report Popup logic ---
+    function openReportPopup(postId) {
+        const popup = document.getElementById('report-popup');
+        popup.style.display = 'flex';
+        popup.classList.add('active');
+        const textarea = popup.querySelector('textarea');
+        textarea.value = '';
+        textarea.focus();
+
+        // Remove previous listeners to avoid duplicates
+        const submitBtn = popup.querySelector('.report-submit-btn');
+        const cancelBtn = popup.querySelector('.report-cancel-btn');
+        const newSubmitBtn = submitBtn.cloneNode(true);
+        const newCancelBtn = cancelBtn.cloneNode(true);
+        submitBtn.parentNode.replaceChild(newSubmitBtn, submitBtn);
+        cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+
+        newSubmitBtn.onclick = async function() {
+            const text = textarea.value.trim();
+            if (!text) {
+                alert('Please enter report details before submitting.');
+                return;
+            }
+            try {
+                const res = await fetch('/students/mailbox/report_post/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken
+                    },
+                    body: JSON.stringify({ post_id: postId, report_text: text })
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    alert('Report submitted successfully.');
+                    popup.style.display = 'none';
+                    popup.classList.remove('active');
+                } else {
+                    alert(data.message || 'Failed to submit report.');
+                }
+            } catch (e) {
+                alert('Failed to submit report.');
+            }
+        };
+        newCancelBtn.onclick = function() {
+            popup.style.display = 'none';
+            popup.classList.remove('active');
+        };
+        // Close popup when clicking outside
+        popup.onclick = function(e) {
+            if (e.target === popup) {
+                popup.style.display = 'none';
+                popup.classList.remove('active');
+            }
+        };
+    }
+
+    function getReactionEmoji(reaction) {
+        switch (reaction) {
+            case 'Like': return '👍';
+            case 'Love': return '❤️';
+            case 'Care': return '🤗';
+            case 'Sad': return '😢';
+            case 'Disgusted': return '🤮';
+            default: return '👍';
+        }
+    }
+
+    async function loadMorePosts() {
+        if (isLoading || allLoaded) return;
+        isLoading = true;
+        try {
+            const response = await fetch(`/students/mailbox/load_more/?page=${currentPage}&per_page=${postsPerPage}`, {
+                method: 'GET',
+                headers: {
+                    'X-CSRFToken': csrftoken
+                }
+            });
+
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const data = await response.json();
+
+            if (data.posts && data.posts.length > 0) {
+                data.posts.forEach(renderPost);
+                if (data.posts.length < postsPerPage) {
+                    allLoaded = true;
+                } else {
+                    currentPage++;
+                }
+            } else {
+                allLoaded = true;
+            }
+        } catch (error) {
+            console.error('Error loading posts:', error);
+            alert('Error loading posts. Please try again.');
+        } finally {
+            isLoading = false;
+        }
+    }
+
+    function handleInfiniteScroll() {
+        if (allLoaded) return;
+        const lastPost = document.querySelector('.main-content .post-container:last-of-type');
+        if (!lastPost) return;
+        const rect = lastPost.getBoundingClientRect();
+        if (rect.bottom < window.innerHeight + 200) {
+            loadMorePosts();
+        }
+    }
+
+    window.addEventListener('scroll', handleInfiniteScroll);
+
+    // Initial load
+    loadMorePosts();
+
+    // Function to initialize all event listeners for a post container
+    function initializePostEvents(postContainer) {
+        // Initialize lightbox for gallery images
+        postContainer.querySelectorAll('.gallery-img').forEach(item => {
+            item.addEventListener('click', function () {
+                const gallery = this.closest('.multi-image-gallery');
+                currentGallery = gallery;
+
+                // Pause any playing videos in the gallery
+                gallery.querySelectorAll('video').forEach(video => {
+                    video.pause();
+                    video.currentTime = 0;
+                    video.muted = true;
+                    video.volume = 0;
+                });
+
+                try {
+                    const filesStr = gallery.dataset.files;
+                    if (!filesStr) {
+                        console.error('No files data found in gallery');
+                        return;
+                    }
+
+                    let allFiles;
+                    try {
+                        allFiles = JSON.parse(filesStr);
+                    } catch (parseError) {
+                        console.error('Error parsing files data:', parseError);
+                        return;
+                    }
+
+                    if (!Array.isArray(allFiles) || allFiles.length === 0) {
+                        console.error('No files found in gallery data');
+                        return;
+                    }
+
+                    mediaItems = allFiles.map(file => {
+                        const isVideo = /\.(mp4|mkv|avi|mov)$/i.test(file);
+                        return {
+                            src: `/media/${file}`,
+                            type: isVideo ? 'video' : 'image'
+                        };
+                    });
+
+                    currentIndex = parseInt(this.dataset.index);
+
+                    if (isNaN(currentIndex) || currentIndex < 0 || currentIndex >= mediaItems.length) {
+                        console.error('Invalid index:', currentIndex);
+                        return;
+                    }
+
+                    showMedia(currentIndex);
+                    lightbox.style.display = 'block';
+                } catch (error) {
+                    console.error('Error opening lightbox:', error);
+                }
+            });
+        });
+
+        // Initialize reaction picker
+        postContainer.querySelectorAll('.to-react').forEach(element => {
+            let pressTimer = null;
+
+            function startPressTimer() {
+                if (pressTimer === null) {
+                    pressTimer = setTimeout(() => {
+                        let parent = element.closest('.img-parent');
+                        let reactionPicker = parent ? parent.querySelector('.reaction-picker') : null;
+                        if (!reactionPicker) {
+                            parent = element.closest('.post-container');
+                            reactionPicker = parent ? parent.querySelector('.reaction-picker') : null;
+                        }
+                        if (!reactionPicker) return;
+                        reactionPicker.style.display = 'block';
+
+                        reactionPicker.addEventListener('mouseleave', () => {
+                            reactionPicker.style.display = 'none';
+                        });
+
+                        reactionPicker.querySelectorAll('.reaction').forEach(reaction => {
+                            reaction.addEventListener('click', async () => {
+                                reactionPicker.style.display = 'none';
+                                // Update only the .to-react span and label, not the whole .img-parent
+                                element.textContent = reaction.textContent;
+                                // Update the label after the emoji
+                                if (element.nextSibling && element.nextSibling.nodeType === Node.TEXT_NODE) {
+                                    element.nextSibling.textContent = reaction.getAttribute("value");
+                                }
+                                // Save reaction to backend for post
+                                let postCont = element.closest('.post-container');
+                                let postId = postCont ? postCont.dataset.postId : null;
+                                if (postId) {
+                                    try {
+                                        await fetch('/students/mailbox/react_post/', {
+                                            method: 'POST',
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                                'X-CSRFToken': csrftoken
+                                            },
+                                            body: JSON.stringify({
+                                                post_id: postId,
+                                                reaction: reaction.getAttribute('value')
+                                            })
+                                        });
+                                        // Optionally: reload reactions UI, or reload post
+                                    } catch (err) {
+                                        alert('Failed to save reaction. Please try again.');
+                                    }
+                                }
+                            });
+                        });
+
+                        pressTimer = null;
+                    }, 300);
+                }
+            }
+
+            function cancelPressTimer() {
+                if (pressTimer !== null) {
+                    let parent = element.closest('.img-parent');
+                    let reactionPicker = parent ? parent.querySelector('.reaction-picker') : null;
+                    if (!reactionPicker) {
+                        parent = element.closest('.post-container');
+                        reactionPicker = parent ? parent.querySelector('.reaction-picker') : null;
+                    }
+                    if (reactionPicker) reactionPicker.style.display = 'none';
+                    clearTimeout(pressTimer);
+                    pressTimer = null;
+                }
+            }
+
+            element.addEventListener('mousedown', startPressTimer);
+            element.addEventListener('mouseup', cancelPressTimer);
+            element.addEventListener('mouseleave', cancelPressTimer);
+        });
+
+        // Initialize report functionality
+        const reportButton = postContainer.querySelector('.post-row div:last-child');
+        if (reportButton) {
+            reportButton.addEventListener('click', function() {
+                const reportPopup = document.getElementById('report-popup');
+                if (reportPopup) {
+                    // Show the popup
+                    reportPopup.style.display = 'flex';
+                    reportPopup.classList.add('active');
+                    
+                    const reportTextarea = reportPopup.querySelector('textarea');
+                    reportTextarea.value = '';
+
+                    // Add event listeners for the report popup buttons
+                    const submitBtn = reportPopup.querySelector('.report-submit-btn');
+                    const cancelBtn = reportPopup.querySelector('.report-cancel-btn');
+
+                    // Remove any existing event listeners
+                    const newSubmitBtn = submitBtn.cloneNode(true);
+                    const newCancelBtn = cancelBtn.cloneNode(true);
+                    submitBtn.parentNode.replaceChild(newSubmitBtn, submitBtn);
+                    cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+
+                    // Add new event listeners
+                    newSubmitBtn.addEventListener('click', function() {
+                        const reportText = reportTextarea.value.trim();
+                        if (reportText) {
+                            // Here you can add the logic to submit the report
+                            // console.log('Report submitted:', reportText);
+                            reportPopup.style.display = 'none';
+                            reportPopup.classList.remove('active');
+                        }
+                    });
+
+                    newCancelBtn.addEventListener('click', function() {
+                        reportPopup.style.display = 'none';
+                        reportPopup.classList.remove('active');
+                    });
+
+                    // Close popup when clicking outside
+                    const closePopup = function(event) {
+                        if (event.target === reportPopup) {
+                            reportPopup.style.display = 'none';
+                            reportPopup.classList.remove('active');
+                            window.removeEventListener('click', closePopup);
+                        }
+                    };
+                    window.addEventListener('click', closePopup);
+                }
+            });
+        }
+
+        // Initialize reply functionality
+        postContainer.querySelectorAll('.comment-reply').forEach(replyLink => {
+            replyLink.addEventListener('click', function (e) {
+                e.preventDefault();
+                const replyPopup = document.getElementById('reply-popup');
+                replyPopup.classList.add('active');
+                const replyTextarea = replyPopup.querySelector('textarea');
+                replyTextarea.value = '';
+            });
+        });
+
+        // Hide/show play icon on gallery video play/pause
+        postContainer.querySelectorAll('.gallery-img video.gallery-media').forEach(video => {
+            const playButton = video.parentElement.querySelector('.play-button');
+            if (playButton) {
+                video.addEventListener('play', function() {
+                    // Pause all other videos except this one
+                    pauseAllVideos(video);
+                    playButton.style.display = 'none';
+                });
+                video.addEventListener('pause', function() {
+                    playButton.style.display = '';
+                });
+            } else {
+                // Still pause all other videos on play
+                video.addEventListener('play', function() {
+                    pauseAllVideos(video);
+                });
+            }
+        });
+
+        // Pause all other videos when lightbox video is played
+        if (lightboxVideo) {
+            lightboxVideo.addEventListener('play', function() {
+                pauseAllVideos(lightboxVideo);
+            });
+        }
+    }
+
+    // Post creation functionality
+    const postInput = document.getElementById('post-input-text');
+    const postButtons = document.querySelector('.post-buttons');
+    const postSubmitBtn = document.getElementById('post-submit-btn');
+    const postCancelBtn = document.querySelector('.post-cancel-btn');
+    const selectedMediaPreview = document.querySelector('.selected-media-preview');
+
+    if (postInput) {
+        postInput.addEventListener('input', function() {
+            postButtons.style.display = this.value.trim() || selectedMediaPreview.children.length > 0 ? 'flex' : 'none';
+        });
+    }
+
+    if (postSubmitBtn) {
+        postSubmitBtn.addEventListener('click', async function() {
+            const postText = postInput.value.trim();
+            if (!postText && selectedMediaPreview.children.length === 0) return;
+
+            try {
+                const formData = new FormData();
+                formData.append('post_text', postText);
+                
+                // Get all file inputs
+                const fileInputs = document.querySelectorAll('.post-input-container input[type="file"]');
+                
+                // Add files from each input
+                fileInputs.forEach(input => {
+                    if (input.files.length > 0) {
+                        Array.from(input.files).forEach(file => {
+                            formData.append('files', file);
+                        });
+                    }
+                });
+
+                const response = await fetch('/students/mailbox/post/', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrftoken
+                    },
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                if (data.status === 'success') {
+                    // Clear the input and media preview
+                    postInput.value = '';
+                    selectedMediaPreview.innerHTML = '';
+                    postButtons.style.display = 'none';
+                    
+                    // Clear file inputs
+                    fileInputs.forEach(input => {
+                        input.value = '';
+                    });
+                    
+                    // Reload the page to show the new post
+                    window.location.reload();
+                } else {
+                    throw new Error(data.message || 'Failed to create post');
+                }
+            } catch (error) {
+                console.error('Error creating post:', error);
+                alert('Error creating post. Please try again.');
+            }
+        });
+    }
+
+    if (postCancelBtn) {
+        postCancelBtn.addEventListener('click', function() {
+            postInput.value = '';
+            selectedMediaPreview.innerHTML = '';
+            postButtons.style.display = 'none'; 
+        });
+    }
+});
+
+// Add this function at the end of the file or before renderPost
+function truncatePostText50(container) {
+    const postText = container.querySelector('.post-text');
+    if (!postText) return;
+    const fullText = postText.innerHTML;
+    // Use plain text length for truncation logic
+    let div = document.createElement('div');
+    div.innerHTML = fullText;
+    let plain = div.textContent || div.innerText || '';
+    if (plain.length <= 50) return; // Do not show "show more" if <= 50 chars
+    function getTruncated(text) {
+        let truncated = plain.slice(0, 50);
+        return truncated + '... <span class="show-more-post" style="color:#1876f2;cursor:pointer;">show more</span>';
+    }
+    function setTruncated() {
+        postText.innerHTML = getTruncated(fullText);
+        postText.querySelector('.show-more-post').onclick = function() {
+            setExpanded();
+        };
+    }
+    function setExpanded() {
+        postText.innerHTML = fullText + ' <span class="show-less-post" style="color:#1876f2;cursor:pointer;">show less</span>';
+        postText.querySelector('.show-less-post').onclick = function() {
+            setTruncated();
+        };
+    }
+    setTruncated();
+}
+
+// --- Remove import, use global function if available ---
+if (window.trackPostViews) {
+    window.trackPostViews();
+}

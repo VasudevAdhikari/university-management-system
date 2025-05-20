@@ -1,0 +1,32 @@
+.status-approved {
+    color: #2ecc40;
+    font-weight: bold;
+}
+.status-pending {
+    color: #f1c40f;
+    font-weight: bold;
+}
+.status-rejected {
+    color: #e74c3c;
+    font-weight: bold;
+}
+.manage-post-actions {
+    margin-top: 10px;
+}
+.manage-post-actions button {
+    margin-right: 10px;
+}
+.edit-post-form {
+    margin-top: 10px;
+    background: #f9f9f9;
+    padding: 10px;
+    border-radius: 6px;
+}
+.edit-post-form textarea {
+    width: 100%;
+    min-height: 60px;
+    margin-bottom: 8px;
+}
+.edit-post-form .selected-media-preview {
+    margin-bottom: 8px;
+}

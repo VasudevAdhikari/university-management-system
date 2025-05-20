@@ -1,0 +1,50 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTP Login - MM Logic Gallery</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'login_register.css' %}">
+    <link rel="stylesheet" href="{% static 'otp_login.css' %}">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-header">
+            <h1>OTP Login</h1>
+        </div>
+        
+        <form id="otpForm">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="email">Email</label>
+                <div class="input-group">
+                    <input type="email" class="form-control" id="email" name="email" required>
+                    <div class="input-group-append">
+                        <button type="button" class="btn btn-primary btn-sm" id="email-ok-btn" disabled>OK</button>
+                    </div>
+                </div>
+                <div id="email-error" class="error-message">This email is not registered.</div>
+                <div id="suspended-message" class="error-message">This account is suspended for three days due to multiple failed login attempts. Please try again later.</div>
+                <div id="success-message" class="success-message"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="otp">OTP</label>
+                <input type="number" class="form-control" id="otp" name="otp" required minlength="6" maxlength="6" disabled>
+                <div id="otp-error" class="error-message"></div>
+            </div>
+
+            <div class="button-group">
+                <button type="button" class="btn btn-secondary" onclick="window.location.href='/auth/recovery/'">Go Back</button>
+                <button type="button" class="btn btn-primary" id="confirm-btn" disabled>Confirm</button>
+            </div>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'otp_login.js' %}"></script>
+</body>
+</html> 
