@@ -289,6 +289,7 @@ def get_comments(request, post_id):
             user_reaction = reactions.get(str(current_user.id))
             formatted_comments.append({
                 'id': comment.id,
+                'post': comment.post.id,  # Add post id for reply posting
                 'comment': comment.comment,
                 'created_at': comment.created_at.isoformat(),
                 'user': {

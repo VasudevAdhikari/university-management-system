@@ -28,7 +28,12 @@ body {
 
 .user-profile img {
   width: 45px;
+  height: 45px;
   border-radius: 50%;
+  object-fit: cover;
+  aspect-ratio: 1/1;
+  background: #f3f3f3;
+  border: 2px solid #e0e0e0;
   margin-right: 10px;
 }
 
@@ -440,7 +445,7 @@ textarea:focus {
   transform: translateY(-50%);
 }
 .lightbox-prev { left: 24px; }
-.lightbox-next { right: 24px; }
+lightbox-next { right: 24px; }
 .lightbox-counter {
   color: #fff;
   font-size: 1.1em;
@@ -543,7 +548,9 @@ textarea:focus {
   height: 80px;
   border-radius: 50%;
   object-fit: cover;
+  aspect-ratio: 1/1;
   border: 3px solid #1877f2;
+  background: #f3f3f3;
   margin-bottom: 8px;
 }
 
@@ -1077,4 +1084,420 @@ textarea:focus {
 
 .comment-reply:hover {
   text-decoration: underline;
+}
+.to-react {
+  cursor: pointer;
+}
+.manage-post-container {
+    cursor: pointer;
+    display: flex;
+    align-items: center !important;
+    justify-content: space-around;
+    gap: 32px;
+    margin: 0 0 16px 0;
+    padding: 16px 24px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    font-family: 'Poppins', sans-serif;
+}
+.manage-title {
+    font-size: 1.2em;
+    font-weight: 600;
+    margin-right: 24px;
+}
+.manage-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 1em;
+}
+.manage-item i {
+    font-size: 1.2em;
+    color: #1876f2;
+}
+.manage-count {
+    border-radius: 50%;
+    padding: 2px 10px;
+    font-size: 0.95em;
+    margin-left: 4px;
+    font-weight: 600;
+    display: inline-block;
+}
+.manage-count-posts {
+    background: #28a745;
+    color: #fff;
+}
+.manage-count-pending {
+    background: #ffc107;
+    color: #fff;
+}
+.manage-count-notification {
+    background: #007bff;
+    color: #fff;
+}
+
+/* --- Mailbox Comments Thread (code.html style) --- */
+.mailbox-comments-container {
+  max-width: 700px;
+  margin: 0 auto;
+}
+.mailbox-comment,
+.mailbox-reply {
+  position: relative;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 1rem;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.1);
+}
+.mailbox-replies {
+  position: relative;
+  padding-left: 20px;
+}
+.mailbox-replies[data-depth="1"],
+.mailbox-replies[data-depth="2"],
+.mailbox-replies[data-depth="3"] {
+  margin-left: 36px;
+}
+.mailbox-replies[data-depth="4"],
+.mailbox-replies[data-depth="5"],
+.mailbox-replies[data-depth="6"],
+.mailbox-replies[data-depth="7"] {
+  margin-left: 36px;
+  background: #fafafa;
+  border-radius: 6px;
+  padding: 8px 12px;
+}
+.mailbox-replies[data-depth="1"]::before,
+.mailbox-replies[data-depth="2"]::before,
+.mailbox-replies[data-depth="3"]::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 9px;
+  width: 2px;
+  background-color: #888;
+  border-radius: 1px;
+}
+.mailbox-replies[data-depth="4"]::before,
+.mailbox-replies[data-depth="5"]::before,
+.mailbox-replies[data-depth="6"]::before,
+.mailbox-replies[data-depth="7"]::before {
+  content: none;
+}
+.mailbox-reply[data-depth="1"]::before,
+.mailbox-reply[data-depth="2"]::before,
+.mailbox-reply[data-depth="3"]::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 24px;
+  width: 16px;
+  height: 2px;
+  background-color: #888;
+  border-radius: 1px;
+}
+.mailbox-reply[data-depth="4"]::before,
+.mailbox-reply[data-depth="5"]::before,
+.mailbox-reply[data-depth="6"]::before,
+.mailbox-reply[data-depth="7"]::before {
+  content: none;
+}
+.mailbox-comment::before {
+  display: none;
+}
+.mailbox-comment-author {
+  font-weight: 600;
+  color: #2a5d9f;
+  margin-bottom: 4px;
+}
+.mailbox-comment-text {
+  font-size: 14px;
+  line-height: 1.4;
+}
+.mailbox-comment-timestamp {
+  font-size: 11px;
+  color: #666;
+  margin-top: 6px;
+  user-select: none;
+}
+.mailbox-toggle-btn {
+  cursor: pointer;
+  font-size: 13px;
+  color: #2a5d9f;
+  margin: 0 0 8px 36px;
+  user-select: none;
+  display: inline-block;
+  font-weight: 600;
+}
+.mailbox-toggle-btn:hover {
+  text-decoration: underline;
+}
+.mailbox-replies.collapsible {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.3s ease;
+}
+.mailbox-replies.collapsible.open {
+  max-height: 10000px;
+  transition: max-height 0.5s ease;
+  padding-right: 0 !important;
+}
+
+.mailbox-reply {
+  padding-right: 0 !important;
+}
+
+.mailbox-replies {
+  margin-left: 5px !important;
+}
+
+.mailbox-comment-reacts {
+  font-size: 13px;
+  margin: 6px 0 2px 0;
+  color: #666;
+}
+
+.mailbox-comment .reaction-picker,
+.mailbox-reply .reaction-picker {
+  display: none;
+  position: absolute;
+  left: 60px;
+  top: 30px;
+  z-index: 10;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px #aaa3;
+  padding: 6px 12px;
+  font-size: 22px;
+  gap: 8px;
+}
+
+.mailbox-comment .reaction-picker .reaction,
+.mailbox-reply .reaction-picker .reaction {
+  cursor: pointer;
+  margin: 0 4px;
+  transition: font-size 0.2s;
+}
+
+.mailbox-comment .reaction-picker .reaction:hover,
+.mailbox-reply .reaction-picker .reaction:hover {
+  font-size: 28px;
+}
+
+/* --- Mailbox Comments Thread (improved style) --- */
+.mailbox-comment,
+.mailbox-reply {
+  position: relative;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 14px 18px 10px 18px;
+  margin-bottom: 1.1rem;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.07);
+  background: #fff;
+  transition: background 0.2s;
+}
+.mailbox-comment[data-depth="0"] { background: #fff; }
+.mailbox-reply[data-depth="1"] { background: #f7faff; }
+.mailbox-reply[data-depth="2"] { background: #f9f7ff; }
+.mailbox-reply[data-depth="3"] { background: #f7fff9; }
+.mailbox-reply[data-depth="4"] { background: #fdf7fa; }
+.mailbox-reply[data-depth="5"] { background: #f7f9fd; }
+.mailbox-reply[data-depth="6"] { background: #f9fdf7; }
+.mailbox-reply[data-depth="7"] { background: #fff9f7; }
+
+.mailbox-comment-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.mailbox-comment-profile {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.mailbox-comment-profile img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e0e0e0;
+  background: #f3f3f3;
+}
+.mailbox-comment-author {
+  font-weight: 600;
+  color: #2a5d9f;
+  font-size: 15px;
+  margin-bottom: 0;
+}
+.mailbox-comment-timestamp {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  color: #888;
+  gap: 3px;
+}
+.mailbox-comment-timestamp i {
+  font-size: 1em;
+  color: #b0b0b0;
+  margin-right: 2px;
+}
+
+.mailbox-comment-text {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #222;
+  margin-bottom: 0;
+  margin-top: 2px;
+  word-break: break-word;
+  padding-right: 10px;
+}
+
+.mailbox-comment-hr {
+  border: none;
+  border-top: 1px solid #e5e5e5;
+  margin: 10px 0 8px 0;
+}
+
+.mailbox-comment-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0;
+  gap: 10px;
+}
+
+.mailbox-to-react-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mailbox-comment-reacts {
+  font-size: 13px;
+  color: #666;
+  margin-left: auto;
+  white-space: nowrap;
+  text-align: right;
+  font-weight: 500;
+}
+
+.mailbox-comment .reaction-picker,
+.mailbox-reply .reaction-picker {
+  display: none;
+  position: absolute;
+  left: 60px;
+  top: 30px;
+  z-index: 10;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px #aaa3;
+  padding: 6px 12px;
+  font-size: 22px;
+  gap: 8px;
+}
+
+.mailbox-comment .reaction-picker .reaction,
+.mailbox-reply .reaction-picker .reaction {
+  cursor: pointer;
+  margin: 0 4px;
+  transition: font-size 0.2s;
+}
+
+.mailbox-comment .reaction-picker .reaction:hover,
+.mailbox-reply .reaction-picker .reaction:hover {
+  font-size: 28px;
+}
+
+.mailbox-toggle-btn {
+  cursor: pointer;
+  font-size: 13px;
+  color: #2a5d9f;
+  margin: 0 0 8px 36px;
+  user-select: none;
+  display: inline-block;
+  font-weight: 600;
+}
+.mailbox-toggle-btn:hover {
+  text-decoration: underline;
+}
+
+.mailbox-comment-timestamp {
+  margin-right: 16px !important;
+}
+
+.mailbox-comment-reacts {
+  margin-right: 16px !important;
+}
+
+/* Profile picture circle for all contexts */
+.user-profile img,
+.member-profile img,
+.mailbox-comment-profile img,
+.mailbox-reaction-profile,
+.reaction-lightbox-profile {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  aspect-ratio: 1/1;
+  background: #f3f3f3;
+  border: 2px solid #e0e0e0;
+  display: inline-block;
+}
+
+/* Most active members (bigger size) */
+.member-profile img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  aspect-ratio: 1/1;
+  border: 3px solid #1877f2;
+  background: #f3f3f3;
+}
+
+/* Profile in write-post-container (larger) */
+.write-post-container .user-profile img {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  object-fit: cover;
+  aspect-ratio: 1/1;
+  background: #f3f3f3;
+  border: 2px solid #e0e0e0;
+  margin-right: 10px;
+}
+
+/* Profile in comments/replies */
+.mailbox-comment-profile img,
+.mailbox-comment-profile-img {
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+  aspect-ratio: 1/1 !important;
+  background: #f3f3f3 !important;
+  border: 2px solid #e0e0e0 !important;
+  display: inline-block !important;
+}
+
+/* Profile in reaction lightbox */
+.mailbox-reaction-profile,
+.reaction-lightbox-profile {
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+  aspect-ratio: 1/1 !important;
+  background: #f3f3f3 !important;
+  border: 2px solid #e0e0e0 !important;
+  margin-right: 10px !important;
+  display: inline-block !important;
 }
