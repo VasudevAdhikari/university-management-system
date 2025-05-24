@@ -10,6 +10,8 @@ import os
 from datetime import datetime
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_GET
+from django.core.files.storage import default_storage
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 @ensure_csrf_cookie
@@ -590,3 +592,57 @@ def report_post(request):
         return JsonResponse({'status': 'success'})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+
+@csrf_exempt
+@login_required
+def edit_post_api(request):
+    print("============================\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
+    if request.method == 'POST':
+        post_id = request.POST.get('post_id')
+        text = request.POST.get('text', '')
+        files = request.FILES.getlist('media')
+        removed_indexes = request.POST.get('removed_indexes')
+        try:
+            requester = Student.objects.get(user=User .objects.get(username=request.COOKIES.get('my_user')))
+            post_author = MailboxPost.objects.get(pk=post_id).uploaded_by
+            if requester != post_author:
+                return JsonResponse({'success': False, 'error': 'You do not have permission to edit this post.'}, status=403)
+            
+            post = MailboxPost.objects.get(pk=post_id)
+            loaded_post = json.loads(post.post)
+            post_files = loaded_post.get('post_files', [])
+            
+            # Remove media by indexes and delete files from storage
+            if removed_indexes:
+                removed = set(map(int, json.loads(removed_indexes)))
+                for i in removed:
+                    if i < len(post_files):  # Check if index is valid
+                        file_to_remove = post_files[i]
+                        # Delete the file from storage
+                        if default_storage.exists(file_to_remove):
+                            default_storage.delete(file_to_remove)
+                        # Remove the file from the list
+                        post_files[i] = None  # Mark for removal
+                # Filter out None values
+                post_files = [f for f in post_files if f is not None]
+            
+            # Add new files
+            for f in files:
+                filename = default_storage.save(f.name, f)
+                post_files.append(filename)
+            
+            # Update the loaded post dictionary
+            loaded_post['post_text'] = text
+            loaded_post['post_files'] = post_files
+            
+            # Save the modified dictionary back to the post as a JSON string
+            post.post = json.dumps(loaded_post)
+            post.updated_at = timezone.now()
+            post.save()
+            return JsonResponse({'success': True})
+        except MailboxPost.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Post not found or not editable'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+    
+    return JsonResponse({'success': False, 'error': 'Invalid request'})

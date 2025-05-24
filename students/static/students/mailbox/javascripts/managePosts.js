@@ -1,669 +1,166 @@
-document.addEventListener('DOMContentLoaded', function () {
-    // Lightbox variables
-    const lightbox = document.getElementById('image-lightbox');
-    const lightboxImg = lightbox.querySelector('.lightbox-img');
-    const lightboxVideo = lightbox.querySelector('.lightbox-video');
-    const closeBtn = lightbox.querySelector('.lightbox-close');
-    const prevBtn = lightbox.querySelector('.lightbox-prev');
-    const nextBtn = lightbox.querySelector('.lightbox-next');
-    const counter = lightbox.querySelector('.lightbox-counter');
+// Edit Post Modal Logic for managePosts.html
 
-    let currentGallery = null;
-    let currentIndex = 0;
-    let mediaItems = []; 
- 
-    function pauseAllVideos(exceptVideo = null) {
-        // Pause all videos in the DOM except the one passed as exceptVideo
-        document.querySelectorAll('video').forEach(video => {
-            if (video !== exceptVideo) {
-                video.pause();
-            }
-        });
-        // Also pause the lightbox video if it's not the exceptVideo
-        if (lightboxVideo && lightboxVideo !== exceptVideo) {
-            lightboxVideo.pause();
-        }
-    }
+let editMediaFiles = [];
+let editExistingMedia = [];
+let editRemovedIndexes = [];
+let editPostId = null;
 
-    function showMedia(index) {
-        try {
-            if (!mediaItems || !mediaItems[index]) {
-                console.error('Invalid media item at index:', index);
-                return;
-            }
+function isVideoFile(file) {
+    return file.type && file.type.startsWith('video/');
+}
+function isVideoUrl(url) {
+    return /\.(mp4|webm|ogg|mov|flv|avi|mkv)$/i.test(url);
+}
 
-            const item = mediaItems[index];
-            // Pause all other videos except the lightbox video
-            pauseAllVideos(lightboxVideo);
-
-            lightboxImg.style.display = 'none';
-            lightboxVideo.style.display = 'none';
-
-            if (item.type === 'video') {
-                lightboxVideo.style.display = 'block';
-                const source = lightboxVideo.querySelector('source');
-                source.src = item.src;
-                lightboxVideo.load();
-                lightboxVideo.currentTime = 0;
-            } else {
-                lightboxImg.style.display = 'block';
-                lightboxImg.src = item.src;
-            }
-
-            counter.textContent = `${index + 1} / ${mediaItems.length}`;
-        } catch (error) {
-            console.error('Error showing media:', error);
-        }
-    }
-
-    function nextMedia() {
-        if (!mediaItems || mediaItems.length === 0) return;
-        if (lightboxVideo.style.display === 'block') {
-            lightboxVideo.pause();
-        }
-        currentIndex = (currentIndex + 1) % mediaItems.length;
-        showMedia(currentIndex);
-    }
-
-    function prevMedia() {
-        if (!mediaItems || mediaItems.length === 0) return;
-        if (lightboxVideo.style.display === 'block') {
-            lightboxVideo.pause();
-        }
-        currentIndex = (currentIndex - 1 + mediaItems.length) % mediaItems.length;
-        showMedia(currentIndex);
-    }
-
-    // Lightbox event listeners
-    closeBtn.addEventListener('click', () => {
-        if (lightboxVideo.style.display === 'block') {
-            lightboxVideo.pause();
-        }
-        lightbox.style.display = 'none';
-    });
-
-    prevBtn.addEventListener('click', prevMedia);
-    nextBtn.addEventListener('click', nextMedia);
-
-    // Keyboard navigation
-    document.addEventListener('keydown', (e) => {
-        if (lightbox.style.display === 'block') {
-            if (e.key === 'ArrowLeft') prevMedia();
-            if (e.key === 'ArrowRight') nextMedia();
-            if (e.key === 'Escape') {
-                if (lightboxVideo.style.display === 'block') {
-                    lightboxVideo.pause();
-                }
-                lightbox.style.display = 'none';
-            }
-        }
-    });
-
-    // Close lightbox when clicking outside
-    lightbox.addEventListener('click', (e) => {
-        if (e.target === lightbox) {
-            if (lightboxVideo.style.display === 'block') {
-                lightboxVideo.pause();
-            }
-            lightbox.style.display = 'none';
-        }
-    });
-
-    let currentPage = 1;
-    const postsPerPage = 5;
-    const mainContent = document.querySelector('.main-content');
-    let isLoading = false;
-    let allLoaded = false;
-
-    function renderPost(post) {
-        const postContainer = document.createElement('div');
-        postContainer.className = 'post-container';
-        postContainer.dataset.postId = post.id || post.post.id || post.post_id;
-        const filesData = JSON.stringify(post.post.post_files || []);
-        // --- Determine user's reaction ---
-        const userReaction = post.user_reaction;
-        const distinctReactions =  (post.reactions)?[...new Set(Object.values(post.reactions).map(r => r.reaction))]:[];
-        topTwoReactors = Object.values(post.reactions).slice(0,2).map(r => r.reactor);
-        reactionEmojis = ""
-        for (let i = 0; i < distinctReactions.length; i++) {
-            reactionEmojis += getReactionEmoji(distinctReactions[i]);
-        }
-        topTwoReactorNames = ""
-        for (let i=0; i < topTwoReactors.length; i++) {
-            topTwoReactorNames += topTwoReactors[i]+", ";  
-        }
-        remainingReactorCount = Object.keys(post.reactions).length - topTwoReactors.length;
-        postContainer.innerHTML = `
-            <div class="user-profile">
-                <img src="${post.uploaded_by.user.profile_picture.url}" alt="${post.uploaded_by.user.full_name}">
-                <div>
-                    <p>${post.uploaded_by.user.full_name}</p>
-                    <span>${post.updated_at}</span>
-                </div>
-            </div>
-            <p class="post-text">
-                ${post.post.post_text}
-            </p>
-            <div class="multi-image-gallery" data-files='${filesData}'>
-                ${(post.post.post_files || []).slice(0, 3).map((file, index) => {
-            const isVideo = /\.(mp4|mkv|avi|mov)$/i.test(file);
-            const showOverlay = index === 2 && post.post.post_files.length > 3;
-            return `
-                        <div class="gallery-img ${showOverlay ? 'gallery-img-overlay' : ''}" 
-                             data-index="${index}" 
-                             data-type="${isVideo ? 'video' : 'image'}"
-                             data-src="/media/${file}">
-                            ${isVideo ? `
-                                <video class="gallery-media" controls>
-                                    <source src="/media/${file}" type="video/mp4">
-                                    Your browser does not support the video tag.
-                                </video>
-                                <div class="play-button">▶</div>
-                            ` : `
-                                <img class="gallery-media" src="/media/${file}" alt="Post image" loading="lazy">
-                            `}
-                            ${showOverlay ? `
-                                <div class="gallery-overlay-text">+${post.post.post_files.length - 2}</div>
-                            ` : ''}
-                        </div>
-                    `;
-        }).join('')}
-            </div>
-            <div class="post-row">
-                <div class="reacts">
-                    ${reactionEmojis?reactionEmojis + " " + topTwoReactorNames:"No reactions yet"}${remainingReactorCount!=0?" + " + remainingReactorCount+" others": ""}
-                </div>
-                <div class="react-details">
-                    ${post.post.views?post.post.views:0} views &nbsp;&nbsp; ${post.comment_count} comments
-                </div>
-            </div>
-            <hr>
-            <div class="post-row">
-                <div class="comment-button">
-                    <img src="${STATIC_URLS.commentsImage}">Comments
-                </div>
-            </div>
-            <div class="post-row comments" style="display: none;">
-                <div class="comment-thread">
-                    <!-- Comments will be loaded here -->
-                </div>
-            </div>
-        `;
-        mainContent.appendChild(postContainer);
-        initializePostEvents(postContainer);
-        if (window.MailboxComments) {
-            window.MailboxComments.initializeCommentFunctionality(postContainer);
-            window.MailboxComments.loadComments(postContainer);
-        }
-        // --- Truncate post text to 50 chars with show more/less ---
-        truncatePostText50(postContainer);
-
-        // --- Reaction Lightbox trigger ---
-        const reactsDiv = postContainer.querySelector('.reacts');
-        if (reactsDiv) {
-            reactsDiv.style.cursor = "pointer";
-            reactsDiv.addEventListener('click', function() {
-                openReactionLightbox(post.reactions);
-            });
-        }
-    }
-
-    // --- Reaction Lightbox logic ---
-    function openReactionLightbox(reactions) {
-        const lightbox = document.getElementById('reaction-lightbox');
-        const closeBtn = lightbox.querySelector('.reaction-lightbox-close');
-        const listDiv = lightbox.querySelector('.reaction-list');
-        listDiv.innerHTML = '';
-
-        // --- Style the lightbox for overlay, background, border radius, shadow, scroll ---
-        lightbox.style.position = 'fixed';
-        lightbox.style.top = '0';
-        lightbox.style.left = '0';
-        lightbox.style.width = '100vw';
-        lightbox.style.height = '100vh';
-        lightbox.style.background = 'rgba(255,255,255,0.96)';
-        lightbox.style.zIndex = '99999';
-        lightbox.style.display = 'flex';
-        lightbox.style.alignItems = 'center';
-        lightbox.style.justifyContent = 'center';
-
-        const content = lightbox.querySelector('.reaction-lightbox-content');
-        if (content) {
-            content.style.background = '#fff';
-            content.style.borderRadius = '18px';
-            content.style.boxShadow = '0 8px 32px rgba(0,0,0,0.18)';
-            content.style.padding = '32px 24px 24px 24px';
-            content.style.maxWidth = '400px';
-            content.style.width = '90vw';
-            content.style.maxHeight = '70vh';
-            content.style.overflow = 'hidden';
-            content.style.position = 'relative';
-            content.style.display = 'flex';
-            content.style.flexDirection = 'column';
-        }
-        if (listDiv) {
-            listDiv.style.overflowY = 'auto';
-            listDiv.style.maxHeight = '40vh';
-            listDiv.style.marginTop = '16px';
-        }
-        if (closeBtn) {
-            closeBtn.style.position = 'absolute';
-            closeBtn.style.top = '12px';
-            closeBtn.style.right = '18px';
-            closeBtn.style.cursor = 'pointer';
-            closeBtn.style.fontSize = '2em';
-            closeBtn.style.color = '#888';
-        }
-
-        // reactions: { user_id: {reaction, reactor, profile_picture:{url}} }
-        if (reactions && Object.keys(reactions).length > 0) {
-            Object.values(reactions).forEach(r => {
-                const row = document.createElement('div');
-                row.style.display = 'flex';
-                row.style.alignItems = 'center';
-                row.style.marginBottom = '10px';
-                row.innerHTML = `
-                    <img src="${r.profile_picture.url}" alt="profile" style="width:32px;height:32px;border-radius:50%;margin-right:10px;">
-                    <span style="font-weight:bold;margin-right:10px;">${r.reactor}</span>
-                    <span style="font-size:1.5em;">${getReactionEmoji(r.reaction)}</span>
-                `;
-                listDiv.appendChild(row);
-            });
+function renderEditMediaPreview() {
+    const preview = document.getElementById('mediaPreview');
+    preview.innerHTML = '';
+    // Existing media
+    editExistingMedia.forEach((media, idx) => {
+        if (editRemovedIndexes.includes(idx)) return;
+        const tile = document.createElement('div');
+        tile.className = 'media-tile';
+        let elem;
+        if (isVideoUrl(media)) {
+            elem = document.createElement('video');
+            elem.src = '/media/' + media;
+            elem.controls = false;
+            elem.muted = true;
+            elem.loop = true;
+            elem.autoplay = true;
         } else {
-            listDiv.innerHTML = '<div>No reactions yet.</div>';
+            elem = document.createElement('img');
+            elem.src = '/media/' + media;
+            elem.alt = 'Image preview';
         }
-
-        // Show the lightbox
-        lightbox.style.display = 'flex';
-
-        // Close logic
-        closeBtn.onclick = function() {
-            lightbox.style.display = 'none';
+        tile.appendChild(elem);
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'remove-media-btn';
+        removeBtn.innerHTML = '&times;';
+        removeBtn.onclick = () => {
+            editRemovedIndexes.push(idx);
+            renderEditMediaPreview();
         };
-        lightbox.onclick = function(e) {
-            if (e.target === lightbox) lightbox.style.display = 'none';
+        tile.appendChild(removeBtn);
+        preview.appendChild(tile);
+    });
+    // New files
+    editMediaFiles.forEach((fileObj, idx) => {
+        const tile = document.createElement('div');
+        tile.className = 'media-tile';
+        let elem;
+        if (isVideoFile(fileObj)) {
+            elem = document.createElement('video');
+            elem.src = URL.createObjectURL(fileObj);
+            elem.controls = false;
+            elem.muted = true;
+            elem.loop = true;
+            elem.autoplay = true;
+        } else {
+            elem = document.createElement('img');
+            elem.src = URL.createObjectURL(fileObj);
+            elem.alt = 'Image preview';
+        }
+        tile.appendChild(elem);
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'remove-media-btn';
+        removeBtn.innerHTML = '&times;';
+        removeBtn.onclick = () => {
+            editMediaFiles.splice(idx, 1);
+            renderEditMediaPreview();
         };
-    }
+        tile.appendChild(removeBtn);
+        preview.appendChild(tile);
+    });
+}
 
-    function getReactionEmoji(reaction) {
-        switch (reaction) {
-            case 'Like': return '👍';
-            case 'Love': return '❤️';
-            case 'Care': return '🤗';
-            case 'Sad': return '😢';
-            case 'Disgusted': return '🤮';
-            default: return '👍';
-        }
-    }
+function openEditLightbox(post) {
+    const overlay = document.getElementById('editPostOverlay');
+    const textArea = document.getElementById('postText');
+    editPostId = post.id || post.post.id || post.post_id;
+    textArea.value = post.post.post_text;
+    editExistingMedia = (post.post.post_files || []).slice();
+    editRemovedIndexes = [];
+    editMediaFiles = [];
+    renderEditMediaPreview();
+    overlay.style.display = 'flex';
+    overlay.classList.add('active');
+    textArea.focus();
+}
 
-    async function loadMorePosts() {
-        if (isLoading || allLoaded) return;
-        isLoading = true;
-        try {
-            const response = await fetch(`/students/mailbox/load_more/?page=${currentPage}&per_page=${postsPerPage}`, {
-                method: 'GET',
-                headers: {
-                    'X-CSRFToken': csrftoken
-                }
-            });
+// Add Media button triggers file input
+document.getElementById('addMediaBtn').onclick = function() {
+    document.getElementById('mediaInput').click();
+};
 
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            const data = await response.json();
-
-            if (data.posts && data.posts.length > 0) {
-                data.posts.forEach(renderPost);
-                if (data.posts.length < postsPerPage) {
-                    allLoaded = true;
-                } else {
-                    currentPage++;
-                }
-            } else {
-                allLoaded = true;
-            }
-        } catch (error) {
-            console.error('Error loading posts:', error);
-            alert('Error loading posts. Please try again.');
-        } finally {
-            isLoading = false;
-        }
-    }
-
-    function handleInfiniteScroll() {
-        if (allLoaded) return;
-        const lastPost = document.querySelector('.main-content .post-container:last-of-type');
-        if (!lastPost) return;
-        const rect = lastPost.getBoundingClientRect();
-        if (rect.bottom < window.innerHeight + 200) {
-            loadMorePosts();
-        }
-    }
-
-    window.addEventListener('scroll', handleInfiniteScroll);
-
-    // Initial load
-    loadMorePosts();
-
-    // Function to initialize all event listeners for a post container
-    function initializePostEvents(postContainer) {
-        // Initialize lightbox for gallery images
-        postContainer.querySelectorAll('.gallery-img').forEach(item => {
-            item.addEventListener('click', function () {
-                const gallery = this.closest('.multi-image-gallery');
-                currentGallery = gallery;
-
-                // Pause any playing videos in the gallery
-                gallery.querySelectorAll('video').forEach(video => {
-                    video.pause();
-                    video.currentTime = 0;
-                    video.muted = true;
-                    video.volume = 0;
-                });
-
-                try {
-                    const filesStr = gallery.dataset.files;
-                    if (!filesStr) {
-                        console.error('No files data found in gallery');
-                        return;
-                    }
-
-                    let allFiles;
-                    try {
-                        allFiles = JSON.parse(filesStr);
-                    } catch (parseError) {
-                        console.error('Error parsing files data:', parseError);
-                        return;
-                    }
-
-                    if (!Array.isArray(allFiles) || allFiles.length === 0) {
-                        console.error('No files found in gallery data');
-                        return;
-                    }
-
-                    mediaItems = allFiles.map(file => {
-                        const isVideo = /\.(mp4|mkv|avi|mov)$/i.test(file);
-                        return {
-                            src: `/media/${file}`,
-                            type: isVideo ? 'video' : 'image'
-                        };
-                    });
-
-                    currentIndex = parseInt(this.dataset.index);
-
-                    if (isNaN(currentIndex) || currentIndex < 0 || currentIndex >= mediaItems.length) {
-                        console.error('Invalid index:', currentIndex);
-                        return;
-                    }
-
-                    showMedia(currentIndex);
-                    lightbox.style.display = 'block';
-                } catch (error) {
-                    console.error('Error opening lightbox:', error);
-                }
-            });
-        });
-
-        // Initialize reply functionality
-        postContainer.querySelectorAll('.comment-reply').forEach(replyLink => {
-            replyLink.addEventListener('click', function (e) {
-                e.preventDefault();
-                const replyPopup = document.getElementById('reply-popup');
-                replyPopup.classList.add('active');
-                const replyTextarea = replyPopup.querySelector('textarea');
-                replyTextarea.value = '';
-            });
-        });
-
-        // Hide/show play icon on gallery video play/pause
-        postContainer.querySelectorAll('.gallery-img video.gallery-media').forEach(video => {
-            const playButton = video.parentElement.querySelector('.play-button');
-            if (playButton) {
-                video.addEventListener('play', function() {
-                    // Pause all other videos except this one
-                    pauseAllVideos(video);
-                    playButton.style.display = 'none';
-                });
-                video.addEventListener('pause', function() {
-                    playButton.style.display = '';
-                });
-            } else {
-                // Still pause all other videos on play
-                video.addEventListener('play', function() {
-                    pauseAllVideos(video);
-                });
-            }
-        });
-        
-        // Pause all other videos when lightbox video is played
-        if (lightboxVideo) {
-            lightboxVideo.addEventListener('play', function() {
-                pauseAllVideos(lightboxVideo);
-            });
-        }
-    }
-
-    // Post creation functionality
-    const postInput = document.getElementById('post-input-text');
-    const postButtons = document.querySelector('.post-buttons');
-    const postSubmitBtn = document.getElementById('post-submit-btn');
-    const postCancelBtn = document.querySelector('.post-cancel-btn');
-    const selectedMediaPreview = document.querySelector('.selected-media-preview');
-
-    if (postInput) {
-        postInput.addEventListener('input', function() {
-            postButtons.style.display = this.value.trim() || selectedMediaPreview.children.length > 0 ? 'flex' : 'none';
-        });
-    }
-
-    // Add a circular progress bar overlay to the write-post-container (not global)
-    function ensureUploadProgressBarOverlay() {
-        let container = document.querySelector('.write-post-container');
-        if (!container) return;
-        if (container.querySelector('#upload-progress-bar')) return;
-        const bar = document.createElement('div');
-        bar.id = 'upload-progress-bar';
-        bar.style.position = 'absolute';
-        bar.style.top = '0';
-        bar.style.left = '0';
-        bar.style.width = '100%';
-        bar.style.height = '100%';
-        bar.style.display = 'none';
-        bar.style.background = 'rgba(255,255,255,0.7)';
-        bar.style.zIndex = '10';
-        bar.style.justifyContent = 'center';
-        bar.style.alignItems = 'center';
-        bar.style.transition = 'opacity 0.2s';
-        bar.style.pointerEvents = 'none';
-        bar.innerHTML = `
-            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;">
-                <svg width="60" height="60" viewBox="0 0 40 40">
-                    <circle cx="20" cy="20" r="18" stroke="#eee" stroke-width="4" fill="none"/>
-                    <circle id="upload-progress-circle" cx="20" cy="20" r="18" stroke="#1876f2" stroke-width="4" fill="none"
-                        stroke-dasharray="113.097" stroke-dashoffset="113.097" style="transition:stroke-dashoffset 0.2s;"/>
-                </svg>
-                <span id="upload-progress-text" style="margin-top:8px;font-weight:bold;">0%</span>
-                <span style="font-size:12px;color:#555;">Uploading...</span>
-            </div>
-        `;
-        bar.style.position = 'absolute';
-        bar.style.top = '0';
-        bar.style.left = '0';
-        bar.style.width = '100%';
-        bar.style.height = '100%';
-        bar.style.display = 'none';
-        container.style.position = 'relative';
-        container.appendChild(bar);
-    }
-    ensureUploadProgressBarOverlay();
-
-    function showUploadProgressBar(percent) {
-        const container = document.querySelector('.write-post-container');
-        const bar = container ? container.querySelector('#upload-progress-bar') : null;
-        const circle = bar ? bar.querySelector('#upload-progress-circle') : null;
-        const text = bar ? bar.querySelector('#upload-progress-text') : null;
-        if (bar && circle && text) {
-            bar.style.display = 'flex';
-            // Fade the write-post-container except the overlay
-            container.style.opacity = '0.5';
-            bar.style.pointerEvents = 'auto';
-            // Circle circumference = 2 * PI * r = ~113.097
-            const offset = 113.097 - (113.097 * percent / 100);
-            circle.setAttribute('stroke-dashoffset', offset);
-            text.textContent = `${Math.round(percent)}%`;
-        }
-    }
-    function hideUploadProgressBar() {
-        const container = document.querySelector('.write-post-container');
-        const bar = container ? container.querySelector('#upload-progress-bar') : null;
-        if (bar) bar.style.display = 'none';
-        if (container) container.style.opacity = '1';
-        if (bar) bar.style.pointerEvents = 'none';
-    }
-
-    if (postSubmitBtn) {
-        postSubmitBtn.addEventListener('click', async function() {
-            const postText = postInput.value.trim();
-            if (!postText && selectedMediaPreview.children.length === 0) return;
-
-            // --- Hide controls and disable input during upload ---
-            const writePostContainer = document.querySelector('.write-post-container');
-            const videoIcon = writePostContainer.querySelector('.video-upload');
-            const photoIcon = writePostContainer.querySelector('.photo-upload');
-            postSubmitBtn.style.display = 'none';
-            if (videoIcon) videoIcon.style.display = 'none';
-            if (photoIcon) photoIcon.style.display = 'none';
-            postCancelBtn.style.display = 'none';
-            postInput.disabled = true;
-
-            try {
-                const formData = new FormData();
-                formData.append('post_text', postText);
-                
-                // Get all file inputs
-                const fileInputs = document.querySelectorAll('.post-input-container input[type="file"]');
-                
-                // Add files from each input
-                fileInputs.forEach(input => {
-                    if (input.files.length > 0) {
-                        Array.from(input.files).forEach(file => {
-                            formData.append('files', file);
-                        });
-                    }
-                });
-
-                // --- Show progress bar before upload ---
-                showUploadProgressBar(0);
-
-                // Use XMLHttpRequest for progress events
-                await new Promise((resolve, reject) => {
-                    const xhr = new XMLHttpRequest();
-                    xhr.open('POST', '/students/mailbox/post/', true);
-                    xhr.setRequestHeader('X-CSRFToken', csrftoken);
-
-                    xhr.upload.onprogress = function(e) {
-                        if (e.lengthComputable) {
-                            const percent = (e.loaded / e.total) * 100;
-                            showUploadProgressBar(percent);
-                        }
-                    };
-                    xhr.onload = function() {
-                        hideUploadProgressBar();
-                        // Restore controls
-                        if (videoIcon) videoIcon.style.display = '';
-                        if (photoIcon) photoIcon.style.display = '';
-                        postSubmitBtn.style.display = '';
-                        postCancelBtn.style.display = '';
-                        postInput.disabled = false;
-                        if (xhr.status >= 200 && xhr.status < 300) {
-                            try {
-                                const data = JSON.parse(xhr.responseText);
-                                if (data.status === 'success') {
-                                    alert('Post uploaded successfully!');
-                                    // Clear the input and media preview
-                                    postInput.value = '';
-                                    selectedMediaPreview.innerHTML = '';
-                                    postButtons.style.display = 'none';
-                                    // Clear file inputs
-                                    fileInputs.forEach(input => { input.value = ''; });
-                                    // Reload the page to show the new post
-                                    window.location.reload();
-                                    resolve();
-                                } else {
-                                    alert(data.message || 'Failed to create post');
-                                    reject();
-                                }
-                            } catch (err) {
-                                alert('Error parsing server response.');
-                                reject();
-                            }
-                        } else {
-                            alert('Error creating post. Please try again.');
-                            reject();
-                        }
-                    };
-                    xhr.onerror = function() {
-                        hideUploadProgressBar();
-                        // Restore controls
-                        if (videoIcon) videoIcon.style.display = '';
-                        if (photoIcon) photoIcon.style.display = '';
-                        postSubmitBtn.style.display = '';
-                        postCancelBtn.style.display = '';
-                        postInput.disabled = false;
-                        alert('Error creating post. Please try again.');
-                        reject();
-                    };
-                    xhr.send(formData);
-                });
-            } catch (error) {
-                hideUploadProgressBar();
-                // Restore controls
-                const writePostContainer = document.querySelector('.write-post-container');
-                const videoIcon = writePostContainer.querySelector('.video-upload');
-                const photoIcon = writePostContainer.querySelector('.photo-upload');
-                if (videoIcon) videoIcon.style.display = '';
-                if (photoIcon) photoIcon.style.display = '';
-                postSubmitBtn.style.display = '';
-                postCancelBtn.style.display = '';
-                postInput.disabled = false;
-                console.error('Error creating post:', error);
-                alert('Error creating post. Please try again.');
-            }
-        });
-    }
-
-    if (postCancelBtn) {
-        postCancelBtn.addEventListener('click', function() {
-            postInput.value = '';
-            selectedMediaPreview.innerHTML = '';
-            postButtons.style.display = 'none'; 
-        });
-    }
+// Handle file input change
+document.getElementById('mediaInput').addEventListener('change', function() {
+    const files = Array.from(this.files);
+    editMediaFiles = editMediaFiles.concat(files);
+    renderEditMediaPreview();
+    this.value = '';
 });
 
-// Add this function at the end of the file or before renderPost
-function truncatePostText50(container) {
-    const postText = container.querySelector('.post-text');
-    if (!postText) return;
-    const fullText = postText.innerHTML;
-    // Use plain text length for truncation logic
-    let div = document.createElement('div');
-    div.innerHTML = fullText;
-    let plain = div.textContent || div.innerText || '';
-    if (plain.length <= 50) return; // Do not show "show more" if <= 50 chars
-    function getTruncated(text) {
-        let truncated = plain.slice(0, 50);
-        return truncated + '... <span class="show-more-post" style="color:#1876f2;cursor:pointer;">show more</span>';
+// Save (submit) edit form
+document.getElementById('savePostBtn').onclick = function() {
+    const text = document.getElementById('postText').value.trim();
+    const formData = new FormData();
+    formData.append('post_id', editPostId);
+    formData.append('text', text);
+    formData.append('removed_indexes', JSON.stringify(editRemovedIndexes));
+    for (let file of editMediaFiles) {
+        formData.append('media', file);
     }
-    function setTruncated() {
-        postText.innerHTML = getTruncated(fullText);
-        postText.querySelector('.show-more-post').onclick = function() {
-            setExpanded();
-        };
-    }
-    function setExpanded() {
-        postText.innerHTML = fullText + ' <span class="show-less-post" style="color:#1876f2;cursor:pointer;">show less</span>';
-        postText.querySelector('.show-less-post').onclick = function() {
-            setTruncated();
-        };
-    }
-    setTruncated();
+    fetch('/students/edit-post-api/', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': window.csrftoken },
+        body: formData
+    }).then(res => res.json()).then(data => {
+        if (data.success) {
+            closeEditLightbox();
+            window.location.reload();
+        } else {
+            alert('Failed to update post.');
+        }
+    });
+};
+
+// Cancel and close logic
+function closeEditLightbox() {
+    const overlay = document.getElementById('editPostOverlay');
+    overlay.style.display = 'none';
+    overlay.classList.remove('active');
+    editPostId = null;
+    editMediaFiles = [];
+    editExistingMedia = [];
+    editRemovedIndexes = [];
+    document.getElementById('postText').value = '';
+    document.getElementById('mediaPreview').innerHTML = '';
 }
+document.getElementById('cancelPostBtn').onclick = function(e) {
+    e.preventDefault();
+    closeEditLightbox();
+};
+document.getElementById('closePopupBtn').onclick = function(e) {
+    e.preventDefault();
+    closeEditLightbox();
+};
+document.getElementById('editPostOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeEditLightbox();
+});
+
+// Attach event delegation for edit buttons after posts are rendered
+document.addEventListener('click', function(e) {
+    if (e.target.closest('.edit-post-btn')) {
+        e.preventDefault();
+        const btn = e.target.closest('.edit-post-btn');
+        const postId = btn.getAttribute('data-post-id');
+        if (window.postsById && window.postsById[postId]) {
+            openEditLightbox(window.postsById[postId]);
+        } else if (typeof getPostDataById === 'function') {
+            getPostDataById(postId).then(post => openEditLightbox(post));
+        } else {
+            alert('Cannot find post data for editing.');
+        }
+    }
+});
