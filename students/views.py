@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from authorization.models import Student, User, MailboxPost, MailboxReport
+from authorization.models import Student, User, MailboxPost, MailboxReport, Comment, MailboxPostStatus
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods, require_POST
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
@@ -15,6 +15,10 @@ from django.views.decorators.http import require_GET
 @ensure_csrf_cookie
 def mailbox(request):
     latest_posts = MailboxPost.objects.order_by('-created_at')[:5]
+    requester = Student.objects.get(user=User.objects.get(username=request.COOKIES.get('my_user')))
+    requester_post_count = MailboxPost.objects.filter(uploaded_by=requester).count()
+    requester_pending_post_count = MailboxPost.objects.filter(uploaded_by=requester,status=MailboxPostStatus.PENDING).count()
+    
     post_details = []
     for post in latest_posts:
         # Convert JSON fields to Python objects
@@ -35,7 +39,10 @@ def mailbox(request):
         'students': Student.objects.all(),
         'most_active': Student.objects.all()[0:5],
         'user': Student.objects.get(user = User.objects.get(username=request.COOKIES.get('my_user'))),
-        'posts': post_details
+        'posts': post_details,
+        'current_page': 'mailbox',
+        'post_count': requester_post_count,
+        'pending_count': requester_pending_post_count,
         
     }
     return render(request, 'students/mailbox/htmls/mailbox.html', context=data)
@@ -80,7 +87,6 @@ def handle_post(request):
             }
             
             # Save to database (you'll need to create this model)
-            from authorization.models import MailboxPost # Import your Post model
             post = MailboxPost.objects.create(
                 post=json.dumps(post_data),
                 created_at=timezone.now(),
@@ -113,18 +119,23 @@ def load_more_posts(request):
     try:
         page = int(request.GET.get('page', 1))
         per_page = int(request.GET.get('per_page', 5))
-        
+        current_page = str(request.GET.get('current_page', 'mailbox'))
         # Calculate offset
         offset = (page - 1) * per_page
         
         # Get posts with pagination
-        posts = MailboxPost.objects.all().order_by('-created_at')[offset:offset + per_page]
+        posts = []
+        if current_page == 'mailbox':
+            posts = MailboxPost.objects.filter(status=MailboxPostStatus.APPROVED).order_by('-created_at')[offset:offset + per_page]
+        elif current_page == 'manage-your-posts':
+            print("this is manage post page")
+            requester = Student.objects.get(user=User.objects.get(username=request.COOKIES.get('my_user')))
+            posts = MailboxPost.objects.filter(uploaded_by=requester).order_by('-created_at')[offset:offset + per_page]
         
         # Format posts for response
         formatted_posts = []
         current_user = get_current_user(request)
         for post in posts:
-            from authorization.models import Comment
             comment_count = Comment.objects.filter(post=post).count()
             post_data = json.loads(post.post)
             reactions_data = json.loads(post.reactions) if post.reactions else {}
@@ -159,6 +170,10 @@ def load_more_posts(request):
                 'user_reaction': user_reaction,
                 'reactions': reactions,
                 'comment_count': comment_count,
+                'status': {
+                    'status': post.status,
+                    'status_text': post.get_status_display(),
+                }
             })
         
         return JsonResponse({
@@ -231,7 +246,6 @@ def handle_comment(request):
             }, status=404)
 
         # Create the comment
-        from authorization.models import Comment
         comment = Comment.objects.create(
             post=post,
             comment=comment_text,
@@ -269,7 +283,6 @@ def handle_comment(request):
 def get_comments(request, post_id):
     try:
         # Get all comments for the post
-        from authorization.models import Comment
         comments = Comment.objects.filter(post_id=post_id).order_by('created_at')
         current_user = get_current_user(request)
         # Format comments for response
@@ -329,6 +342,7 @@ def get_current_username(request):
     username = request.COOKIES.get('my_user')
     if not username:
         return None
+    print(username)
     return username
 
 def get_current_user(request):
@@ -339,6 +353,11 @@ def get_current_user(request):
         return User.objects.get(username=username)
     except User.DoesNotExist:
         return None
+    
+def is_current_user(request, user_id):
+    cookie = request.COOKIES.get('my_user')
+    username = User.objects.get(id=user_id).username
+    return cookie == username
 
 @require_http_methods(["POST"])
 @csrf_exempt
@@ -365,7 +384,6 @@ def react_comment(request):
         comment_id = data.get('comment_id')
         reaction = data.get('reaction')
         user = get_current_user(request)
-        from authorization.models import Comment
         comment = Comment.objects.get(id=comment_id)
         reactions = json.loads(comment.reactions) if comment.reactions else {}
         reactions[str(user.id)] = reaction
@@ -377,7 +395,16 @@ def react_comment(request):
 
 @ensure_csrf_cookie
 def manage_posts(request):
-    return render(request, 'students/mailbox/htmls/managePosts.html')
+    requester = Student.objects.get(user=User.objects.get(username=request.COOKIES.get('my_user')))
+    requester_post_count = MailboxPost.objects.filter(uploaded_by=requester).count()
+    requester_pending_post_count = MailboxPost.objects.filter(uploaded_by=requester,status=MailboxPostStatus.PENDING).count()
+    data = {
+        'current_page': 'manage-your-posts',
+        'post_count': requester_post_count,
+        'pending_count': requester_pending_post_count,
+        'requester': requester,
+    }
+    return render(request, 'students/mailbox/htmls/managePosts.html', context = data)
 
 @require_GET
 def manage_posts_load_more(request):
@@ -423,18 +450,64 @@ def manage_posts_load_more(request):
 @csrf_exempt
 def manage_posts_delete(request, post_id):
     try:
-        user = get_current_user(request)
-        if not user:
-            return JsonResponse({'status': 'error', 'message': 'User not found (cookie missing or invalid).'}, status=401)
+        if not is_current_user(request, post_id):
+            raise AttributeError("You do not have permission to delete this post.")
         try:
-            student = Student.objects.get(user=user)
+            student = Student.objects.get(User.objects.get(username=request.COOKIES.get('my_user')))
         except Student.DoesNotExist:
             return JsonResponse({'status': 'error', 'message': 'Student profile not found for user.'}, status=403)
-        post = get_object_or_404(MailboxPost, id=post_id, uploaded_by=student)
+        post = get_object_or_404(MailboxPost, id=post_id, uploaded_by=student)  
+
+            
+        # Load the post data from JSON
+        post_data = json.loads(post.post)
+        
+        # Extract file paths
+        post_files = post_data.get('post_files', [])
+        
+        # Delete each file from storage
+        for file_path in post_files:
+            full_file_path = os.path.join(settings.MEDIA_ROOT, file_path.replace('\\', '/'))  # Ensure correct path format
+            if os.path.isfile(full_file_path):
+                os.remove(full_file_path)  # Delete the file from the filesystem
+
         post.delete()
         return JsonResponse({'status': 'success'})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+    
+
+
+@require_http_methods(['POST'])
+@csrf_exempt
+def delete_post(request):
+    post_id = None
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        post_id = data.get('post_id')
+    try:
+        requester = request.COOKIES.get('my_user')
+        post = MailboxPost.objects.get(id=post_id)
+        post_author = post.uploaded_by.user.username
+        if requester != post_author:
+            return JsonResponse({'status': 'error', 'message': 'You do not have permission to delete this post.'}, status=403)
+        
+        if not post:
+            return JsonResponse({'status': 'error', 'message': 'Post not found.'}, status=404)
+        
+        post_data = json.loads(post.post)
+        post_files = post_data.get('post_files', [])
+
+        for file_path in post_files:
+            full_file_path = os.path.join(settings.MEDIA_ROOT, file_path.replace('\\', '/'))
+            if os.path.isfile(full_file_path):
+                os.remove(full_file_path)
+
+        post.delete()
+        return JsonResponse({'status': 'success', 'message': 'Post deleted successfully.'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+    
 
 @require_http_methods(["POST"])
 @csrf_exempt
@@ -491,7 +564,6 @@ def increment_post_view(request):
         # Save back to the model
         post.post = json.dumps(post_data)
         post.save()
-        print(f"Post ID {post_id} view count incremented to {post_data['views']}")
         return JsonResponse({'success': True, 'view_count': post_data['views']})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=400)

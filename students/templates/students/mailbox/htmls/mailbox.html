@@ -13,6 +13,7 @@
     <!-- Add CSRF Token -->
     <script>
         const csrftoken = '{{ csrf_token }}';
+        const current_page = '{{ current_page }}';
     </script>
 </head>
 
@@ -59,7 +60,7 @@
         <span class="manage-item">
             <i class="fa-solid fa-file-lines"></i>
             <span>Your Posts</span>
-            <span class="manage-count manage-count-posts">{{ your_posts_count|default:0 }}</span>
+            <span class="manage-count manage-count-posts">{{ post_count|default:0 }}</span>
         </span>
         <span class="manage-item">
             <i class="fa-solid fa-hourglass-half"></i>
@@ -74,7 +75,6 @@
     </div>
     <br>
     <div class="container">
-
         <div class="main-content">
             <div class="write-post-container">
                 <div class="post-row">

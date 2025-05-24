@@ -283,93 +283,96 @@ document.addEventListener('DOMContentLoaded', function() {
         const actions = document.createElement('div');
         actions.className = 'mailbox-comment-actions';
 
-        // To-react group (emoji + label)
-        const toReactGroup = document.createElement('div');
-        toReactGroup.className = 'mailbox-to-react-group';
+        if (current_page == 'mailbox') {
+            // To-react group (emoji + label)
+            const toReactGroup = document.createElement('div');
+            toReactGroup.className = 'mailbox-to-react-group';
 
-        // --- To-react button ---
-        const toReact = document.createElement('span');
-        toReact.className = 'to-react';
-        let userReact = comment.user_reaction && comment.user_reaction.reaction;
-        toReact.textContent = userReact ? getReactionEmoji(comment.user_reaction.reaction) : '👍';
-        toReact.style.cursor = "pointer";
-        toReact.style.marginRight = "2px";
-        toReactGroup.appendChild(toReact);
+            // --- To-react button ---
+            const toReact = document.createElement('span');
+            toReact.className = 'to-react';
+            let userReact = comment.user_reaction && comment.user_reaction.reaction;
+            toReact.textContent = userReact ? getReactionEmoji(comment.user_reaction.reaction) : '👍';
+            toReact.style.cursor = "pointer";
+            toReact.style.marginRight = "2px";
+            toReactGroup.appendChild(toReact);
 
-        // --- To-react label ---
-        const toReactLabel = document.createElement('span');
-        toReactLabel.style.fontSize = "13px";
-        toReactLabel.style.color = "#1876f2";
-        toReactLabel.style.fontWeight = "500";
-        toReactLabel.textContent = userReact ? comment.user_reaction.reaction : "React";
-        toReactGroup.appendChild(toReactLabel);
+            // --- To-react label ---
+            const toReactLabel = document.createElement('span');
+            toReactLabel.style.fontSize = "13px";
+            toReactLabel.style.color = "#1876f2";
+            toReactLabel.style.fontWeight = "500";
+            toReactLabel.textContent = userReact ? comment.user_reaction.reaction : "React";
+            toReactGroup.appendChild(toReactLabel);
 
-        // --- Reaction picker ---
-        const reactionPicker = document.createElement('div');
-        reactionPicker.className = 'reaction-picker';
-        reactionPicker.style.display = 'none';
-        reactionPicker.innerHTML = `
-            <span class="reaction" value="Like">👍</span>
-            <span class="reaction" value="Love">❤️</span>
-            <span class="reaction" value="Care">🤗</span>
-            <span class="reaction" value="Sad">😢</span>
-            <span class="reaction" value="Disgusted">🤮</span>
-        `;
-        toReactGroup.appendChild(reactionPicker);
+            // --- Reaction picker ---
+            const reactionPicker = document.createElement('div');
+            reactionPicker.className = 'reaction-picker';
+            reactionPicker.style.display = 'none';
+            reactionPicker.innerHTML = `
+                <span class="reaction" value="Like">👍</span>
+                <span class="reaction" value="Love">❤️</span>
+                <span class="reaction" value="Care">🤗</span>
+                <span class="reaction" value="Sad">😢</span>
+                <span class="reaction" value="Disgusted">🤮</span>
+            `;
+            toReactGroup.appendChild(reactionPicker);
+        
 
-        // --- Reaction picker logic ---
-        let pressTimer = null;
-        toReact.addEventListener('mousedown', function () {
-            if (pressTimer === null) {
-                pressTimer = setTimeout(() => {
-                    reactionPicker.style.display = 'block';
-                    reactionPicker.addEventListener('mouseleave', () => {
-                        reactionPicker.style.display = 'none';
-                    });
-                    pressTimer = null;
-                }, 300);
-            }
-        });
-        toReact.addEventListener('mouseup', function () {
-            if (pressTimer !== null) {
-                reactionPicker.style.display = 'none';
-                clearTimeout(pressTimer);
-                pressTimer = null;
-            }
-        });
-        toReact.addEventListener('mouseleave', function () {
-            if (pressTimer !== null) {
-                reactionPicker.style.display = 'none';
-                clearTimeout(pressTimer);
-                pressTimer = null;
-            }
-        });
-
-        reactionPicker.querySelectorAll('.reaction').forEach(reactionEl => {
-            reactionEl.addEventListener('click', async function () {
-                reactionPicker.style.display = 'none';
-                toReact.textContent = reactionEl.textContent;
-                toReactLabel.textContent = reactionEl.getAttribute('value');
-                try {
-                    await fetch('/students/mailbox/react_comment/', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': csrftoken
-                        },
-                        body: JSON.stringify({
-                            comment_id: comment.id,
-                            reaction: reactionEl.getAttribute('value')
-                        })
-                    });
-                    if (postContainer) await loadComments(postContainer);
-                } catch (err) {
-                    alert('Failed to save reaction. Please try again.');
+            // --- Reaction picker logic ---
+            let pressTimer = null;
+            toReact.addEventListener('mousedown', function () {
+                if (pressTimer === null) {
+                    pressTimer = setTimeout(() => {
+                        reactionPicker.style.display = 'block';
+                        reactionPicker.addEventListener('mouseleave', () => {
+                            reactionPicker.style.display = 'none';
+                        });
+                        pressTimer = null;
+                    }, 300);
                 }
             });
-        });
+            toReact.addEventListener('mouseup', function () {
+                if (pressTimer !== null) {
+                    reactionPicker.style.display = 'none';
+                    clearTimeout(pressTimer);
+                    pressTimer = null;
+                }
+            });
+            toReact.addEventListener('mouseleave', function () {
+                if (pressTimer !== null) {
+                    reactionPicker.style.display = 'none';
+                    clearTimeout(pressTimer);
+                    pressTimer = null;
+                }
+            });
 
-        actions.appendChild(toReactGroup);
+            reactionPicker.querySelectorAll('.reaction').forEach(reactionEl => {
+                reactionEl.addEventListener('click', async function () {
+                    reactionPicker.style.display = 'none';
+                    toReact.textContent = reactionEl.textContent;
+                    toReactLabel.textContent = reactionEl.getAttribute('value');
+                    try {
+                        await fetch('/students/mailbox/react_comment/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': csrftoken
+                            },
+                            body: JSON.stringify({
+                                comment_id: comment.id,
+                                reaction: reactionEl.getAttribute('value')
+                            })
+                        });
+                        if (postContainer) await loadComments(postContainer);
+                    } catch (err) {
+                        alert('Failed to save reaction. Please try again.');
+                    }
+                });
+            });
+
+            actions.appendChild(toReactGroup);
+        }
 
         // --- Reaction display (top 2, right aligned) ---
         const reactsDiv = document.createElement('div');
@@ -401,6 +404,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         commentEl.appendChild(actions);
 
+        
         // --- Reply link (below actions) ---
         const replyLink = document.createElement('a');
         replyLink.href = '#';
@@ -411,7 +415,7 @@ document.addEventListener('DOMContentLoaded', function() {
         replyLink.style.fontWeight = "500";
         replyLink.style.marginTop = "6px";
         replyLink.style.display = "inline-block";
-        commentEl.appendChild(replyLink);
+        if (current_page == 'mailbox') commentEl.appendChild(replyLink);
 
         // --- Recursively render replies ---
         if (comment.replies && comment.replies.length > 0) {

@@ -124,6 +124,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const userReaction = post.user_reaction;
         const distinctReactions =  (post.reactions)?[...new Set(Object.values(post.reactions).map(r => r.reaction))]:[];
         topTwoReactors = Object.values(post.reactions).slice(0,2).map(r => r.reactor);
+        console.log(post.status);
         reactionEmojis = ""
         for (let i = 0; i < distinctReactions.length; i++) {
             reactionEmojis += getReactionEmoji(distinctReactions[i]);
@@ -133,13 +134,37 @@ document.addEventListener('DOMContentLoaded', function () {
             topTwoReactorNames += topTwoReactors[i]+", ";  
         }
         remainingReactorCount = Object.keys(post.reactions).length - topTwoReactors.length;
+        // Add status badge and action buttons
+        const statusMap = {
+            'P': { text: 'Pending', class: 'status-pending' },
+            'A': { text: 'Approved', class: 'status-approved' },
+            'R': { text: 'Rejected', class: 'status-rejected' },
+            'D': { text: 'Disqualified', class: 'status-disqualified' }
+        };
+        const status = statusMap[post.status.status] || { text: post.status.status, class: '' };
         postContainer.innerHTML = `
             <div class="user-profile">
                 <img src="${post.uploaded_by.user.profile_picture.url}" alt="${post.uploaded_by.user.full_name}">
                 <div>
-                    <p>${post.uploaded_by.user.full_name}</p>
+                    <p>${post.uploaded_by.user.full_name}
+                        <span class="post-status-badge ${status.class}">${post.status.status_text}</span>
+                    </p>
                     <span>${post.updated_at}</span>
                 </div>
+                ${
+                current_page == 'manage-your-posts'?
+                `
+                <div class="post-actions">
+                    <button class="edit-post-btn" title="Edit Post" ${post.status.status !== 'P' ? 'disabled' : ''}>
+                        <i class="fa-solid fa-pen-to-square"></i>
+                    </button>
+                    <button class="delete-post-btn" title="Delete Post">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+                `
+                : ""
+                }
             </div>
             <p class="post-text">
                 ${post.post.post_text}
@@ -177,17 +202,23 @@ document.addEventListener('DOMContentLoaded', function () {
                     ${post.post.views?post.post.views:0} views &nbsp;&nbsp; ${post.comment_count} comments
                 </div>
             </div>
-            <div class="post-row">
-                <div class="reaction-picker">
-                    <span class="reaction" value="Like">👍</span>
-                    <span class="reaction" value="Love">❤️</span>
-                    <span class="reaction" value="Care">🤗</span>
-                    <span class="reaction" value="Sad">😢</span>
-                    <span class="reaction" value="Disgusted">🤮</span>
+            ${current_page=='mailbox'?
+                `<div class="post-row">
+                    <div class="reaction-picker">
+                        <span class="reaction" value="Like">👍</span>
+                        <span class="reaction" value="Love">❤️</span>
+                        <span class="reaction" value="Care">🤗</span>
+                        <span class="reaction" value="Sad">😢</span>
+                        <span class="reaction" value="Disgusted">🤮</span>
+                    </div>
                 </div>
-            </div>
+                `: ``
+            }
             <hr>
             <div class="post-row">
+                ${
+                current_page == 'mailbox' ?
+                `
                 <div class="img-parent">
                     <span class="to-react">${userReaction ? getReactionEmoji(userReaction.reaction) : '👍'}</span>${userReaction ? userReaction.reaction : 'React'}
                     <div class="reaction-picker">
@@ -198,14 +229,22 @@ document.addEventListener('DOMContentLoaded', function () {
                         <span class="reaction" value="Disgusted">🤮</span>
                     </div>
                 </div>
+                `:""
+                }
                 <div class="comment-button">
                     <img src="${STATIC_URLS.commentsImage}">Comment
                 </div>
+                ${current_page == 'mailbox' ?
+                `
                 <div class"report-img">
                     <img src="${STATIC_URLS.shareImage}">Report
                 </div>
+                `:""
+                }
             </div>
             <div class="post-row comments" style="display: none;">
+                ${current_page == 'mailbox' ?
+                `
                 <div class="comment-input">
                     <textarea placeholder="Write a comment"></textarea>
                 </div>
@@ -213,6 +252,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     <button class="comment-btn">Comment</button>
                     <button class="cancel-btn">Cancel</button>
                 </div>
+                `:""
+                }
+                
                 <hr>
                 <div class="comment-thread">
                     <!-- Comments will be loaded here -->
@@ -237,31 +279,64 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
 
-        // --- Report Popup trigger (fix) ---
-        console.log("Post container:", postContainer);
-        const reportBtn = postContainer.querySelector('img[src="/static/students/mailbox/images/share.png"]');
-        console.log("Report button:", reportBtn);
-        if (reportBtn) {
-            reportBtn.style.cursor = "pointer";
-            // Only trigger popup when clicking the report icon itself
-            const reportIcon = reportBtn;
-            if (reportIcon) {
-                reportIcon.style.cursor = "pointer";
-                reportIcon.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    const popup = document.getElementById('report-popup');
-                    if (popup) {
-                        popup.style.display = 'flex';
-                        popup.classList.add('active');
-                    }
-                    openReportPopup(post.id);
-                });
+        if (current_page == 'mailbox') {
+            // --- Report Popup trigger (fix) ---
+            const reportBtn = postContainer.querySelector('img[src="/static/students/mailbox/images/share.png"]');
+            if (reportBtn) {
+                reportBtn.style.cursor = "pointer";
+                // Only trigger popup when clicking the report icon itself
+                const reportIcon = reportBtn;
+                if (reportIcon) {
+                    reportIcon.style.cursor = "pointer";
+                    reportIcon.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        const popup = document.getElementById('report-popup');
+                        if (popup) {
+                            popup.style.display = 'flex';
+                            popup.classList.add('active');
+                        }
+                        openReportPopup(post.id);
+                    });
+                }
+            }
+        
+
+            // --- Reinitialize view tracking for this post ---
+            if (window.trackPostViews) {
+                window.trackPostViews();
             }
         }
 
-        // --- Reinitialize view tracking for this post ---
-        if (window.trackPostViews) {
-            window.trackPostViews();
+        // Add event listeners for edit/delete
+        const editBtn = postContainer.querySelector('.edit-post-btn');
+        const deleteBtn = postContainer.querySelector('.delete-post-btn');
+        if (editBtn) {
+            editBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                openEditPostPopup(post);
+            });
+        }
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (confirm('Are you sure you want to delete this post?')) {
+                    fetch(`/students/delete_post/`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrftoken
+                        },
+                        body: JSON.stringify({ post_id: post.id || post.post.id || post.post_id })
+                    }).then(res => res.json()).then(data => {
+                        if (data.success) {
+                            postContainer.remove();
+                        } else {
+                            console.error(`status: ${data.status}, message: ${data.message}`);
+                            alert('Failed to delete post.');
+                        }
+                    });
+                }
+            });
         }
     }
 
@@ -414,7 +489,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (isLoading || allLoaded) return;
         isLoading = true;
         try {
-            const response = await fetch(`/students/mailbox/load_more/?page=${currentPage}&per_page=${postsPerPage}`, {
+            const response = await fetch(`/students/mailbox/load_more/?page=${currentPage}&per_page=${postsPerPage}&current_page=${current_page}`, {
                 method: 'GET',
                 headers: {
                     'X-CSRFToken': csrftoken
@@ -516,145 +591,148 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
 
-        // Initialize reaction picker
-        postContainer.querySelectorAll('.to-react').forEach(element => {
-            let pressTimer = null;
+        if (current_page == 'mailbox') {
+            // Initialize reaction picker
+            postContainer.querySelectorAll('.to-react').forEach(element => {
+                let pressTimer = null;
 
-            function startPressTimer() {
-                if (pressTimer === null) {
-                    pressTimer = setTimeout(() => {
+                function startPressTimer() {
+                    if (pressTimer === null) {
+                        pressTimer = setTimeout(() => {
+                            let parent = element.closest('.img-parent');
+                            let reactionPicker = parent ? parent.querySelector('.reaction-picker') : null;
+                            if (!reactionPicker) {
+                                parent = element.closest('.post-container');
+                                reactionPicker = parent ? parent.querySelector('.reaction-picker') : null;
+                            }
+                            if (!reactionPicker) return;
+                            reactionPicker.style.display = 'block';
+
+                            reactionPicker.addEventListener('mouseleave', () => {
+                                reactionPicker.style.display = 'none';
+                            });
+
+                            reactionPicker.querySelectorAll('.reaction').forEach(reaction => {
+                                reaction.addEventListener('click', async () => {
+                                    reactionPicker.style.display = 'none';
+                                    // Update only the .to-react span and label, not the whole .img-parent
+                                    element.textContent = reaction.textContent;
+                                    // Update the label after the emoji
+                                    if (element.nextSibling && element.nextSibling.nodeType === Node.TEXT_NODE) {
+                                        element.nextSibling.textContent = reaction.getAttribute("value");
+                                    }
+                                    // Save reaction to backend for post
+                                    let postCont = element.closest('.post-container');
+                                    let postId = postCont ? postCont.dataset.postId : null;
+                                    if (postId) {
+                                        try {
+                                            await fetch('/students/mailbox/react_post/', {
+                                                method: 'POST',
+                                                headers: {
+                                                    'Content-Type': 'application/json',
+                                                    'X-CSRFToken': csrftoken
+                                                },
+                                                body: JSON.stringify({
+                                                    post_id: postId,
+                                                    reaction: reaction.getAttribute('value')
+                                                })
+                                            });
+                                            // Optionally: reload reactions UI, or reload post
+                                        } catch (err) {
+                                            alert('Failed to save reaction. Please try again.');
+                                        }
+                                    }
+                                });
+                            });
+
+                            pressTimer = null;
+                        }, 300);
+                    }
+                }
+
+                function cancelPressTimer() {
+                    if (pressTimer !== null) {
                         let parent = element.closest('.img-parent');
                         let reactionPicker = parent ? parent.querySelector('.reaction-picker') : null;
                         if (!reactionPicker) {
                             parent = element.closest('.post-container');
                             reactionPicker = parent ? parent.querySelector('.reaction-picker') : null;
                         }
-                        if (!reactionPicker) return;
-                        reactionPicker.style.display = 'block';
-
-                        reactionPicker.addEventListener('mouseleave', () => {
-                            reactionPicker.style.display = 'none';
-                        });
-
-                        reactionPicker.querySelectorAll('.reaction').forEach(reaction => {
-                            reaction.addEventListener('click', async () => {
-                                reactionPicker.style.display = 'none';
-                                // Update only the .to-react span and label, not the whole .img-parent
-                                element.textContent = reaction.textContent;
-                                // Update the label after the emoji
-                                if (element.nextSibling && element.nextSibling.nodeType === Node.TEXT_NODE) {
-                                    element.nextSibling.textContent = reaction.getAttribute("value");
-                                }
-                                // Save reaction to backend for post
-                                let postCont = element.closest('.post-container');
-                                let postId = postCont ? postCont.dataset.postId : null;
-                                if (postId) {
-                                    try {
-                                        await fetch('/students/mailbox/react_post/', {
-                                            method: 'POST',
-                                            headers: {
-                                                'Content-Type': 'application/json',
-                                                'X-CSRFToken': csrftoken
-                                            },
-                                            body: JSON.stringify({
-                                                post_id: postId,
-                                                reaction: reaction.getAttribute('value')
-                                            })
-                                        });
-                                        // Optionally: reload reactions UI, or reload post
-                                    } catch (err) {
-                                        alert('Failed to save reaction. Please try again.');
-                                    }
-                                }
-                            });
-                        });
-
+                        if (reactionPicker) reactionPicker.style.display = 'none';
+                        clearTimeout(pressTimer);
                         pressTimer = null;
-                    }, 300);
-                }
-            }
-
-            function cancelPressTimer() {
-                if (pressTimer !== null) {
-                    let parent = element.closest('.img-parent');
-                    let reactionPicker = parent ? parent.querySelector('.reaction-picker') : null;
-                    if (!reactionPicker) {
-                        parent = element.closest('.post-container');
-                        reactionPicker = parent ? parent.querySelector('.reaction-picker') : null;
                     }
-                    if (reactionPicker) reactionPicker.style.display = 'none';
-                    clearTimeout(pressTimer);
-                    pressTimer = null;
                 }
+
+                element.addEventListener('mousedown', startPressTimer);
+                element.addEventListener('mouseup', cancelPressTimer);
+                element.addEventListener('mouseleave', cancelPressTimer);
+            });
+        
+
+            // Initialize report functionality
+            const reportButton = postContainer.querySelector('.post-row div:last-child');
+            if (reportButton) {
+                reportButton.addEventListener('click', function() {
+                    const reportPopup = document.getElementById('report-popup');
+                    if (reportPopup) {
+                        // Show the popup
+                        reportPopup.style.display = 'flex';
+                        reportPopup.classList.add('active');
+                        
+                        const reportTextarea = reportPopup.querySelector('textarea');
+                        reportTextarea.value = '';
+
+                        // Add event listeners for the report popup buttons
+                        const submitBtn = reportPopup.querySelector('.report-submit-btn');
+                        const cancelBtn = reportPopup.querySelector('.report-cancel-btn');
+
+                        // Remove any existing event listeners
+                        const newSubmitBtn = submitBtn.cloneNode(true);
+                        const newCancelBtn = cancelBtn.cloneNode(true);
+                        submitBtn.parentNode.replaceChild(newSubmitBtn, submitBtn);
+                        cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+
+                        // Add new event listeners
+                        newSubmitBtn.addEventListener('click', function() {
+                            const reportText = reportTextarea.value.trim();
+                            if (reportText) {
+                                // Here you can add the logic to submit the report
+                                // console.log('Report submitted:', reportText);
+                                reportPopup.style.display = 'none';
+                                reportPopup.classList.remove('active');
+                            }
+                        });
+
+                        newCancelBtn.addEventListener('click', function() {
+                            reportPopup.style.display = 'none';
+                            reportPopup.classList.remove('active');
+                        });
+
+                        // Close popup when clicking outside
+                        const closePopup = function(event) {
+                            if (event.target === reportPopup) {
+                                reportPopup.style.display = 'none';
+                                reportPopup.classList.remove('active');
+                                window.removeEventListener('click', closePopup);
+                            }
+                        };
+                        window.addEventListener('click', closePopup);
+                    }
+                });
             }
 
-            element.addEventListener('mousedown', startPressTimer);
-            element.addEventListener('mouseup', cancelPressTimer);
-            element.addEventListener('mouseleave', cancelPressTimer);
-        });
-
-        // Initialize report functionality
-        const reportButton = postContainer.querySelector('.post-row div:last-child');
-        if (reportButton) {
-            reportButton.addEventListener('click', function() {
-                const reportPopup = document.getElementById('report-popup');
-                if (reportPopup) {
-                    // Show the popup
-                    reportPopup.style.display = 'flex';
-                    reportPopup.classList.add('active');
-                    
-                    const reportTextarea = reportPopup.querySelector('textarea');
-                    reportTextarea.value = '';
-
-                    // Add event listeners for the report popup buttons
-                    const submitBtn = reportPopup.querySelector('.report-submit-btn');
-                    const cancelBtn = reportPopup.querySelector('.report-cancel-btn');
-
-                    // Remove any existing event listeners
-                    const newSubmitBtn = submitBtn.cloneNode(true);
-                    const newCancelBtn = cancelBtn.cloneNode(true);
-                    submitBtn.parentNode.replaceChild(newSubmitBtn, submitBtn);
-                    cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
-
-                    // Add new event listeners
-                    newSubmitBtn.addEventListener('click', function() {
-                        const reportText = reportTextarea.value.trim();
-                        if (reportText) {
-                            // Here you can add the logic to submit the report
-                            // console.log('Report submitted:', reportText);
-                            reportPopup.style.display = 'none';
-                            reportPopup.classList.remove('active');
-                        }
-                    });
-
-                    newCancelBtn.addEventListener('click', function() {
-                        reportPopup.style.display = 'none';
-                        reportPopup.classList.remove('active');
-                    });
-
-                    // Close popup when clicking outside
-                    const closePopup = function(event) {
-                        if (event.target === reportPopup) {
-                            reportPopup.style.display = 'none';
-                            reportPopup.classList.remove('active');
-                            window.removeEventListener('click', closePopup);
-                        }
-                    };
-                    window.addEventListener('click', closePopup);
-                }
+            // Initialize reply functionality
+            postContainer.querySelectorAll('.comment-reply').forEach(replyLink => {
+                replyLink.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const replyPopup = document.getElementById('reply-popup');
+                    replyPopup.classList.add('active');
+                    const replyTextarea = replyPopup.querySelector('textarea');
+                    replyTextarea.value = '';
+                });
             });
         }
-
-        // Initialize reply functionality
-        postContainer.querySelectorAll('.comment-reply').forEach(replyLink => {
-            replyLink.addEventListener('click', function (e) {
-                e.preventDefault();
-                const replyPopup = document.getElementById('reply-popup');
-                replyPopup.classList.add('active');
-                const replyTextarea = replyPopup.querySelector('textarea');
-                replyTextarea.value = '';
-            });
-        });
 
         // Hide/show play icon on gallery video play/pause
         postContainer.querySelectorAll('.gallery-img video.gallery-media').forEach(video => {
@@ -880,6 +958,41 @@ document.addEventListener('DOMContentLoaded', function () {
             postButtons.style.display = 'none'; 
         });
     }
+
+    // Fix: Only add event listeners if the element exists
+    // Close/cancel edit-lightbox
+    const editCancelBtn = document.getElementById('edit-cancel-btn');
+    if (editCancelBtn) {
+        editCancelBtn.onclick = function(e) {
+            e.preventDefault();
+            const lightbox = document.getElementById('edit-lightbox');
+            lightbox.style.display = 'none';
+            lightbox.classList.remove('active');
+        };
+    }
+    const editLightboxClose = document.getElementById('edit-lightbox-close');
+    if (editLightboxClose) {
+        editLightboxClose.onclick = function(e) {
+            e.preventDefault();
+            const lightbox = document.getElementById('edit-lightbox');
+            lightbox.style.display = 'none';
+            lightbox.classList.remove('active');
+        };
+    }
+
+    // If you have edit-photo-input and edit-video-input, check before adding listeners
+    const editPhotoInput = document.getElementById('edit-photo-input');
+    if (editPhotoInput) {
+        editPhotoInput.addEventListener('change', function() {
+            updateEditMediaPreview();
+        });
+    }
+    const editVideoInput = document.getElementById('edit-video-input');
+    if (editVideoInput) {
+        editVideoInput.addEventListener('change', function() {
+            updateEditMediaPreview();
+        });
+    }
 });
 
 // Add this function at the end of the file or before renderPost
@@ -915,3 +1028,286 @@ function truncatePostText50(container) {
 if (window.trackPostViews) {
     window.trackPostViews();
 }
+
+// Edit Post Popup logic
+function openEditPostPopup(post) {
+    let popup = document.getElementById('edit-post-popup');
+    if (!popup) {
+        popup = document.createElement('div');
+        popup.id = 'edit-post-popup';
+        popup.className = 'edit-post-popup';
+        popup.innerHTML = `
+            <div class="edit-post-popup-content">
+                <span class="edit-post-popup-close">&times;</span>
+                <form id="edit-post-form">
+                    <textarea id="edit-post-text" maxlength="1000"></textarea>
+                    <div id="edit-media-preview"></div>
+                    <input type="file" id="edit-media-input" multiple accept="image/*,video/*">
+                    <button type="submit">Save Changes</button>
+                </form>
+            </div>
+        `;
+        document.body.appendChild(popup);
+    }
+    popup.style.display = 'flex';
+    popup.classList.add('active');
+    // Fill form with current post data
+    const textarea = popup.querySelector('#edit-post-text');
+    textarea.value = post.post.post_text;
+    const mediaPreview = popup.querySelector('#edit-media-preview');
+    mediaPreview.innerHTML = (post.post.post_files || []).map(file => {
+        const isVideo = /\.(mp4|mkv|avi|mov)$/i.test(file);
+        return isVideo
+            ? `<video src="/media/${file}" controls style="width:60px;height:60px;border-radius:8px;margin:4px;"></video>`
+            : `<img src="/media/${file}" style="width:60px;height:60px;border-radius:8px;margin:4px;">`;
+    }).join('');
+    // Remove popup on close
+    popup.querySelector('.edit-post-popup-close').onclick = function() {
+        popup.style.display = 'none';
+        popup.classList.remove('active');
+    };
+    // Handle form submit
+    popup.querySelector('#edit-post-form').onsubmit = function(e) {
+        e.preventDefault();
+        const newText = textarea.value.trim();
+        const files = popup.querySelector('#edit-media-input').files;
+        const formData = new FormData();
+        formData.append('post_id', post.id || post.post.id || post.post_id);
+        formData.append('text', newText);
+        for (let i = 0; i < files.length; i++) {
+            formData.append('media', files[i]);
+        }
+        fetch(`/students/mailbox/edit_post/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': csrftoken },
+            body: formData
+        }).then(res => res.json()).then(data => {
+            if (data.success) {
+                popup.style.display = 'none';
+                popup.classList.remove('active');
+                window.location.reload();
+            } else {
+                alert('Failed to update post.');
+            }
+        });
+    };
+}
+
+// Open edit-lightbox and populate with post data
+function openEditLightbox(post) {
+    const lightbox = document.getElementById('edit-lightbox');
+    const textArea = document.getElementById('edit-post-text');
+    const preview = document.getElementById('edit-selected-media-preview');
+    textArea.value = post.post.post_text;
+    preview.innerHTML = '';
+    (post.post.post_files || []).forEach(file => {
+        const isVideo = /\.(mp4|mkv|avi|mov)$/i.test(file);
+        if (isVideo) {
+            preview.innerHTML += `<video src="/media/${file}" controls></video>`;
+        } else {
+            preview.innerHTML += `<img src="/media/${file}" />`;
+        }
+    });
+    lightbox.style.display = 'flex';
+    lightbox.classList.add('active');
+    // Store post id for submit
+    lightbox.dataset.postId = post.id || post.post.id || post.post_id;
+}
+
+// Close/cancel edit-lightbox
+const editCancelBtn = document.getElementById('edit-cancel-btn');
+if (editCancelBtn) {
+    editCancelBtn.onclick = function(e) {
+        e.preventDefault();
+        const lightbox = document.getElementById('edit-lightbox');
+        lightbox.style.display = 'none';
+        lightbox.classList.remove('active');
+    };
+}
+const editLightboxClose = document.getElementById('edit-lightbox-close');
+if (editLightboxClose) {
+    editLightboxClose.onclick = function(e) {
+        e.preventDefault();
+        const lightbox = document.getElementById('edit-lightbox');
+        lightbox.style.display = 'none';
+        lightbox.classList.remove('active');
+    };
+}
+
+// Handle media file input and preview for edit
+// document.getElementById('edit-photo-input').addEventListener('change', function() {
+//     updateEditMediaPreview();
+// });
+document.getElementById('edit-video-input').addEventListener('change', function() {
+    updateEditMediaPreview();
+});
+function updateEditMediaPreview() {
+    const preview = document.getElementById('edit-selected-media-preview');
+    preview.innerHTML = ''; 
+    const photoFiles = document.getElementById('edit-photo-input').files;
+    const videoFiles = document.getElementById('edit-video-input').files;
+    for (let file of photoFiles) {
+        const url = URL.createObjectURL(file);
+        preview.innerHTML += `<img src="${url}" />`;
+    }
+    for (let file of videoFiles) {
+        const url = URL.createObjectURL(file);
+        preview.innerHTML += `<video src="${url}" controls></video>`;
+    }
+}
+
+// Submit edit form
+document.getElementById('edit-post-form').onsubmit = function(e) {
+    e.preventDefault();
+    const lightbox = document.getElementById('edit-lightbox');
+    const postId = lightbox.dataset.postId;
+    const text = document.getElementById('edit-post-text').value.trim();
+    const photoFiles = document.getElementById('edit-photo-input').files;
+    const videoFiles = document.getElementById('edit-video-input').files;
+    const formData = new FormData();
+    formData.append('post_id', postId);
+    formData.append('text', text);
+    for (let file of photoFiles) formData.append('media', file);
+    for (let file of videoFiles) formData.append('media', file);
+    fetch('/students/mailbox/edit_post/', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': csrftoken },
+        body: formData
+    }).then(res => res.json()).then(data => {
+        if (data.success) {
+            lightbox.style.display = 'none';
+            lightbox.classList.remove('active');
+            window.location.reload();
+        } else {
+            alert('Failed to update post.');
+        }
+    });
+};
+
+// To trigger edit-lightbox from post actions, call openEditLightbox(post) with the post data
+
+// --- Edit-lightbox logic with media delete and add ---
+let editMediaState = {
+    existing: [], // {file, isVideo}
+    newFiles: [], // File objects
+    removedIndexes: [] // indexes of removed existing media
+};
+
+function openEditLightbox(post) {
+    const lightbox = document.getElementById('edit-lightbox');
+    const textArea = document.getElementById('edit-post-text');
+    const preview = document.getElementById('edit-selected-media-preview');
+    const mediaInput = document.getElementById('edit-media-input');
+    editMediaState = { existing: [], newFiles: [], removedIndexes: [] };
+
+    textArea.value = post.post.post_text;
+    preview.innerHTML = '';
+
+    // Populate existing media
+    (post.post.post_files || []).forEach((file, idx) => {
+        const isVideo = /\.(mp4|mkv|avi|mov)$/i.test(file);
+        editMediaState.existing.push({ file, isVideo });
+    });
+    renderEditMediaPreview();
+
+    // Reset file input
+    mediaInput.value = '';
+    editMediaState.newFiles = [];
+
+    lightbox.style.display = 'flex';
+    lightbox.classList.add('active');
+    lightbox.dataset.postId = post.id || post.post.id || post.post_id;
+}
+
+function renderEditMediaPreview() {
+    const preview = document.getElementById('edit-selected-media-preview');
+    preview.innerHTML = '';
+    // Existing media
+    editMediaState.existing.forEach((media, idx) => {
+        if (editMediaState.removedIndexes.includes(idx)) return;
+        preview.innerHTML += `
+            <div class="media-thumb" data-type="existing" data-idx="${idx}">
+                ${media.isVideo
+                    ? `<video src="/media/${media.file}" controls></video>`
+                    : `<img src="/media/${media.file}" />`
+                }
+                <button type="button" class="delete-media-btn" title="Remove"><i class="fa fa-times"></i></button>
+            </div>
+        `;
+    });
+    // New files
+    editMediaState.newFiles.forEach((file, idx) => {
+        const isVideo = file.type.startsWith('video');
+        const url = URL.createObjectURL(file);
+        preview.innerHTML += `
+            <div class="media-thumb" data-type="new" data-idx="${idx}">
+                ${isVideo
+                    ? `<video src="${url}" controls></video>`
+                    : `<img src="${url}" />`
+                }
+                <button type="button" class="delete-media-btn" title="Remove"><i class="fa fa-times"></i></button>
+            </div>
+        `;
+    });
+}
+
+// Handle delete click for media
+document.getElementById('edit-selected-media-preview').addEventListener('click', function(e) {
+    if (e.target.closest('.delete-media-btn')) {
+        const thumb = e.target.closest('.media-thumb');
+        const type = thumb.getAttribute('data-type');
+        const idx = parseInt(thumb.getAttribute('data-idx'));
+        if (type === 'existing') {
+            editMediaState.removedIndexes.push(idx);
+        } else if (type === 'new') {
+            editMediaState.newFiles.splice(idx, 1);
+        }
+        renderEditMediaPreview();
+    }
+});
+
+// Add Media button triggers file input
+document.getElementById('edit-add-media-btn').onclick = function() {
+    document.getElementById('edit-media-input').click();
+};
+
+// Handle file input change
+document.getElementById('edit-media-input').addEventListener('change', function() {
+    const files = Array.from(this.files);
+    editMediaState.newFiles = editMediaState.newFiles.concat(files);
+    renderEditMediaPreview();
+    this.value = '';
+});
+
+// Submit edit form
+document.getElementById('edit-post-form').onsubmit = function(e) {
+    e.preventDefault();
+    const lightbox = document.getElementById('edit-lightbox');
+    const postId = lightbox.dataset.postId;
+    const text = document.getElementById('edit-post-text').value.trim();
+    const formData = new FormData();
+    formData.append('post_id', postId);
+    formData.append('text', text);
+
+    // Send info about removed existing media
+    formData.append('removed_indexes', JSON.stringify(editMediaState.removedIndexes));
+
+    // Send new files
+    for (let file of editMediaState.newFiles) {
+        formData.append('media', file);
+    }
+
+    fetch('/students/mailbox/edit_post/', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': csrftoken },
+        body: formData
+    }).then(res => res.json()).then(data => {
+        if (data.success) {
+            lightbox.style.display = 'none';
+            lightbox.classList.remove('active');
+            window.location.reload();
+        } else {
+            alert('Failed to update post.');
+        }
+    });
+};

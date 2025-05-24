@@ -48,6 +48,12 @@ class StudentStatus(models.TextChoices):
     SUSPENDED = 'S', 'Suspended'
     DROPPED = 'D', 'Dropped'
 
+class MailboxPostStatus(models.TextChoices):
+    PENDING = 'P', 'Pending'
+    APPROVED = 'A', 'Approved'
+    REJECTED = 'R', 'Rejected'
+    DISQUALIFIED = 'D', 'Disqualified'
+
 # Base Models
 class BaseModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
@@ -152,7 +158,7 @@ class Degree(BaseModel):
     description = models.TextField(default='')
     total_credits = models.PositiveIntegerField(default=120)
     degree_type = models.CharField(max_length=1, choices=DegreeType.choices, default=DegreeType.BACHELORS)
-
+ 
 # Semester Model
 class Semester(BaseModel):
     semester_name = models.CharField(max_length=100, default='')
@@ -258,6 +264,7 @@ class MailboxPost(BaseModel):
     approved_by = models.ForeignKey(MailboxAdmin, on_delete=models.SET_NULL, null=True, default=None)
     approved_at = models.DateTimeField(null=True, default=None)
     reactions = models.JSONField(default=dict)
+    status = models.CharField(max_length=1, choices=MailboxPostStatus.choices, default=MailboxPostStatus.PENDING)
 
 # Comment Model
 class Comment(BaseModel):
