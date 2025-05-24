@@ -46,7 +46,7 @@ A modern, interactive Django-based social platform for students to share, discus
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/yourusername/student-mailbox.git
+   git clone https://github.com/VasudevAdhikari/university-management-system.git
    cd student-mailbox
    ```
 

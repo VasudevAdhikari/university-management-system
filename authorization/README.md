@@ -1,4 +1,4 @@
- # Authorization App
+# Authorization App
 
 ## Description
 The Authorization App is a Django-based authentication and authorization system that provides secure user management, registration, and login functionality. It includes features like email verification, OTP-based authentication, and password recovery mechanisms.
@@ -126,11 +126,11 @@ This project is licensed under the MIT License.
 
 ## Contact
 For support or questions, please contact the project maintainer.
-Name              : Moe Thiha
-Phone             : +959 989377380
-Telegram username : @moethihaAdk
-Facebook          : Vasudev Adhikari
-Youtube           : MM Logic Gallery
+- **Name**              : Moe Thiha
+- **Phone**             : +959 989377380
+- **Telegram username** : @moethihaAdk
+- **Facebook**          : Vasudev Adhikari
+- **Youtube**           : MM Logic Gallery
 
 ## Acknowledgments
 - Django Documentation
