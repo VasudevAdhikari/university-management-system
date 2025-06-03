@@ -84,6 +84,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 const commentText = commentInput.value.trim();
                 if (!commentText) return;
 
+                // Get anonymous toggle state
+                const anonymousToggle = postContainer.querySelector('.comment-anonymous-toggle');
+                const isAnonymous = anonymousToggle ? anonymousToggle.checked : false;
+
                 try {
                     const response = await fetch('/students/mailbox/comment/', {
                         method: 'POST',
@@ -94,7 +98,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         body: JSON.stringify({
                             post_id: parseInt(postContainer.dataset.postId),
                             comment_text: commentText,
-                            parent_comment_id: null
+                            parent_comment_id: null,
+                            is_anonymous: isAnonymous
                         })
                     });
 
@@ -107,9 +112,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (data.status === 'success') {
                         // Reload all comments to maintain proper order
                         await loadComments(postContainer);
-                        
-                        // Clear input
+
+                        // Clear input and reset anonymous toggle
                         commentInput.value = '';
+                        if (anonymousToggle) anonymousToggle.checked = false;
                         commentInput.focus();
                     }
                 } catch (error) {
@@ -122,6 +128,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (cancelBtn && commentInput) {
             cancelBtn.addEventListener('click', function() {
                 commentInput.value = '';
+                // Reset anonymous toggle
+                const anonymousToggle = postContainer.querySelector('.comment-anonymous-toggle');
+                if (anonymousToggle) anonymousToggle.checked = false;
                 commentInput.focus();
             });
         }
@@ -157,6 +166,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     const replyText = replyTextarea.value.trim();
                     if (!replyText) return;
 
+                    // Get anonymous toggle state
+                    const anonymousToggle = replyPopup.querySelector('#reply-anonymous-toggle');
+                    const isAnonymous = anonymousToggle ? anonymousToggle.checked : false;
+
                     try {
                         const response = await fetch('/students/mailbox/comment/', {
                             method: 'POST',
@@ -167,7 +180,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             body: JSON.stringify({
                                 post_id: postContainer.dataset.postId,
                                 comment_text: replyText,
-                                parent_comment_id: commentId
+                                parent_comment_id: commentId,
+                                is_anonymous: isAnonymous
                             })
                         });
 
@@ -178,7 +192,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             // Reload all comments to maintain proper order
                             await loadComments(postContainer);
 
-                            // Close popup
+                            // Reset anonymous toggle and close popup
+                            if (anonymousToggle) anonymousToggle.checked = false;
                             replyPopup.style.display = 'none';
                             replyPopup.classList.remove('active');
                         }
@@ -190,6 +205,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Handle cancel
                 const handleCancel = function() {
+                    // Reset anonymous toggle
+                    const anonymousToggle = replyPopup.querySelector('#reply-anonymous-toggle');
+                    if (anonymousToggle) anonymousToggle.checked = false;
                     replyPopup.style.display = 'none';
                     replyPopup.classList.remove('active');
                 };
@@ -478,6 +496,11 @@ document.addEventListener('DOMContentLoaded', function() {
             newSubmitBtn.addEventListener('click', async function() {
                 const replyText = replyTextarea.value.trim();
                 if (!replyText) return;
+
+                // Get anonymous toggle state
+                const anonymousToggle = replyPopup.querySelector('#reply-anonymous-toggle');
+                const isAnonymous = anonymousToggle ? anonymousToggle.checked : false;
+
                 try {
                     const response = await fetch('/students/mailbox/comment/', {
                         method: 'POST',
@@ -488,13 +511,16 @@ document.addEventListener('DOMContentLoaded', function() {
                         body: JSON.stringify({
                             post_id: comment.post,
                             comment_text: replyText,
-                            parent_comment_id: comment.id
+                            parent_comment_id: comment.id,
+                            is_anonymous: isAnonymous
                         })
                     });
                     if (!response.ok) throw new Error('Failed to post reply');
                     const data = await response.json();
                     if (data.status === 'success') {
                         if (postContainer) await loadComments(postContainer);
+                        // Reset anonymous toggle
+                        if (anonymousToggle) anonymousToggle.checked = false;
                         replyPopup.style.display = 'none';
                         replyPopup.classList.remove('active');
                     }
@@ -505,6 +531,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Cancel
             newCancelBtn.addEventListener('click', function() {
+                // Reset anonymous toggle
+                const anonymousToggle = replyPopup.querySelector('#reply-anonymous-toggle');
+                if (anonymousToggle) anonymousToggle.checked = false;
                 replyPopup.style.display = 'none';
                 replyPopup.classList.remove('active');
             });

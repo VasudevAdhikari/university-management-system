@@ -1,8 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import MinLengthValidator, MaxLengthValidator
+from django.utils.text import Truncator
 from django.utils import timezone
 import json
+from django.db import DatabaseError
+from django.core.exceptions import ValidationError
 
 # Enums
 class Gender(models.TextChoices):
@@ -53,6 +55,11 @@ class MailboxPostStatus(models.TextChoices):
     APPROVED = 'A', 'Approved'
     REJECTED = 'R', 'Rejected'
     DISQUALIFIED = 'D', 'Disqualified'
+
+class NotificationType(models.TextChoices):
+    STUDENT_QUIZ = 'S', 'Student Quiz'
+    STUDENT_ASSESSMENT = 'A', 'Student Assessment'
+    STUDENT_MAILBOX = 'M', 'Student Mailbox'
 
 # Base Models
 class BaseModel(models.Model):
@@ -259,20 +266,78 @@ class MailboxAdmin(BaseModel):
 
 # Mailbox Post Model
 class MailboxPost(BaseModel):
-    post = models.JSONField(default=dict)
+    post = models.JSONField(default=None)
     uploaded_by = models.ForeignKey(Student, on_delete=models.SET_NULL, null=True, default=None)
     approved_by = models.ForeignKey(MailboxAdmin, on_delete=models.SET_NULL, null=True, default=None)
     approved_at = models.DateTimeField(null=True, default=None)
     reactions = models.JSONField(default=dict)
     status = models.CharField(max_length=1, choices=MailboxPostStatus.choices, default=MailboxPostStatus.PENDING)
+    is_anonymous = models.BooleanField(default=False)
 
-# Comment Model
+    def save(self, *args, **kwargs):
+        try:
+        # Retrieve the old status if the instance already exists in the database
+            old_status = None
+            if self.pk:
+                try:
+                    old_status = MailboxPost.objects.get(pk=self.pk).status
+                except MailboxPost.DoesNotExist:
+                    pass  # This can happen for new objects before they're saved for the first time
+
+            super().save(*args, **kwargs)  # Call the "real" save() method to save the new status
+
+            # Check if the status has actually changed
+            if old_status != self.status:
+                # Ensure you have a field for the post text
+                truncated_text = Truncator(json.loads(self.post).get('text', '')).chars(50, truncate='...')  # Adjust as needed
+
+                if self.status == MailboxPostStatus.APPROVED:  # Use the enum value
+                    self.notify_approved_post(self.uploaded_by, self.pk, truncated_text)
+                elif self.status == MailboxPostStatus.REJECTED:
+                    self.notify_rejected_post(self.uploaded_by, self.pk, truncated_text)
+                elif self.status == MailboxPostStatus.DISQUALIFIED:
+                    self.notify_disqualified_post(self.uploaded_by, self.pk, truncated_text)
+                # Add other status checks if you have more notification types
+
+        except Exception as e:
+            pass
+
+
+    def notify_post_status(self, user, post_id, post_text, status):
+        try:
+            Notification.objects.create(
+                user=user,
+                type=NotificationType.STUDENT_MAILBOX,
+                notification=json.dumps({
+                    f"is_{status}": True,
+                    "post": post_id,
+                    "text": f"Your post '{post_text}...' has been {status} by an admin!",
+                }),
+                created_at=timezone.now(),
+                updated_at=timezone.now()
+            )
+        except (DatabaseError, ValidationError) as db_err:
+            print(f"Database error: {db_err}")
+        except Exception as e:
+            print(f"Unexpected error in notify_approved_post: {e}")
+
+    def notify_approved_post(self, user, post_id, post_text):
+        self.notify_post_status(user, post_id, post_text, "approved")
+
+    def notify_rejected_post(self, user, post_id, post_text):
+        self.notify_post_status(user, post_id, post_text, "rejected")
+
+    def notify_disqualified_post(self, user, post_id, post_text):
+        self.notify_post_status(user, post_id, post_text, "disqualified")
+   
+
 class Comment(BaseModel):
     post = models.ForeignKey(MailboxPost, on_delete=models.CASCADE)
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, default=None, related_name='replies')
     comment = models.TextField(default='')
     reactions = models.JSONField(default=dict)
     commented_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    is_anonymous = models.BooleanField(default=False)
 
 # Security Models
 class LoginAttempt(BaseModel):
@@ -317,5 +382,19 @@ class MailboxReport(models.Model):
     reporter = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='reports_made')
     post = models.ForeignKey('MailboxPost', on_delete=models.CASCADE, related_name='reports')
     report_text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+class Notification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    type = models.CharField(max_length=1, choices=NotificationType.choices, default=None)
+    notification = models.JSONField(default=dict)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    seen = models.BooleanField(default=False)
+
+class UniversityDetails(models.Model):
+    name = models.CharField(max_length=100, default='')
+    details = models.JSONField(default=dict)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

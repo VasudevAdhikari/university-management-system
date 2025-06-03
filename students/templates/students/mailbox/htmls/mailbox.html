@@ -8,6 +8,7 @@
     <title>Student Mailbox</title>
     <link rel="stylesheet" href="{% static 'students/mailbox/styles/mailbox.css' %}">
     <link rel="stylesheet" href="{% static 'students/mailbox/styles/comments.css' %}">
+    <link rel="stylesheet" href="{% static 'students/mailbox/styles/notifications.css' %}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <!-- Add CSRF Token -->
@@ -19,7 +20,7 @@
 
 <body>
     <div class="mailbox-banner">
-        <img src="{% static 'students/mailbox/images/feed-image-1.png' %}" alt="Mailbox Banner">
+        <img src="{% if university_details.mailbox_banner_photo %}{{ university_details.mailbox_banner_photo }}{% else %}{% static 'students/mailbox/images/feed-image-1.png' %}{% endif %}" alt="Mailbox Banner">
         <div class="banner-overlay">
             <h1>Student Mailbox</h1>
         </div>
@@ -30,15 +31,28 @@
     <!-- Description Section -->
     <div class="mailbox-description">
         <p class="description-text">
-            Welcome to the Student Mailbox - your central hub for academic discussions, resource sharing, and community
-            engagement. Connect with fellow students, share your thoughts, and stay updated with the latest campus
-            activities. This platform is designed to foster meaningful interactions and collaborative learning among
-            students.
-            <span class="more-text" style="display: none;">
-                Whether you're looking to discuss course materials, organize study groups, or simply connect with peers,
-                the Student Mailbox provides a safe and inclusive space for all academic-related conversations. Join our
-                growing community and be part of an enriching educational experience.
-            </span>
+            {% if university_details.mailbox_description %}
+                {% with description=university_details.mailbox_description %}
+                    {% if description|length > 200 %}
+                        {{ description|truncatewords:30 }}
+                        <span class="more-text" style="display: none;">
+                            {{ description|slice:"200:" }}
+                        </span>
+                    {% else %}
+                        {{ description }}
+                    {% endif %}
+                {% endwith %}
+            {% else %}
+                Welcome to the Student Mailbox - your central hub for academic discussions, resource sharing, and community
+                engagement. Connect with fellow students, share your thoughts, and stay updated with the latest campus
+                activities. This platform is designed to foster meaningful interactions and collaborative learning among
+                students.
+                <span class="more-text" style="display: none;">
+                    Whether you're looking to discuss course materials, organize study groups, or simply connect with peers,
+                    the Student Mailbox provides a safe and inclusive space for all academic-related conversations. Join our
+                    growing community and be part of an enriching educational experience.
+                </span>
+            {% endif %}
         </p>
         <button class="show-more-btn" type="button">Show More</button>
     </div>
@@ -55,19 +69,31 @@
             {% endfor %}
         </div>
     </div>
-    <div class="manage-post-container" onclick="window.location.href='/students/manage_posts/'">
-        <span class="manage-title">Manage Your Posts</span>
+    {% if is_admin %}
+    <div class="manage-post-container">
+        <span class="manage-item" id="add-admin-btn" style="cursor: pointer;">
+            <i class="fa-solid fa-user-plus"></i>
+            <span>Add Admin</span>
+        </span>
+        <span class="manage-item" id="leave-admin-btn" style="cursor: pointer;">
+            <i class="fa-solid fa-user-minus"></i>
+            <span>Leave Admin Role</span>
+        </span>
+    </div>
+    {% endif %}
+    <div class="manage-post-container">
+        <span class="manage-title" onclick="window.location.href='/students/manage_posts/'">Manage {% if is_admin %}All{% else %}Your{% endif %} Posts</span>
         <span class="manage-item">
             <i class="fa-solid fa-file-lines"></i>
             <span>Your Posts</span>
             <span class="manage-count manage-count-posts">{{ post_count|default:0 }}</span>
         </span>
-        <span class="manage-item">
+        <span class="manage-item" onclick="window.location.href='/students/manage_posts/'">
             <i class="fa-solid fa-hourglass-half"></i>
             <span>Pending Posts</span>
             <span class="manage-count manage-count-pending">{{ pending_count|default:0 }}</span>
         </span>
-        <span class="manage-item">
+        <span class="manage-item" id="notifications-icon" style="cursor: pointer;">
             <i class="fa-solid fa-bell"></i>
             <span>Notifications</span>
             <span class="manage-count manage-count-notification">{{ notification_count|default:0 }}</span>
@@ -91,19 +117,28 @@
                     <textarea rows="3" id="post-input-text"
                         placeholder="What's on your mind? {{user.user.full_name}}!!"></textarea>
                     <div class="selected-media-preview"></div>
+                    <div class="post-options" style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                        <div class="anonymous-toggle">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="post-anonymous-toggle">
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <span class="toggle-label">Post anonymously</span>
+                        </div>
+                        <div class="add-post-links">
+                            <label class="video-upload">
+                                <input type="file" accept=".mp4,.mkv,.avi,.mov" multiple style="display: none;">
+                                <img src="{% static 'students/mailbox/images/live-video.png' %}" alt="video">Video
+                            </label>
+                            <label class="photo-upload">
+                                <input type="file" accept="image/*" multiple style="display: none;">
+                                <img src="{% static 'students/mailbox/images/photo.png' %}" alt="photo">Photo
+                            </label>
+                        </div>
+                    </div>
                     <div class="post-buttons" style="display: none;">
                         <button id="post-submit-btn" class="post-submit-btn">Post</button>
                         <button class="post-cancel-btn">Cancel</button>
-                    </div>
-                    <div class="add-post-links">
-                        <label class="video-upload">
-                            <input type="file" accept=".mp4,.mkv,.avi,.mov" multiple style="display: none;">
-                            <img src="{% static 'students/mailbox/images/live-video.png' %}" alt="video">Video
-                        </label>
-                        <label class="photo-upload">
-                            <input type="file" accept="image/*" multiple style="display: none;">
-                            <img src="{% static 'students/mailbox/images/photo.png' %}" alt="photo">Photo
-                        </label>
                     </div>
                 </div>
             </div>
@@ -112,9 +147,18 @@
                 <div class="comment-input">
                     <textarea placeholder="Write a comment"></textarea>
                 </div>
-                <div class="comment-buttons">
-                    <button class="comment-btn">Comment</button>
-                    <button class="cancel-btn">Cancel</button>
+                <div class="comment-options" style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+                    <div class="anonymous-toggle">
+                        <label class="toggle-switch">
+                            <input type="checkbox" class="comment-anonymous-toggle">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span class="toggle-label">Comment anonymously</span>
+                    </div>
+                    <div class="comment-buttons">
+                        <button class="comment-btn">Comment</button>
+                        <button class="cancel-btn">Cancel</button>
+                    </div>
                 </div>
                 <hr>
                 <div class="mailbox-comments-container">
@@ -169,12 +213,85 @@
         <div class="reply-popup-content">
             <h2>Write a reply</h2>
             <textarea placeholder="Write your reply here..." rows="3"></textarea>
-            <div class="reply-buttons">
-                <button class="reply-submit-btn">Reply</button>
-                <button class="reply-cancel-btn">Cancel</button>
+            <div class="reply-options" style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                <div class="anonymous-toggle">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="reply-anonymous-toggle">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span class="toggle-label">Reply anonymously</span>
+                </div>
+                <div class="reply-buttons">
+                    <button class="reply-submit-btn">Reply</button>
+                    <button class="reply-cancel-btn">Cancel</button>
+                </div>
             </div>
         </div>
     </div>
+
+    <!-- Add Admin Lightbox -->
+    <div id="add-admin-lightbox" class="add-admin-lightbox" style="display: none;">
+        <div class="add-admin-lightbox-content">
+            <div class="lightbox-header">
+                <h2>Add New MailboxAdmin</h2>
+                <span class="close-add-admin" style="cursor: pointer;">&times;</span>
+            </div>
+            <div class="search-container">
+                <input type="text" id="student-search" placeholder="Search students by name..." />
+                <i class="fa-solid fa-search search-icon"></i>
+            </div>
+            <div class="admin-count-info">
+                <span id="admin-count-display">Loading...</span>
+            </div>
+            <div class="students-grid" id="students-grid">
+                <div class="loading-spinner">
+                    <i class="fa-solid fa-spinner fa-spin"></i>
+                    <p>Loading students...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leave Admin Role Confirmation Modal -->
+    <div id="leave-admin-modal" class="leave-admin-modal" style="display: none;">
+        <div class="leave-admin-modal-content">
+            <div class="modal-header">
+                <div class="warning-icon">
+                    <i class="fa-solid fa-exclamation-triangle"></i>
+                </div>
+                <h2>Leave MailboxAdmin Role</h2>
+                <span class="close-leave-admin" style="cursor: pointer;">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="warning-message">
+                    <p><strong>Are you sure you want to leave your MailboxAdmin role?</strong></p>
+                    <p>This action will:</p>
+                    <ul>
+                        <li>Remove your admin privileges immediately</li>
+                        <li>Prevent you from managing posts and users</li>
+                        <li>Remove access to admin-only features</li>
+                        <li>Require another admin to re-add you if needed</li>
+                    </ul>
+                    <div class="admin-info">
+                        <i class="fa-solid fa-info-circle"></i>
+                        <span>You have been serving as a MailboxAdmin. Thank you for your contributions!</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="confirm-leave-admin" class="confirm-leave-btn">
+                    <i class="fa-solid fa-user-minus"></i>
+                    <span>Yes, Leave Admin Role</span>
+                </button>
+                <button id="cancel-leave-admin" class="cancel-leave-btn">
+                    <i class="fa-solid fa-times"></i>
+                    <span>Cancel</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    {% include "students/mailbox/htmls/notifications.html" %}
     <script>
         // Add static URLs as JavaScript variables
         const STATIC_URLS = {
@@ -198,12 +315,41 @@
                     }
                 });
             }
+
+            // Show notifications modal on bell icon click
+            const notifIcon = document.getElementById('notifications-icon');
+            if (notifIcon) {
+                notifIcon.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    showNotificationsModal();
+                });
+            }
+
+            // Add Admin functionality
+            const addAdminBtn = document.getElementById('add-admin-btn');
+            if (addAdminBtn) {
+                addAdminBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    openAddAdminLightbox();
+                });
+            }
+
+            // Leave Admin Role functionality
+            const leaveAdminBtn = document.getElementById('leave-admin-btn');
+            if (leaveAdminBtn) {
+                leaveAdminBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    openLeaveAdminModal();
+                });
+            }
         });
     </script>
+    <script src="{% static 'students/mailbox/javascripts/notifications.js' %}"></script>
     <script src="{% static 'students/mailbox/javascripts/mailbox_views.js' %}"></script>
     <script src="{% static 'students/mailbox/javascripts/mailbox1.js' %}"></script>
     <script src="{% static 'students/mailbox/javascripts/mailbox2.js' %}"></script>
     <script src="{% static 'students/mailbox/javascripts/comments.js' %}"></script>
+    <script src="{% static 'students/mailbox/javascripts/adminManagement.js' %}"></script>
 </body>
 
 </html>

@@ -5,9 +5,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Mailbox</title>
+    <title>Manage Posts</title>
     <link rel="stylesheet" href="{% static 'students/mailbox/styles/mailbox.css' %}">
     <link rel="stylesheet" href="{% static 'students/mailbox/styles/comments.css' %}">
+    <link rel="stylesheet" href="{% static 'students/mailbox/styles/notifications.css' %}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
@@ -21,6 +22,307 @@
             align-items: center;
             justify-content: center;
             z-index: 1002;
+        }
+
+        /* University Settings Modal Styles */
+        #universitySettingsModal {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(8px);
+            font-family: 'Poppins', sans-serif;
+        }
+
+        #universitySettingsModal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        #universitySettingsModal .modal-content {
+            background: linear-gradient(145deg, #ffffff, #f8f9fa);
+            padding: 40px;
+            border-radius: 20px;
+            max-width: 700px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            transform: scale(0.7) translateY(50px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        #universitySettingsModal.show .modal-content {
+            transform: scale(1) translateY(0);
+        }
+
+        #universitySettingsModal h2 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 28px;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        #universitySettingsModal .close {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            font-size: 32px;
+            font-weight: 300;
+            cursor: pointer;
+            color: #95a5a6;
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        #universitySettingsModal .close:hover {
+            color: #e74c3c;
+            background: rgba(231, 76, 60, 0.1);
+            transform: rotate(90deg);
+        }
+
+        #universitySettingsModal .form-group {
+            margin-bottom: 30px;
+            animation: slideInUp 0.6s ease forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        #universitySettingsModal .form-group:nth-child(1) { animation-delay: 0.1s; }
+        #universitySettingsModal .form-group:nth-child(2) { animation-delay: 0.2s; }
+        #universitySettingsModal .form-group:nth-child(3) { animation-delay: 0.3s; }
+
+        @keyframes slideInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        #universitySettingsModal label {
+            display: block;
+            margin-bottom: 12px;
+            font-weight: 600;
+            color: #34495e;
+            font-family: 'Poppins', sans-serif;
+            font-size: 16px;
+            letter-spacing: 0.5px;
+        }
+
+        #universitySettingsModal textarea {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid #e8ecef;
+            border-radius: 12px;
+            font-size: 15px;
+            font-family: 'Poppins', sans-serif;
+            resize: vertical;
+            min-height: 120px;
+            transition: all 0.3s ease;
+            background: #ffffff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        #universitySettingsModal textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        #universitySettingsModal .file-upload-container {
+            position: relative;
+            margin-top: 15px;
+        }
+
+        #universitySettingsModal .file-upload-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        #universitySettingsModal input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        #universitySettingsModal .file-upload-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            width: 100%;
+        }
+
+        #universitySettingsModal .file-upload-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        #universitySettingsModal .file-upload-button i {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+
+        #universitySettingsModal .preview-container {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border: 2px dashed #dee2e6;
+            transition: all 0.3s ease;
+        }
+
+        #universitySettingsModal .preview-container.has-image {
+            border-color: #667eea;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+        }
+
+        #universitySettingsModal .preview-container img {
+            max-width: 100%;
+            max-height: 250px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            display: block;
+            margin: 0 auto;
+        }
+
+        #universitySettingsModal .preview-container img:hover {
+            transform: scale(1.02);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        #universitySettingsModal .preview-label {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+            color: #6c757d;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        #universitySettingsModal .form-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 40px;
+            animation: slideInUp 0.6s ease forwards;
+            animation-delay: 0.4s;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        #universitySettingsModal button {
+            padding: 14px 30px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 16px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            min-width: 120px;
+            letter-spacing: 0.5px;
+        }
+
+        #universitySettingsModal button[type="submit"] {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        #universitySettingsModal button[type="submit"]:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        #universitySettingsModal button[type="button"] {
+            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(149, 165, 166, 0.3);
+        }
+
+        #universitySettingsModal button[type="button"]:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(149, 165, 166, 0.4);
+        }
+
+        /* Loading animation for save button */
+        #universitySettingsModal button[type="submit"].loading {
+            position: relative;
+            color: transparent;
+        }
+
+        #universitySettingsModal button[type="submit"].loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin: -10px 0 0 -10px;
+            border: 2px solid transparent;
+            border-top: 2px solid #ffffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Custom scrollbar for modal */
+        #universitySettingsModal .modal-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #universitySettingsModal .modal-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        #universitySettingsModal .modal-content::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+        }
+
+        #universitySettingsModal .modal-content::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
         }
         #editPostOverlay.active { display: flex; }
         #editPostPopup {
@@ -169,13 +471,16 @@
     <script>
         const csrftoken = '{{ csrf_token }}';
         const current_page = '{{ current_page }}';
-        console.log(current_page);
+        const is_admin = '{{ is_admin|lower }}';
+        const user_id = '{{ requester.user.id}}';
+        const username = '{{ requester.user.username}}';
+        console.log(`is admin ${is_admin}. User id: ${user_id}. Username: ${username}`);
     </script>
 </head>
 
 <body>
     <div class="mailbox-banner">
-        <img src="{% static 'students/mailbox/images/feed-image-1.png' %}" alt="Mailbox Banner">
+        <img src="{% if university_details.mailbox_banner_photo %}{{ university_details.mailbox_banner_photo }}{% else %}{% static 'students/mailbox/images/feed-image-1.png' %}{% endif %}" alt="Mailbox Banner">
         <div class="banner-overlay">
             <h1>Student Mailbox</h1>
         </div>
@@ -186,20 +491,49 @@
     <!-- Description Section -->
     <div class="mailbox-description">
         <p class="description-text">
-            Welcome to the Student Mailbox - your central hub for academic discussions, resource sharing, and community
-            engagement. Connect with fellow students, share your thoughts, and stay updated with the latest campus
-            activities. This platform is designed to foster meaningful interactions and collaborative learning among
-            students.
-            <span class="more-text" style="display: none;">
-                Whether you're looking to discuss course materials, organize study groups, or simply connect with peers,
-                the Student Mailbox provides a safe and inclusive space for all academic-related conversations. Join our
-                growing community and be part of an enriching educational experience.
-            </span>
+            {% if university_details.mailbox_description %}
+                {% with description=university_details.mailbox_description %}
+                    {% if description|length > 200 %}
+                        {{ description|slice:":200" }}
+                        <span class="more-text" style="display: none;">
+                            {{ description|slice:"200:" }}
+                        </span>
+                    {% else %}
+                        {{ description }}
+                    {% endif %}
+                {% endwith %}
+            {% else %}
+                Welcome to the Student Mailbox - your central hub for academic discussions, resource sharing, and community
+                engagement. Connect with fellow students, share your thoughts, and stay updated with the latest campus
+                activities. This platform is designed to foster meaningful interactions and collaborative learning among
+                students.
+                <span class="more-text" style="display: none;">
+                    Whether you're looking to discuss course materials, organize study groups, or simply connect with peers,
+                    the Student Mailbox provides a safe and inclusive space for all academic-related conversations. Join our
+                    growing community and be part of an enriching educational experience.
+                </span>
+            {% endif %}
         </p>
         <button class="show-more-btn" type="button">Show More</button>
     </div>
-    <div class="manage-post-container" onclick="window.location.href='/students/mailbox/'">
-        <span class="manage-title">Back to Mailbox </span>
+    {% if is_admin %}
+    <div class="manage-post-container">
+        <span class="manage-item" id="add-admin-btn" style="cursor: pointer;">
+            <i class="fa-solid fa-user-plus"></i>
+            <span>Add Admin</span>
+        </span>
+        <span class="manage-item" id="leave-admin-btn" style="cursor: pointer;">
+            <i class="fa-solid fa-user-minus"></i>
+            <span>Leave Admin Role</span>
+        </span>
+        <span class="manage-item" id="university-settings-icon" style="display: none;">
+            <i class="fa-solid fa-university"></i>
+            <span>Mailbox Details</span>
+        </span>
+    </div>
+    {% endif %}
+    <div class="manage-post-container">
+        <span class="manage-title" onclick="window.location.href='/students/mailbox/'">Back to Mailbox </span>
         <span class="manage-item">
             <i class="fa-solid fa-file-lines"></i>
             <span>Your Posts</span>
@@ -210,7 +544,7 @@
             <span>Pending Posts</span>
             <span class="manage-count manage-count-pending">{{ pending_count|default:0 }}</span>
         </span>
-        <span class="manage-item">
+        <span class="manage-item" id="notifications-icon">
             <i class="fa-solid fa-bell"></i>
             <span>Notifications</span>
             <span class="manage-count manage-count-notification">{{ notification_count|default:0 }}</span>
@@ -272,6 +606,113 @@
       </div>
     </div>
 
+    <!-- University Settings Modal -->
+    <div id="universitySettingsModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeUniversitySettingsModal()">&times;</span>
+            <h2>🏛️ Mailbox Details</h2>
+            <div id="universitySettingsContent">
+                <form id="universitySettingsForm" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="mailboxDescription">📝 Mailbox Description</label>
+                        <textarea id="mailboxDescription" name="mailbox_description" rows="4" placeholder="Enter a welcoming description for your student mailbox..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="mailboxBannerPhoto">🖼️ Mailbox Banner Photo</label>
+                        <div class="file-upload-container">
+                            <div class="file-upload-wrapper">
+                                <input type="file" id="mailboxBannerPhoto" name="mailbox_banner_photo" accept="image/*">
+                                <div class="file-upload-button">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <span id="fileButtonText">Choose Banner Image</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="bannerPreviewContainer" class="preview-container">
+                            <div class="preview-label">Current Banner Preview</div>
+                            <div id="currentBannerPreview">
+                                <!-- Current/selected banner preview will be shown here -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-buttons">
+                        <button type="submit" id="saveUniversitySettings">
+                            <i class="fas fa-save"></i> Save Settings
+                        </button>
+                        <button type="button" onclick="closeUniversitySettingsModal()">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Admin Lightbox -->
+    <div id="add-admin-lightbox" class="add-admin-lightbox" style="display: none;">
+        <div class="add-admin-lightbox-content">
+            <div class="lightbox-header">
+                <h2>Add New MailboxAdmin</h2>
+                <span class="close-add-admin" style="cursor: pointer;">&times;</span>
+            </div>
+            <div class="search-container">
+                <input type="text" id="student-search" placeholder="Search students by name..." />
+                <i class="fa-solid fa-search search-icon"></i>
+            </div>
+            <div class="admin-count-info">
+                <span id="admin-count-display">Loading...</span>
+            </div>
+            <div class="students-grid" id="students-grid">
+                <div class="loading-spinner">
+                    <i class="fa-solid fa-spinner fa-spin"></i>
+                    <p>Loading students...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leave Admin Role Confirmation Modal -->
+    <div id="leave-admin-modal" class="leave-admin-modal" style="display: none;">
+        <div class="leave-admin-modal-content">
+            <div class="modal-header">
+                <div class="warning-icon">
+                    <i class="fa-solid fa-exclamation-triangle"></i>
+                </div>
+                <h2>Leave MailboxAdmin Role</h2>
+                <span class="close-leave-admin" style="cursor: pointer;">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="warning-message">
+                    <p><strong>Are you sure you want to leave your MailboxAdmin role?</strong></p>
+                    <p>This action will:</p>
+                    <ul>
+                        <li>Remove your admin privileges immediately</li>
+                        <li>Prevent you from managing posts and users</li>
+                        <li>Remove access to admin-only features</li>
+                        <li>Require another admin to re-add you if needed</li>
+                    </ul>
+                    <div class="admin-info">
+                        <i class="fa-solid fa-info-circle"></i>
+                        <span>You have been serving as a MailboxAdmin. Thank you for your contributions!</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="confirm-leave-admin" class="confirm-leave-btn">
+                    <i class="fa-solid fa-user-minus"></i>
+                    <span>Yes, Leave Admin Role</span>
+                </button>
+                <button id="cancel-leave-admin" class="cancel-leave-btn">
+                    <i class="fa-solid fa-times"></i>
+                    <span>Cancel</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    {% include "students/mailbox/htmls/notifications.html" %}
+    
+    <script src="{% static 'students/mailbox/javascripts/adminManagement.js' %}"></script>
     <script>
         // Add static URLs as JavaScript variables
         const STATIC_URLS = {
@@ -296,11 +737,41 @@
                 });
             }
         });
+
+        // Show notifications modal on bell icon click
+    document.addEventListener('DOMContentLoaded', function() {
+      const notifIcon = document.getElementById('notifications-icon');
+      if (notifIcon) {
+        notifIcon.addEventListener('click', function(e) {
+          e.stopPropagation();
+          showNotificationsModal();
+        });
+      }
+
+      // Add Admin functionality
+      const addAdminBtn = document.getElementById('add-admin-btn');
+      if (addAdminBtn) {
+        addAdminBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          openAddAdminLightbox();
+        });
+      }
+
+      // Leave Admin Role functionality
+      const leaveAdminBtn = document.getElementById('leave-admin-btn');
+      if (leaveAdminBtn) {
+        leaveAdminBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          openLeaveAdminModal();
+        });
+      }
+    });
     </script>
     
     <script src="{% static 'students/mailbox/javascripts/managePosts.js' %}"></script>
     <script src="{% static 'students/mailbox/javascripts/mailbox2.js' %}"></script>
     <script src="{% static 'students/mailbox/javascripts/comments.js' %}"></script>
+    <script src="{% static 'students/mailbox/javascripts/notifications.js' %}"></script>
 </body>
 
 </html>

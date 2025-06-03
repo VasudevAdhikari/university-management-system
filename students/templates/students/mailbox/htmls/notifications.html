@@ -1,0 +1,92 @@
+{% load custom_tags %}
+<div id="notificationsOverlay" class="notifications-overlay" style="display:none;">
+  <div class="notifications-popup">
+    <button class="close-notifications-btn" aria-label="Close notifications">&times;</button>
+    <div class="notifications-header">
+      <h2>Notifications</h2>
+      <button class="mark-all-read-btn" onclick="markAllNotificationsAsSeen()" title="Mark all as read">
+        <i class="fa-solid fa-check-double"></i>
+        <span>Mark All Read</span>
+      </button>
+    </div>
+    <div class="notifications-list">
+      <!-- Sample notifications -->
+      {% for notification in notifications %}
+      {% with notification.notification|json_loads as noti %}
+      <div class="notification-item {% if notification.seen %}seen{% else %}unseen{% endif %}"
+           data-type="{% if noti.is_comment or noti.is_comment_reply or noti.is_comment_reaction %}comment{% else %}post{% endif %}"
+           data-id="{% if noti.post %}{{ noti.post }}{% elif noti.comment %}{{ noti.comment }}{% else %}{{ noti|get_noti_id }}{% endif %}"
+           data-notification-id="{{ notification.id }}"
+           data-seen="{{ notification.seen|yesno:'true,false' }}">
+
+        <div class="notification-content">
+          <div class="notification-icon">
+            {% if noti.is_1001_views %}
+              <i class="fa-solid fa-eye" style="color: #ff6b6b;"></i>
+            {% elif noti.is_new_comment_on_post %}
+              <i class="fa-solid fa-comment" style="color: #4ecdc4;"></i>
+            {% elif noti.is_comment_reply %}
+              <i class="fa-solid fa-reply" style="color: #45b7d1;"></i>
+            {% elif noti.is_comment_reaction %}
+              <i class="fa-solid fa-heart" style="color: #f39c12;"></i>
+            {% elif noti.is_approved %}
+              <i class="fa-solid fa-check-circle" style="color: #27ae60;"></i>
+            {% elif noti.is_rejected %}
+              <i class="fa-solid fa-times-circle" style="color: #e74c3c;"></i>
+            {% elif noti.is_trending %}
+              <i class="fa-solid fa-fire" style="color: #ff9500;"></i>
+            {% elif noti.is_post_reaction %}
+              <i class="fa-solid fa-thumbs-up" style="color: #3498db;"></i>
+            {% else %}
+              <i class="fa-solid fa-bell" style="color: #95a5a6;"></i>
+            {% endif %}
+          </div>
+
+          <div class="notification-text">
+            <div class="notification-title">{{ noti.text }}</div>
+            <div class="notification-meta">
+              {% if noti.is_1001_views %}
+                🎉 {{ noti.view_count }} views
+              {% elif noti.is_new_comment_on_post %}
+                {% if noti.comment_count > 1 %}{{ noti.comment_count }} comments{% else %}New comment{% endif %}
+              {% elif noti.is_comment_reply %}
+                {% if noti.reply_count > 1 %}{{ noti.reply_count }} replies{% else %}New reply{% endif %}
+              {% elif noti.is_comment_reaction %}
+                {% if noti.reaction_count > 1 %}{{ noti.reaction_count }} reactions{% else %}{{ noti.latest_reaction }}{% endif %}
+              {% elif noti.is_trending %}
+                {% if noti.view_count %}{{ noti.view_count }} views{% elif noti.reaction_count %}{{ noti.reaction_count }} reactions{% endif %}
+              {% endif %}
+              &middot; {{ notification.created_at|timesince }} ago
+            </div>
+          </div>
+        </div>
+
+        {% if not notification.seen %}
+        <div class="unseen-indicator"></div>
+        {% endif %}
+      </div>
+      <hr>
+      {% endwith %}
+      {% endfor %}
+      <div class="notification-item" data-type="post" data-id="42">
+        <div class="notification-title">Your post has been approved!</div>
+        <div class="notification-meta">Post ID: 101 &middot; 2 minutes ago</div>
+      </div>
+      <hr>
+      <div class="notification-item" data-type="comment" data-id="61">
+        <div class="notification-title">Someone replied to your comment.</div>
+        <div class="notification-meta">Comment ID: 202 &middot; 5 minutes ago</div>
+      </div>
+      <hr>
+      <div class="notification-item" data-type="post" data-id="103">
+        <div class="notification-title">Your post was rejected by admin.</div>
+        <div class="notification-meta">Post ID: 103 &middot; 10 minutes ago</div>
+      </div>
+      <hr>
+      <div class="notification-item" data-type="post" data-id="104">
+        <div class="notification-title">Your post received a new reaction.</div>
+        <div class="notification-meta">Post ID: 104 &middot; 15 minutes ago</div>
+      </div>
+    </div>
+  </div>
+</div>
