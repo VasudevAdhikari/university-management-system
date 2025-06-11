@@ -1,4 +1,109 @@
+// Enhanced Skeleton Loading Utilities
+function createMailboxSkeleton() {
+    return `
+        <div class="mailbox-skeleton">
+            <!-- Skeleton Header -->
+            <div class="skeleton-mailbox-header">
+                <div class="skeleton skeleton-mailbox-title"></div>
+                <div class="skeleton skeleton-mailbox-subtitle"></div>
+            </div>
+
+            <!-- Skeleton Write Post -->
+            <div class="skeleton-write-post">
+                <div class="skeleton-write-header">
+                    <div class="skeleton skeleton-avatar"></div>
+                    <div class="skeleton skeleton-write-input"></div>
+                </div>
+                <div class="skeleton-write-actions">
+                    <div class="skeleton-media-buttons">
+                        <div class="skeleton skeleton-media-btn"></div>
+                        <div class="skeleton skeleton-media-btn"></div>
+                    </div>
+                    <div class="skeleton skeleton-post-btn"></div>
+                </div>
+            </div>
+
+            <!-- Skeleton Posts -->
+            ${createSkeletonPost()}
+            ${createSkeletonPost()}
+            ${createSkeletonPost()}
+        </div>
+    `;
+}
+
+function createSkeletonPost() {
+    return `
+        <div class="skeleton-post-card">
+            <div class="skeleton-post-header">
+                <div class="skeleton skeleton-avatar"></div>
+                <div class="skeleton-user-info">
+                    <div class="skeleton skeleton-text name"></div>
+                    <div class="skeleton skeleton-text time"></div>
+                </div>
+            </div>
+            <div class="skeleton-post-content">
+                <div class="skeleton skeleton-text long"></div>
+                <div class="skeleton skeleton-text medium"></div>
+                <div class="skeleton skeleton-text short"></div>
+                <div class="skeleton skeleton-post-image"></div>
+            </div>
+            <div class="skeleton-post-actions">
+                <div class="skeleton-action-group">
+                    <div class="skeleton skeleton-button"></div>
+                    <div class="skeleton skeleton-button"></div>
+                    <div class="skeleton skeleton-button"></div>
+                </div>
+                <div class="skeleton skeleton-reaction-count"></div>
+            </div>
+        </div>
+    `;
+}
+
+function showPostsSkeleton() {
+    const mainContent = document.querySelector('.main-content');
+    if (!mainContent) return;
+
+    // Create skeleton container for posts only (keep write-post-container)
+    const skeletonContainer = document.createElement('div');
+    skeletonContainer.className = 'posts-loading';
+    skeletonContainer.id = 'posts-skeleton';
+
+    // Add 3 skeleton posts
+    for (let i = 0; i < 3; i++) {
+        skeletonContainer.innerHTML += createSkeletonPost();
+    }
+
+    // Insert skeleton after write-post-container
+    const writePostContainer = document.querySelector('.write-post-container');
+    if (writePostContainer) {
+        writePostContainer.insertAdjacentElement('afterend', skeletonContainer);
+    } else {
+        mainContent.appendChild(skeletonContainer);
+    }
+}
+
+function hidePostsSkeleton() {
+    const skeleton = document.getElementById('posts-skeleton');
+
+    if (skeleton) {
+        // Fade out skeleton
+        skeleton.style.opacity = '0';
+        skeleton.style.transform = 'translateY(-20px)';
+
+        setTimeout(() => {
+            skeleton.remove();
+            document.body.classList.add('content-loaded');
+        }, 300);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function () {
+    // Show skeleton loading first
+    showPostsSkeleton();
+
+    // Add fade-in animation to body
+    document.body.classList.add('fade-in');
+
     // Lightbox variables
     const lightbox = document.getElementById('image-lightbox');
     const lightboxImg = lightbox.querySelector('.lightbox-img');
@@ -404,25 +509,37 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
         if (deleteBtn) {
-            deleteBtn.addEventListener('click', function (e) {
+            deleteBtn.addEventListener('click', async function (e) {
                 e.stopPropagation();
-                if (confirm('Are you sure you want to delete this post?')) {
-                    fetch(`/students/delete_post/`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': csrftoken
-                        },
-                        body: JSON.stringify({ post_id: post.id || post.post.id || post.post_id })
-                    }).then(res => res.json()).then(data => {
+                const confirmed = await showConfirm('Are you sure you want to delete this post?', {
+                    title: 'Delete Post',
+                    yesText: 'Delete',
+                    noText: 'Cancel'
+                });
+
+                if (confirmed) {
+                    try {
+                        const response = await fetch(`/students/delete_post/`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': csrftoken
+                            },
+                            body: JSON.stringify({ post_id: post.id || post.post.id || post.post_id })
+                        });
+
+                        const data = await response.json();
                         if (data.status == 'success') {
-                            alert("Post deleted successfully");
+                            showAlert("Post deleted successfully", 'success');
                             postContainer.remove();
                         } else {
                             console.error(`status: ${data.status}, message: ${data.message}`);
-                            alert('Failed to delete post.');
+                            showAlert('Failed to delete post.', 'error');
                         }
-                    });
+                    } catch (error) {
+                        console.error('Delete error:', error);
+                        showAlert('Failed to delete post.', 'error');
+                    }
                 }
             });
         }
@@ -795,6 +912,11 @@ document.addEventListener('DOMContentLoaded', function () {
             const data = await response.json();
 
             if (data.posts && data.posts.length > 0) {
+                // Hide skeleton on first load
+                if (currentPage === 1) {
+                    hidePostsSkeleton();
+                }
+
                 data.posts.forEach(renderPost);
                 if (data.posts.length < postsPerPage) {
                     allLoaded = true;
@@ -803,10 +925,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             } else {
                 allLoaded = true;
+                // Hide skeleton even if no posts
+                if (currentPage === 1) {
+                    hidePostsSkeleton();
+                }
             }
         } catch (error) {
             console.error('Error loading posts:', error);
-            alert('Error loading posts. Please try again.');
+            // Hide skeleton on error
+            hidePostsSkeleton();
+            showAlert('Error loading posts. Please try again.', 'error');
         } finally {
             isLoading = false;
         }
@@ -864,8 +992,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         approveButton.classList.add('admin-action-success');
                         approveButton.innerHTML = '<i class="fa-solid fa-check"></i><span>Approved!</span>';
 
-                        // Show success notification
-                        showAdminNotification('success', data.message);
+                        // Show modern success notification
+                        showAlert(data.message, 'success');
 
                         // Reload after short delay
                         setTimeout(() => {
@@ -915,8 +1043,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         rejectButton.classList.add('admin-action-success');
                         rejectButton.innerHTML = '<i class="fa-solid fa-times"></i><span>Rejected!</span>';
 
-                        // Show success notification
-                        showAdminNotification('success', data.message);
+                        // Show modern success notification
+                        showAlert(data.message, 'success');
 
                         // Reload after short delay
                         setTimeout(() => {
@@ -930,7 +1058,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     rejectButton.classList.remove('loading');
                     rejectButton.innerHTML = originalHTML;
                     rejectButton.disabled = false;
-                    showAdminNotification('error', 'Failed to reject post. Please try again.');
+                    showAlert('Failed to reject post. Please try again.', 'error');
                 }
             });
         }
@@ -966,8 +1094,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         disqualifyButton.classList.add('admin-action-success');
                         disqualifyButton.innerHTML = '<i class="fa-solid fa-ban"></i><span>Disqualified!</span>';
 
-                        // Show success notification
-                        showAdminNotification('success', data.message);
+                        // Show modern success notification
+                        showAlert(data.message, 'success');
 
                         // Reload after short delay
                         setTimeout(() => {
@@ -981,7 +1109,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     disqualifyButton.classList.remove('loading');
                     disqualifyButton.innerHTML = originalHTML;
                     disqualifyButton.disabled = false;
-                    showAdminNotification('error', 'Failed to disqualify post. Please try again.');
+                    showAlert('Failed to disqualify post. Please try again.', 'error');
                 }
             });
         }
@@ -1297,6 +1425,20 @@ document.addEventListener('DOMContentLoaded', function () {
             const postText = postInput.value.trim();
             if (!postText && selectedMediaPreview.children.length === 0) return;
 
+            // Show confirmation popup before posting
+            const confirmed = await showConfirm(
+                'Are you sure you want to post this? Once posted, it will be visible to other students.',
+                {
+                    title: 'Confirm Post',
+                    yesText: 'Post',
+                    noText: 'Cancel'
+                }
+            );
+
+            if (!confirmed) {
+                return; // User cancelled, don't proceed with posting
+            }
+
             // --- Hide controls and disable input during upload ---
             const writePostContainer = document.querySelector('.write-post-container');
             const videoIcon = writePostContainer.querySelector('.video-upload');
@@ -1355,7 +1497,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             try {
                                 const data = JSON.parse(xhr.responseText);
                                 if (data.status === 'success') {
-                                    alert('Post uploaded successfully!');
+                                    showAlert('Post uploaded successfully!', 'success');
                                     // Clear the input and media preview
                                     postInput.value = '';
                                     selectedMediaPreview.innerHTML = '';
@@ -1368,15 +1510,15 @@ document.addEventListener('DOMContentLoaded', function () {
                                     window.location.reload();
                                     resolve();
                                 } else {
-                                    alert(data.message || 'Failed to create post');
+                                    showAlert(data.message || 'Failed to create post', 'error');
                                     reject();
                                 }
                             } catch (err) {
-                                alert('Error parsing server response.');
+                                showAlert('Error parsing server response.', 'error');
                                 reject();
                             }
                         } else {
-                            alert('Error creating post. Please try again.');
+                            showAlert('Error creating post. Please try again.', 'error');
                             reject();
                         }
                     };
@@ -1388,7 +1530,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         postSubmitBtn.style.display = '';
                         postCancelBtn.style.display = '';
                         postInput.disabled = false;
-                        alert('Error creating post. Please try again.');
+                        showAlert('Error creating post. Please try again.', 'error');
                         reject();
                     };
                     xhr.send(formData);
@@ -1405,7 +1547,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 postCancelBtn.style.display = '';
                 postInput.disabled = false;
                 console.error('Error creating post:', error);
-                alert('Error creating post. Please try again.');
+                showAlert('Error creating post. Please try again.', 'error');
             }
         });
     }

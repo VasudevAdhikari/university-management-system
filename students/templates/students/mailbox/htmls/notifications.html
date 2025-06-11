@@ -68,6 +68,9 @@
       <hr>
       {% endwith %}
       {% endfor %}
+      {% if not notifications %}
+      You have no notifications
+      {% endif %}
       <div class="notification-item" data-type="post" data-id="42">
         <div class="notification-title">Your post has been approved!</div>
         <div class="notification-meta">Post ID: 101 &middot; 2 minutes ago</div>

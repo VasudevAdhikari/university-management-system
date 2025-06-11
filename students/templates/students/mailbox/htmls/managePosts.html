@@ -6,10 +6,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Posts</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'students/mailbox/styles/mailbox.css' %}">
+    <link rel="stylesheet" href="{% static 'students/mailbox/styles/modern-mailbox.css' %}">
+    <link rel="stylesheet" href="{% static 'students/mailbox/styles/managePosts.css' %}">
     <link rel="stylesheet" href="{% static 'students/mailbox/styles/comments.css' %}">
     <link rel="stylesheet" href="{% static 'students/mailbox/styles/notifications.css' %}">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
         /* ...existing styles... */
@@ -479,6 +483,24 @@
 </head>
 
 <body>
+    <!-- Animated Background Emojis -->
+    <!-- <div class="mailbox-background">
+        <div class="floating-emoji">📊</div>
+        <div class="floating-emoji">📝</div>
+        <div class="floating-emoji">⚙️</div>
+        <div class="floating-emoji">📋</div>
+        <div class="floating-emoji">✅</div>
+        <div class="floating-emoji">📈</div>
+        <div class="floating-emoji">🔍</div>
+        <div class="floating-emoji">📌</div>
+        <div class="floating-emoji">🎯</div> -->
+    </div>
+
+    <!-- Loading Overlay (initially hidden) -->
+    <div id="loading-overlay" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner"></div>
+    </div>
+
     <div class="mailbox-banner">
         <img src="{% if university_details.mailbox_banner_photo %}{{ university_details.mailbox_banner_photo }}{% else %}{% static 'students/mailbox/images/feed-image-1.png' %}{% endif %}" alt="Mailbox Banner">
         <div class="banner-overlay">
@@ -768,6 +790,7 @@
     });
     </script>
     
+    <script src="{% static 'students/mailbox/javascripts/popups.js' %}"></script>
     <script src="{% static 'students/mailbox/javascripts/managePosts.js' %}"></script>
     <script src="{% static 'students/mailbox/javascripts/mailbox2.js' %}"></script>
     <script src="{% static 'students/mailbox/javascripts/comments.js' %}"></script>

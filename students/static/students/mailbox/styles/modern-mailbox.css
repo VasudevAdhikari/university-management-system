@@ -1,0 +1,591 @@
+/* Modern Minimalistic Mailbox Design */
+/* 60-30-10 Color Rule Implementation */
+
+:root {
+  /* 60% - Primary (Neutral) Colors */
+  --primary-bg: #fafbfc;
+  --primary-surface: #ffffff;
+  --primary-text: #2c3e50;
+  --primary-text-light: #5a6c7d;
+  
+  /* 30% - Secondary (Accent) Colors */
+  --secondary-bg: #f8f9fa;
+  --secondary-border: #e9ecef;
+  --secondary-hover: #f1f3f4;
+  
+  /* 10% - Accent Colors */
+  --accent-primary: #667eea;
+  --accent-success: #27ae60;
+  --accent-danger: #e74c3c;
+  --accent-warning: #f39c12;
+  
+  /* Shadows and Effects */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+  
+  /* Transitions */
+  --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Global Font and Base Styles */
+* {
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+body {
+  background: var(--primary-bg);
+  color: var(--primary-text);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* Animated Background Emojis */
+.mailbox-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
+  overflow: hidden;
+}
+
+.floating-emoji {
+  position: absolute;
+  font-size: 2rem;
+  opacity: 0.5;
+  animation: float 20s infinite linear;
+  user-select: none;
+}
+
+.floating-emoji:nth-child(1) { animation-delay: 0s; left: 10%; }
+.floating-emoji:nth-child(2) { animation-delay: -5s; left: 20%; }
+.floating-emoji:nth-child(3) { animation-delay: -10s; left: 30%; }
+.floating-emoji:nth-child(4) { animation-delay: -15s; left: 40%; }
+.floating-emoji:nth-child(5) { animation-delay: -20s; left: 50%; }
+.floating-emoji:nth-child(6) { animation-delay: -25s; left: 60%; }
+.floating-emoji:nth-child(7) { animation-delay: -30s; left: 70%; }
+.floating-emoji:nth-child(8) { animation-delay: -35s; left: 80%; }
+.floating-emoji:nth-child(9) { animation-delay: -40s; left: 90%; }
+
+@keyframes float {
+  0% {
+    transform: translateY(100vh) rotate(0deg);
+  }
+  100% {
+    transform: translateY(-100px) rotate(360deg);
+  }
+}
+
+/* Enhanced Skeleton Loading Animations */
+.skeleton {
+  background: linear-gradient(90deg, #f0f2f5 25%, #e4e6ea 50%, #f0f2f5 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s infinite;
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.skeleton::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  animation: skeleton-shine 2s infinite;
+}
+
+@keyframes skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes skeleton-shine {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* Skeleton Post Card */
+.skeleton-post-card {
+  background: var(--primary-surface);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--secondary-border);
+}
+
+.skeleton-post-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.skeleton-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+}
+
+.skeleton-user-info {
+  flex: 1;
+}
+
+.skeleton-text {
+  height: 16px;
+  margin-bottom: 8px;
+  border-radius: 4px;
+}
+
+.skeleton-text.short { width: 60%; }
+.skeleton-text.medium { width: 80%; }
+.skeleton-text.long { width: 100%; }
+.skeleton-text.name { width: 120px; height: 18px; }
+.skeleton-text.time { width: 80px; height: 14px; }
+
+.skeleton-post-content {
+  margin-bottom: 16px;
+}
+
+.skeleton-post-image {
+  width: 100%;
+  height: 200px;
+  border-radius: 12px;
+  margin-top: 12px;
+}
+
+.skeleton-post-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 16px;
+  border-top: 1px solid var(--secondary-border);
+}
+
+.skeleton-action-group {
+  display: flex;
+  gap: 24px;
+}
+
+.skeleton-button {
+  height: 36px;
+  width: 80px;
+  border-radius: 8px;
+}
+
+.skeleton-reaction-count {
+  height: 20px;
+  width: 60px;
+  border-radius: 4px;
+}
+
+/* Skeleton Comment */
+.skeleton-comment {
+  display: flex;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--secondary-border);
+}
+
+.skeleton-comment-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.skeleton-comment-content {
+  flex: 1;
+}
+
+.skeleton-comment-text {
+  height: 14px;
+  margin-bottom: 6px;
+  border-radius: 4px;
+}
+
+/* Loading States */
+.posts-loading {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.comments-loading {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px 0;
+}
+
+/* Skeleton Write Post */
+.skeleton-write-post {
+  background: var(--primary-surface);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--secondary-border);
+}
+
+.skeleton-write-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.skeleton-write-input {
+  height: 48px;
+  border-radius: 24px;
+  flex: 1;
+}
+
+.skeleton-write-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 16px;
+  border-top: 1px solid var(--secondary-border);
+}
+
+.skeleton-media-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.skeleton-media-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.skeleton-post-btn {
+  height: 40px;
+  width: 100px;
+  border-radius: 20px;
+}
+
+/* Skeleton Mailbox Header */
+.skeleton-mailbox-header {
+  text-align: center;
+  padding: 40px 20px;
+  background: linear-gradient(135deg, var(--primary-surface) 0%, var(--secondary-bg) 100%);
+  border-radius: 20px;
+  margin-bottom: 30px;
+}
+
+.skeleton-mailbox-title {
+  height: 40px;
+  width: 300px;
+  margin: 0 auto 16px auto;
+  border-radius: 8px;
+}
+
+.skeleton-mailbox-subtitle {
+  height: 20px;
+  width: 200px;
+  margin: 0 auto;
+  border-radius: 4px;
+}
+
+/* Skeleton Animation Delays */
+.skeleton:nth-child(1) { animation-delay: 0s; }
+.skeleton:nth-child(2) { animation-delay: 0.1s; }
+.skeleton:nth-child(3) { animation-delay: 0.2s; }
+.skeleton:nth-child(4) { animation-delay: 0.3s; }
+.skeleton:nth-child(5) { animation-delay: 0.4s; }
+.skeleton:nth-child(6) { animation-delay: 0.5s; }
+.skeleton:nth-child(7) { animation-delay: 0.6s; }
+.skeleton:nth-child(8) { animation-delay: 0.7s; }
+
+/* Modern Container Styles */
+.mailbox-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  background: var(--primary-surface);
+  border-radius: 24px;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+.mailbox-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--accent-primary), var(--accent-success));
+  border-radius: 24px 24px 0 0;
+}
+
+/* Header Modernization */
+.mailbox-header {
+  text-align: center;
+  padding: 40px 20px;
+  background: linear-gradient(135deg, var(--primary-surface) 0%, var(--secondary-bg) 100%);
+  border-radius: 20px;
+  margin-bottom: 30px;
+  position: relative;
+  overflow: hidden;
+}
+
+.mailbox-header::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, var(--accent-primary) 0%, transparent 70%);
+  opacity: 0.03;
+  animation: rotate 30s linear infinite;
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.mailbox-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--primary-text);
+  margin: 0 0 10px 0;
+  letter-spacing: -0.02em;
+  position: relative;
+}
+
+.mailbox-subtitle {
+  font-size: 1.1rem;
+  color: var(--primary-text-light);
+  font-weight: 400;
+  margin: 0;
+}
+
+/* Post Cards Modernization */
+.post-card {
+  background: var(--primary-surface);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--secondary-border);
+  transition: all var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+.post-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent-primary), transparent);
+  transform: scaleX(0);
+  transition: transform var(--transition-normal);
+}
+
+.post-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.post-card:hover::before {
+  transform: scaleX(1);
+}
+
+/* Button Modernization */
+.modern-btn {
+  background: var(--accent-primary);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+  text-transform: none;
+  letter-spacing: 0.02em;
+}
+
+.modern-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left var(--transition-slow);
+}
+
+.modern-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.modern-btn:hover::before {
+  left: 100%;
+}
+
+.modern-btn.success {
+  background: var(--accent-success);
+}
+
+.modern-btn.danger {
+  background: var(--accent-danger);
+}
+
+.modern-btn.warning {
+  background: var(--accent-warning);
+}
+
+/* Input Field Modernization */
+.modern-input {
+  width: 100%;
+  padding: 16px 20px;
+  border: 2px solid var(--secondary-border);
+  border-radius: 12px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  background: var(--primary-surface);
+  color: var(--primary-text);
+  transition: all var(--transition-normal);
+  outline: none;
+}
+
+.modern-input:focus {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  transform: translateY(-1px);
+}
+
+.modern-input::placeholder {
+  color: var(--primary-text-light);
+  font-weight: 400;
+}
+
+/* Card Hover Effects */
+.hover-lift {
+  transition: all var(--transition-normal);
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Fade In Animation */
+.fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Slide In Animation */
+.slide-in {
+  animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Pulse Animation */
+.pulse {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+/* Loading States */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(250, 251, 252, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(5px);
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 3px solid var(--secondary-border);
+  border-top: 3px solid var(--accent-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .mailbox-container {
+    margin: 10px;
+    padding: 15px;
+    border-radius: 16px;
+  }
+  
+  .mailbox-title {
+    font-size: 2rem;
+  }
+  
+  .post-card {
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .floating-emoji {
+    font-size: 1.5rem;
+  }
+}

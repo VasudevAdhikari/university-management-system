@@ -1,3 +1,4 @@
+import contextlib
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.text import Truncator
@@ -6,7 +7,6 @@ import json
 from django.db import DatabaseError
 from django.core.exceptions import ValidationError
 
-# Enums
 class Gender(models.TextChoices):
     MALE = 'M', 'Male'
     FEMALE = 'F', 'Female'
@@ -61,7 +61,17 @@ class NotificationType(models.TextChoices):
     STUDENT_ASSESSMENT = 'A', 'Student Assessment'
     STUDENT_MAILBOX = 'M', 'Student Mailbox'
 
-# Base Models
+class BloodGroup(models.TextChoices):
+    A = 'A', 'A'
+    B = 'B', 'B'
+    O = 'O', 'O'
+    AB = 'X', 'AB'
+
+class DocumentType(models.TextChoices):
+    PUBLIC = 'A', 'Public'
+    PRIVATE = 'B', 'Private'
+    PROTECTED = 'C', 'Protected'
+
 class BaseModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -170,30 +180,37 @@ class Degree(BaseModel):
 class Semester(BaseModel):
     semester_name = models.CharField(max_length=100, default='')
     degree = models.ForeignKey(Degree, on_delete=models.CASCADE)
-    enrollment_scheme = models.JSONField(default=dict)
-    start_date = models.DateField(default=timezone.now)
-    end_date = models.DateField(default=timezone.now)
+
+    # Semester duration
+    duration = models.SmallIntegerField(default=16, null=False)
+    syllabus_structure = models.JSONField(default=dict, null=False)
 
 # Course Model
 class Course(BaseModel):
+    course_code = models.CharField(max_length=20, unique=True, default='')
     course_name = models.CharField(max_length=100, default='')
-    semester = models.ForeignKey(Semester, on_delete=models.CASCADE)
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
     is_elective = models.BooleanField(default=False)
+    is_supportive = models.BooleanField(default=False)
     credit_hours = models.PositiveIntegerField(default=3)
-    course_code = models.CharField(max_length=20, default='')
     description = models.TextField(default='')
 
 # Term Model
 class Term(BaseModel):
     year = models.PositiveIntegerField(default=timezone.now().year)
+    term_name =models.CharField(max_length=100, default='')
     start_date = models.DateField(default=timezone.now)
     end_date = models.DateField(default=timezone.now)
+    result_date = models.DateField(default=timezone.now)
+
+class Batch(BaseModel):
+    name = models.CharField(max_length=100, default='')
+    term = models.ForeignKey(Term, on_delete=models.CASCADE)
     semester = models.ForeignKey(Semester, on_delete=models.CASCADE)
 
 # Term Instructor Model
-class TermInstructor(BaseModel):
-    term = models.ForeignKey(Term, on_delete=models.CASCADE)
+class BatchInstructor(BaseModel):
+    batch = models.ForeignKey(Batch, on_delete=models.CASCADE)
     instructor = models.ForeignKey(Instructor, on_delete=models.CASCADE)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     assigned_date = models.DateField(default=timezone.now)
@@ -206,14 +223,58 @@ class Student(BaseModel):
     enrollment_date = models.DateField(default=timezone.now)
     status = models.CharField(max_length=1, choices=StudentStatus.choices, default=StudentStatus.ACTIVE)
 
+class SISForm(BaseModel):
+    # Student's information
+    student = models.OneToOneField(Student, on_delete=models.CASCADE, primary_key=True)
+    blood_group = models.CharField(max_length=1, choices=BloodGroup.choices, default=BloodGroup.A)
+    ethnicity = models.TextField(max_length=30, default='Burmese')
+    religion = models.TextField(max_length=30, default='Buddhist')
+    NRC = models.TextField(max_length=20, default='9/MKN(N)191305', null=False)
+    birthplace = models.TextField(max_length=30, default='Yangon', null=False)
+
+    # Father's information
+    father_name = models.TextField(max_length=40, default='U Ba', null=False)
+    father_NRC = models.TextField(max_length=20, default='9/MKN(N)191305', null=False)
+    father_birthplace = models.TextField(max_length=30, default='Yangon', null=False)
+    father_city = models.TextField(max_length=30, default='Yangon', null=False)
+    father_phone = models.TextField(max_length=18, default='0', null=False)
+    father_profession = models.TextField(max_length=20, default='Businessman', null=False)
+    father_gmail = models.EmailField(max_length=50, default='uba@gmail.com', null=False)
+    father_ethnicity = models.TextField(max_length=30, default='Burmese')
+    father_religion = models.TextField(max_length=30, default='Buddhist')
+
+    #Mother's Information
+    mother_name = models.TextField(max_length=40, default='Daw Hla', null=False)
+    mother_NRC = models.TextField(max_length=20, default='9/MKN(N)191305', null=False)
+    mother_birthplace = models.TextField(max_length=30, default='Yangon', null=False)
+    mother_city = models.TextField(max_length=30, default='Yangon', null=False)
+    mother_phone = models.TextField(max_length=18, default='0', null=False)
+    mother_profession = models.TextField(max_length=20, default='Businessman', null=False)
+    mother_gmail = models.EmailField(max_length=50, default='dawhla@gmail.com', null=False)
+    mother_ethnicity = models.TextField(max_length=30, default='Burmese')
+    mother_religion = models.TextField(max_length=30, default='Buddhist')
+
+    # Matriculation Information
+    matric_roll_no = models.TextField(max_length=10, default='မမ-၉၂၉', null=False)
+    # စာစစ်ဌာန
+    exam_dept = models.TextField(max_length=60, default='ထ(၃)၊ပြင်ဦးလွင်', null=False)
+    passed_year = models.PositiveSmallIntegerField(default=2022, null=False)
+    total_marks = models.PositiveSmallIntegerField(default=516, null=False)
+    
+    # Spouse Information
+    has_spouse = models.BooleanField(default=False, null=False)
+    spouse_name = models.TextField(max_length=50, null=False)
+
+
 # Student Term Model
-class StudentTerm(BaseModel):
-    term = models.ForeignKey(Term, on_delete=models.CASCADE)
+class StudentBatch(BaseModel):
+    batch = models.ForeignKey(Batch, on_delete=models.CASCADE)
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    result = models.JSONField(default=dict)
 
 # Enrollment Model
 class Enrollment(BaseModel):
-    student_term = models.OneToOneField(StudentTerm, on_delete=models.CASCADE, primary_key=True)
+    student_batch = models.OneToOneField(StudentBatch, on_delete=models.CASCADE, primary_key=True)
     enrollment_form = models.JSONField(default=dict)
     enrollment_date = models.DateField(default=timezone.now)
     handled_by = models.ForeignKey(Admin, on_delete=models.SET_NULL, null=True, default=None)
@@ -224,6 +285,7 @@ class Document(BaseModel):
     description = models.TextField(default='')
     file_link = models.URLField(default='')
     uploaded_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    access_status = models.CharField(max_length=1, choices=DocumentType.choices, default=DocumentType.PUBLIC)
 
 # Video Conference Model
 class VideoConference(BaseModel):
@@ -236,16 +298,14 @@ class VideoConference(BaseModel):
 
 # Assessment Scheme Model
 class AssessmentScheme(BaseModel):
-    term_instructor = models.ForeignKey(TermInstructor, on_delete=models.CASCADE)
-    assessment_type = models.CharField(max_length=1, choices=AssessmentType.choices, default=AssessmentType.QUIZ)
-    percentage = models.PositiveIntegerField(default=0)
+    batch_instructor = models.ForeignKey(BatchInstructor, on_delete=models.CASCADE)
+    scheme = models.JSONField(default=dict)
 
 # Assessment Model
 class Assessment(BaseModel):
     assessment_scheme = models.ForeignKey(AssessmentScheme, on_delete=models.CASCADE)
-    question = models.JSONField(default=dict)
-    sample_answer = models.JSONField(default=dict)
-    for_which_students = models.JSONField(default=list)
+    assessment_type = models.TextField(max_length=1, choices=AssessmentType.choices)
+    assessment = models.JSONField(default=dict)
     assigned_date = models.DateField(default=timezone.now)
     due_date = models.DateField(default=timezone.now)
 
@@ -275,15 +335,12 @@ class MailboxPost(BaseModel):
     is_anonymous = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
-        try:
+        with contextlib.suppress(Exception):
         # Retrieve the old status if the instance already exists in the database
             old_status = None
             if self.pk:
-                try:
+                with contextlib.suppress(MailboxPost.DoesNotExist):
                     old_status = MailboxPost.objects.get(pk=self.pk).status
-                except MailboxPost.DoesNotExist:
-                    pass  # This can happen for new objects before they're saved for the first time
-
             super().save(*args, **kwargs)  # Call the "real" save() method to save the new status
 
             # Check if the status has actually changed
@@ -298,9 +355,6 @@ class MailboxPost(BaseModel):
                 elif self.status == MailboxPostStatus.DISQUALIFIED:
                     self.notify_disqualified_post(self.uploaded_by, self.pk, truncated_text)
                 # Add other status checks if you have more notification types
-
-        except Exception as e:
-            pass
 
 
     def notify_post_status(self, user, post_id, post_text, status):

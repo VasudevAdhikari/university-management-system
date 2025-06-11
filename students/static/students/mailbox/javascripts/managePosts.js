@@ -1,5 +1,152 @@
 // Edit Post Modal Logic for managePosts.html
 
+// ===== SKELETON LOADING UTILITIES =====
+
+function createManagePostsSkeleton() {
+    return `
+        <div class="manage-posts-skeleton">
+            <!-- Skeleton Header -->
+            <div class="skeleton-header">
+                <div class="skeleton skeleton-title"></div>
+                <div class="skeleton-stats">
+                    <div class="skeleton-stat-item">
+                        <div class="skeleton skeleton-stat-number"></div>
+                        <div class="skeleton skeleton-stat-label"></div>
+                    </div>
+                    <div class="skeleton-stat-item">
+                        <div class="skeleton skeleton-stat-number"></div>
+                        <div class="skeleton skeleton-stat-label"></div>
+                    </div>
+                    <div class="skeleton-stat-item">
+                        <div class="skeleton skeleton-stat-number"></div>
+                        <div class="skeleton skeleton-stat-label"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Skeleton Filters -->
+            <div class="skeleton-filters">
+                <div class="skeleton skeleton-filter-btn"></div>
+                <div class="skeleton skeleton-filter-btn"></div>
+                <div class="skeleton skeleton-filter-btn"></div>
+                <div class="skeleton skeleton-filter-btn"></div>
+                <div class="skeleton skeleton-search"></div>
+            </div>
+
+            <!-- Skeleton Posts -->
+            ${createSkeletonManagePost()}
+            ${createSkeletonManagePost()}
+            ${createSkeletonManagePost()}
+        </div>
+    `;
+}
+
+function createSkeletonManagePost() {
+    return `
+        <div class="skeleton-post-card">
+            <div class="skeleton-post-header">
+                <div class="skeleton skeleton-avatar"></div>
+                <div class="skeleton-user-info">
+                    <div class="skeleton skeleton-username"></div>
+                    <div class="skeleton skeleton-timestamp"></div>
+                </div>
+                <div class="skeleton skeleton-status-badge"></div>
+            </div>
+
+            <div class="skeleton-post-content">
+                <div class="skeleton skeleton-text-line long"></div>
+                <div class="skeleton skeleton-text-line medium"></div>
+                <div class="skeleton skeleton-text-line short"></div>
+                <div class="skeleton skeleton-media"></div>
+            </div>
+
+            <div class="skeleton-post-actions">
+                <div class="skeleton-action-buttons">
+                    <div class="skeleton skeleton-action-btn"></div>
+                    <div class="skeleton skeleton-action-btn"></div>
+                    <div class="skeleton skeleton-action-btn"></div>
+                </div>
+                <div class="skeleton-stats-row">
+                    <div class="skeleton skeleton-stat"></div>
+                    <div class="skeleton skeleton-stat"></div>
+                    <div class="skeleton skeleton-stat"></div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function showManagePostsSkeleton() {
+    // Find the main content area or create one
+    let mainContainer = document.querySelector('.main-content') ||
+                       document.querySelector('.container') ||
+                       document.querySelector('main') ||
+                       document.body;
+
+    // Create skeleton container
+    const skeletonContainer = document.createElement('div');
+    skeletonContainer.id = 'manage-posts-skeleton-container';
+    skeletonContainer.className = 'loading-container';
+    skeletonContainer.innerHTML = createManagePostsSkeleton();
+
+    // Hide existing content temporarily
+    const existingContent = mainContainer.children;
+    for (let child of existingContent) {
+        if (child.id !== 'manage-posts-skeleton-container') {
+            child.style.display = 'none';
+        }
+    }
+
+    // Insert skeleton at the beginning
+    mainContainer.insertBefore(skeletonContainer, mainContainer.firstChild);
+
+    // Add loading class to body
+    document.body.classList.add('loading-manage-posts');
+
+    console.log('Manage posts skeleton shown');
+}
+
+function hideManagePostsSkeleton() {
+    const skeletonContainer = document.getElementById('manage-posts-skeleton-container');
+    if (skeletonContainer) {
+        // Fade out skeleton
+        skeletonContainer.style.opacity = '0';
+        skeletonContainer.style.transform = 'translateY(-20px)';
+
+        setTimeout(() => {
+            // Remove skeleton
+            skeletonContainer.remove();
+
+            // Restore hidden content
+            const mainContainer = document.querySelector('.main-content') ||
+                                 document.querySelector('.container') ||
+                                 document.querySelector('main') ||
+                                 document.body;
+
+            const hiddenContent = mainContainer.children;
+            for (let child of hiddenContent) {
+                if (child.style.display === 'none') {
+                    child.style.display = '';
+                    child.style.opacity = '0';
+                    child.style.transform = 'translateY(20px)';
+
+                    // Animate content in
+                    setTimeout(() => {
+                        child.style.transition = 'all 0.5s ease-out';
+                        child.style.opacity = '1';
+                        child.style.transform = 'translateY(0)';
+                    }, 50);
+                }
+            }
+
+            document.body.classList.remove('loading-manage-posts');
+            document.body.classList.add('content-loaded');
+
+            console.log('Manage posts skeleton hidden, content restored');
+        }, 300);
+    }
+}
+
 let editMediaFiles = [];
 let editExistingMedia = [];
 let editRemovedIndexes = [];
@@ -120,7 +267,7 @@ document.getElementById('savePostBtn').onclick = function() {
             closeEditLightbox();
             window.location.reload();
         } else {
-            alert('Failed to update post.');
+            showAlert('Failed to update post.', 'error');
         }
     });
 };
@@ -160,7 +307,7 @@ document.addEventListener('click', function(e) {
         } else if (typeof getPostDataById === 'function') {
             getPostDataById(postId).then(post => openEditLightbox(post));
         } else {
-            alert('Cannot find post data for editing.');
+            showAlert('Cannot find post data for editing.', 'error');
         }
     }
 });
@@ -223,81 +370,10 @@ function closeUniversitySettingsModal() {
     }, 300);
 }
 
-// Show notification function with beautiful styling
+// Show notification function with beautiful styling (now uses modern popups)
 function showNotification(message, type = 'info') {
-    // Create notification element
-    const notification = document.createElement('div');
-
-    let backgroundColor;
-    let icon;
-
-    switch(type) {
-        case 'error':
-            backgroundColor = 'linear-gradient(135deg, #e74c3c, #c0392b)';
-            icon = '❌';
-            break;
-        case 'success':
-            backgroundColor = 'linear-gradient(135deg, #27ae60, #2ecc71)';
-            icon = '✅';
-            break;
-        default:
-            backgroundColor = 'linear-gradient(135deg, #667eea, #764ba2)';
-            icon = 'ℹ️';
-    }
-
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 18px 25px;
-        background: ${backgroundColor};
-        color: white;
-        border-radius: 12px;
-        font-family: 'Poppins', sans-serif;
-        font-weight: 500;
-        font-size: 14px;
-        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-        z-index: 10000;
-        transform: translateX(400px);
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        max-width: 350px;
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255,255,255,0.1);
-    `;
-
-    notification.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 10px;">
-            <span style="font-size: 16px;">${icon}</span>
-            <span>${message}</span>
-        </div>
-    `;
-
-    document.body.appendChild(notification);
-
-    // Animate in
-    setTimeout(() => {
-        notification.style.transform = 'translateX(0)';
-    }, 10);
-
-    // Add hover effect
-    notification.addEventListener('mouseenter', () => {
-        notification.style.transform = 'translateX(-5px) scale(1.02)';
-    });
-
-    notification.addEventListener('mouseleave', () => {
-        notification.style.transform = 'translateX(0) scale(1)';
-    });
-
-    // Remove after 4 seconds
-    setTimeout(() => {
-        notification.style.transform = 'translateX(400px)';
-        notification.style.opacity = '0';
-        setTimeout(() => {
-            if (document.body.contains(notification)) {
-                document.body.removeChild(notification);
-            }
-        }, 400);
-    }, 4000);
+    // Use modern popup system instead of custom notification
+    showAlert(message, type);
 }
 
 // Load current university details with beautiful preview
@@ -439,8 +515,20 @@ function resetSaveButton() {
 
 // Initialize university settings functionality
 document.addEventListener('DOMContentLoaded', function() {
+    // Show skeleton loading immediately
+    showManagePostsSkeleton();
+
+    // Add fade-in animation to body
+    document.body.classList.add('fade-in');
+
     // Check admin status on page load
     checkAdminStatus();
+
+    // Simulate content loading (in real app, this would be when actual content loads)
+    // Increased time to make skeleton more visible
+    setTimeout(() => {
+        hideManagePostsSkeleton();
+    }, 2500);
 
     // Add event listener for university settings icon
     const universitySettingsIcon = document.getElementById('university-settings-icon');

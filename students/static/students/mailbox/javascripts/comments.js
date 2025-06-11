@@ -384,7 +384,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         });
                         if (postContainer) await loadComments(postContainer);
                     } catch (err) {
-                        alert('Failed to save reaction. Please try again.');
+                        showAlert('Failed to save reaction. Please try again.', 'error');
                     }
                 });
             });

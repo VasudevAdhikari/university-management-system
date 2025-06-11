@@ -276,6 +276,7 @@ def notify_new_comment_on_post(user, post_id, commenter_name, post_text, is_anon
     except Exception as e:
         print(f"Unexpected error in notify_new_comment_on_post: {e}")
 
+
 def notify_comment_reaction(user, comment_id, reactor_name, reaction_type, comment_text):
     """Notify commenter when their comment gets new reactions"""
     try:
