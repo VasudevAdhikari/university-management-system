@@ -1,0 +1,494 @@
+/* Reset and base styles */
+body {
+  background: linear-gradient(135deg,#e3f2fd 60%,#fff 100%);
+  font-family: 'Poppins', Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  box-sizing: border-box;
+  display: flex;
+}
+
+/* Navbar styles */
+.navbar {
+  width: 100%;
+  height: 64px;
+  background: #decd6b;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 0 24px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 2000;
+}
+.nav-hamburger {
+  display: block;
+  background: #e6e9d8;
+  border: none;
+  border-radius: 8px;
+  font-size: 2rem;
+  padding: 6px 14px;
+  cursor: pointer;
+  margin-right: 10px;
+}
+.nav-logo {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  background: #fff;
+  object-fit: contain;
+  margin-right: 16px;
+}
+.nav-title {
+  font-size: 1.45rem;
+  font-weight: bold;
+  color: #222;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nav-bell {
+  margin-left: auto;
+  font-size: 1.5rem;
+  color: #fff;
+}
+
+/* Sidebar styles */
+.sidebar {
+  width: 260px;
+  background: #546bd4;
+  color: #fff;
+  min-height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 64px;
+  z-index: 1001;
+  transition: transform 0.3s;
+  transform: translateX(0); /* VISIBLE BY DEFAULT ON DESKTOP */
+  overflow-y: auto; /* Make sidebar scrollable */
+}
+.sidebar.show {
+  transform: translateX(0);
+}
+.sidebar-header {
+  padding: 24px 0 12px 0;
+  text-align: center;
+  font-size: 1.3rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+  background: #4256a3;
+}
+.sidebar-header img,
+.sidebar-logo {
+  max-width: 90%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+.sidebar-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.sidebar-list li {
+  border-bottom: 1px solid #6d84e6;
+}
+.sidebar-list li:last-child {
+  border-bottom: none;
+}
+.sidebar-list a {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: #fff;
+  text-decoration: none;
+  font-size: 1.13rem;
+  padding: 18px 28px;
+  transition: background 0.15s, color 0.15s;
+}
+.sidebar-list a:hover {
+  background: #4256a3;
+  color: #e3f2fd;
+}
+.sidebar-list i {
+  font-size: 1.2rem;
+}
+
+/* Hide sidebar on desktop when .sidebar-closed is on body */
+body.sidebar-closed .sidebar {
+  transform: translateX(-100%);
+}
+
+/* Main content shifts when sidebar is visible (desktop) */
+.main-content {
+  margin-left: 260px;
+  width: calc(100% - 260px);
+  transition: margin-left 0.3s, width 0.3s;
+}
+body.sidebar-closed .main-content {
+  margin-left: 0;
+  width: 100%;
+}
+
+/* Degree grid: 3 cards with reduced gap when sidebar is visible */
+.degree-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px; /* Reduced gap */
+  width: 96%;
+  margin: 40px auto;
+  padding: 40px 0;
+  min-height: 400px;
+  transition: grid-template-columns 0.3s, gap 0.3s;
+}
+body.sidebar-closed .degree-grid {
+  grid-template-columns: repeat(4, 1fr);
+  gap: 32px; /* Normal gap */
+}
+
+/* Hamburger styles */
+.hamburger {
+  display: none;
+  position: fixed;
+  left: 18px;
+  top: 18px;
+  font-size: 2rem;
+  background: #fff;
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(44,44,44,0.10);
+  padding: 8px 14px;
+  z-index: 1100;
+  cursor: pointer;
+}
+
+/* Main content styles */
+.main-content {
+  margin-left: 260px;
+  width: calc(100% - 260px);
+  transition: margin-left 0.3s, width 0.3s;
+  min-height: 100vh;
+  padding-top: 84px;
+  padding-bottom: 40px;
+}
+.admin-header {
+  width: 96%;
+  margin: 40px auto 0 auto;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px; /* Reduce gap between search and add button */
+}
+.add-btn {
+  background: #444;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 28px;
+  font-size: 1.3rem;
+  font-weight: bold;
+  cursor: pointer;
+  margin-left: 0; /* Remove auto margin so it stays close to search box */
+  transition: background 0.2s;
+}
+.add-btn:hover {
+  background: #222;
+}
+
+/* Degree grid and card styles */
+.degree-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  width: 96%;
+  margin: 40px auto;
+  padding: 40px 0;
+  min-height: 400px;
+  transition: grid-template-columns 0.3s, gap 0.3s;
+}
+
+/* 4 cards with normal gap when sidebar is hidden */
+body.sidebar-closed .degree-grid {
+  grid-template-columns: repeat(4, 1fr);
+  gap: 32px;
+}
+body.sidebar-hidden .main-content {
+  margin-left: 0;
+  width: 100%;
+}
+body.sidebar-hidden .degree-grid {
+  grid-template-columns: repeat(4, 1fr); /* 4 cards when sidebar is hidden */
+}
+.degree-card {
+  background: #fff;
+  border-radius: 18px;
+  width: 100%;
+  min-width: 0;
+  max-width: 340px;
+  margin: 0 auto;
+  min-height: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 8px 32px rgba(44,44,44,0.13), 0 2px 8px rgba(0,0,0,0.08);
+  padding-bottom: 24px;
+  transition: transform 0.18s, box-shadow 0.18s;
+}
+.degree-card:hover {
+  transform: translateY(-8px) scale(1.03);
+  box-shadow: 0 16px 48px rgba(44,44,44,0.18), 0 4px 16px rgba(0,0,0,0.10);
+}
+.degree-img {
+  width: 90%;
+  height: 120px;
+  border-radius: 12px;
+  margin: 20px 0 10px 0;
+  background: linear-gradient(135deg,#e0f7fa 60%,#b2ebf2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(29,161,255,0.13);
+  border: 4px solid #fff;
+  position: relative;
+}
+.degree-img img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: cover;
+  border-radius: 10px;
+  z-index: 1;
+  position: relative;
+}
+.degree-card h2 {
+  font-size: 1.7rem;
+  font-weight: bold;
+  margin: 10px 0 8px 0;
+  text-align: center;
+  color: #1da1ff;
+  letter-spacing: 1px;
+  text-shadow: 0 2px 8px #e0f7fa;
+}
+.degree-card p {
+  margin: 2px 0;
+  font-size: 1.1rem;
+  color: #444;
+  text-align: left;
+  width: 90%;
+  margin-left: 5%;
+  line-height: 1.4;
+}
+.card-actions {
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  margin-top: 28px;
+}
+.view-btn, .delete-btn {
+  background: linear-gradient(90deg,#1da1ff 60%,#00bcd4 100%);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 32px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(29,161,255,0.10);
+}
+.delete-btn {
+  background: linear-gradient(90deg,#ff3b3b 60%,#ffb2b2 100%);
+}
+.view-btn:hover, .delete-btn:hover {
+  background: #222;
+  box-shadow: 0 4px 16px rgba(29,161,255,0.13);
+}
+
+/* Modal action buttons (edit & close) container */
+.modal-actions {
+  position: absolute;
+  top: 12px;
+  right: 18px;
+  display: flex;
+  gap: 18px; /* More space between buttons */
+  z-index: 10;
+}
+
+/* Edit button: smaller font, square hover */
+#editDegreeBtn.modal-action-btn {
+  background: none;
+  border: none;
+  color: #1da1ff;
+  font-size: 1.1rem; /* Reduced font size */
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s, background 0.2s, color 0.2s, border-radius 0.2s;
+  padding: 4px 10px;
+  border-radius: 6px;
+  outline: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+#editDegreeBtn.modal-action-btn:hover {
+  background: #e3f2fd;
+  color: #0077cc;
+  border-radius: 6px; /* Square */
+}
+
+/* Close button: circle hover */
+#closeDegreeDetailsBtn.modal-action-btn {
+  background: none;
+  border: none;
+  color: #1da1ff;
+  font-size: 1.5rem;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s, background 0.2s, color 0.2s, border-radius 0.2s;
+  padding: 4px;
+  border-radius: 50%;
+  outline: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#closeDegreeDetailsBtn.modal-action-btn:hover {
+  background: #e3f2fd;
+  color: #0077cc;
+  border-radius: 50%; /* Circle */
+}
+
+/* Show buttons on modal hover/focus */
+#degreeDetailsModal:hover .modal-action-btn,
+#degreeDetailsModal:focus-within .modal-action-btn {
+  opacity: 1;
+}
+
+/* Sticky details section */
+.degree-details-sticky {
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 2;
+  /* Optional: add a subtle shadow or border-bottom for separation */
+  box-shadow: 0 2px 8px rgba(44,44,44,0.04);
+}
+.syllabus-scrollable {
+  overflow-y: auto;
+  max-height: 100%;
+}
+
+
+/* Search box styles */
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 6px; /* Reduce gap between input and search button */
+  margin-left: 0; /* Remove extra left margin */
+}
+.search-box input {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid #bfc6e0;
+  font-size: 1rem;
+}
+.search-box button {
+  background: #1da1ff;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+/* Responsive styles */
+@media (max-width: 1400px) {
+  .degree-grid,
+  .sidebar.show ~ .main-content .degree-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 900px) {
+  .sidebar {
+    width: 280px;
+    top: 56px;
+    transform: translateX(-100%);
+    position: fixed;
+    z-index: 2001;
+  }
+  body.sidebar-open .sidebar {
+    transform: translateX(0);
+  }
+
+  .main-content,
+  body.sidebar-open .main-content,
+  body.sidebar-closed .main-content {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  /* Default: 1 card per row for safety */
+  .degree-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  /* 2 cards per row if sidebar is open */
+  body.sidebar-open .degree-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+  }
+
+  /* 3 cards per row if sidebar is closed */
+  body.sidebar-closed .degree-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+  }
+
+  /* .modal-action-btn {
+    opacity: 0 !important;
+    pointer-events: none;
+  }
+  .active-semester .modal-action-btn {
+    opacity: 1 !important;
+    pointer-events: auto;
+  } */
+}
+@media (max-width: 600px) {
+  .sidebar {
+    width: 220px;
+    top: 56px;
+  }
+  .sidebar.show ~ .main-content {
+    margin-left: 180px;
+    width: calc(100% - 180px);
+  }
+}
+/* Desktop: 4 cards per row when sidebar is closed */
+@media (min-width: 901px) {
+  body.sidebar-closed .degree-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 32px;
+  }
+}
+@media (min-width: 901px) and (max-width: 1200px) {
+  .sidebar-list a {
+    padding: 10px 18px; /* Reduce vertical and horizontal padding */
+    font-size: 1rem;    /* Optionally reduce font size a bit */
+    gap: 10px;          /* Reduce icon/text gap if needed */
+  }
+}
+
+.modal-action-btn {
+  opacity: 1 !important;
+  pointer-events: auto;
+}
+@media (max-width: 1200px) {
+  .sidebar {
+    max-height: 100vh;
+  }
+}

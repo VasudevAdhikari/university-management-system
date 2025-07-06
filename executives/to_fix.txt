@@ -1,0 +1,6 @@
+views.py -> show_lab_details -> all_project_leaders
+project editing and adding 
+remove 1. iselective and 2. issupportive from authorization.course model
+add credit_hours and credit_points separately in authorization.course model
+
+components.faculty_manager -> show_faculty_management -> List of all users

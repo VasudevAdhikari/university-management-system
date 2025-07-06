@@ -141,19 +141,25 @@ class Admin(BaseModel):
 
 # Faculty Model
 class Faculty(BaseModel):
+    id = models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID', default=1)
     name = models.CharField(max_length=100, default='')
     description = models.TextField(default='')
     contact_email = models.EmailField(default='')
     contact_phone = models.CharField(max_length=20, default='')
+    location = models.CharField(max_length=30, default='')
+    head_of_faculty = models.ForeignKey(User, on_delete=models.CASCADE, default=None, null=True)
+    faculty_photo = models.ImageField(upload_to='profile_pictures/', default='default_profile.png')
 
 # Department Model
 class Department(BaseModel):
     name = models.CharField(max_length=100, default='')
     faculty = models.ForeignKey(Faculty, on_delete=models.CASCADE)
     description = models.TextField(default='')
-    office_location = models.CharField(max_length=100, default='')
+    location = models.CharField(max_length=100, default='')
     contact_email = models.EmailField(default='')
     contact_phone = models.CharField(max_length=20, default='')
+    head_of_department = models.ForeignKey(User, on_delete=models.CASCADE, default=None, null=True)
+    department_photo = models.ImageField(upload_to='departments/', default='default.jpg')
 
 # Instructor Model
 class Instructor(BaseModel):
@@ -170,29 +176,43 @@ class Instructor(BaseModel):
 # Degree Model
 class Degree(BaseModel):
     name = models.CharField(max_length=100, default='')
+    code = models.CharField(max_length=20, default='')
     faculty = models.ForeignKey(Faculty, on_delete=models.CASCADE)
-    semester_count = models.PositiveIntegerField(default=8)
+    duration = models.PositiveIntegerField(default=4) # duration in years
     description = models.TextField(default='')
-    total_credits = models.PositiveIntegerField(default=120)
+    total_credits = models.PositiveIntegerField(default=120) # derived attribute
+    total_courses = models.PositiveIntegerField(default=48) # derived attribute
+    total_hours = models.PositiveBigIntegerField(default=260) #derived_attribute
     degree_type = models.CharField(max_length=1, choices=DegreeType.choices, default=DegreeType.BACHELORS)
+    degree_image = models.ImageField(upload_to='degrees/', default='default.jpg')
+    
  
 # Semester Model
 class Semester(BaseModel):
     semester_name = models.CharField(max_length=100, default='')
     degree = models.ForeignKey(Degree, on_delete=models.CASCADE)
-
-    # Semester duration
-    duration = models.SmallIntegerField(default=16, null=False)
+    # Duration in weeks
+    duration_weeks = models.PositiveSmallIntegerField(default=4, null=False)
     syllabus_structure = models.JSONField(default=dict, null=False)
+    # Example syllabus_structure:
+    # [
+    #   {
+    #     "course_code": "CS101",
+    #     "course_name": "Intro to CS",
+    #     "course_credits": 3,
+    #     "course_hours": 45,
+    #     "type": "Core"
+    #   },
+    #   ...
+    # ]
 
 # Course Model
 class Course(BaseModel):
     course_code = models.CharField(max_length=20, unique=True, default='')
     course_name = models.CharField(max_length=100, default='')
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
-    is_elective = models.BooleanField(default=False)
-    is_supportive = models.BooleanField(default=False)
-    credit_hours = models.PositiveIntegerField(default=3)
+    course_hours = models.PositiveIntegerField(default=30)
+    course_credits = models.PositiveSmallIntegerField(default=3)
     description = models.TextField(default='')
 
 # Term Model

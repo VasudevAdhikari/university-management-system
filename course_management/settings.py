@@ -26,9 +26,11 @@ SECRET_KEY = 'django-insecure-9i8pkuq#kba=ks!2hy&_h)m%l^i25b9dzp1v85tvz!9i*@zltt
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
-
+CSRF_TRUSTED_ORIGINS = [
+    'https://3664-51-15-79-175.ngrok-free.app',
+]
 # Application definition
 
 INSTALLED_APPS = [
@@ -163,6 +165,11 @@ if not os.path.exists(MEDIA_ROOT):
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Authentication URLs
+LOGIN_URL = '/auth/login/'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
 
 # Email Configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

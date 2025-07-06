@@ -1,0 +1,110 @@
+body {
+    font-family: 'Poppins', Arial, sans-serif;
+    background: linear-gradient(135deg, #e3f0ff 0%, #f8fbff 100%);
+    min-height: 100vh;
+}
+
+h1 {
+    font-weight: 600;
+    color: #2563eb;
+    letter-spacing: 1px;
+}
+
+/* .container {
+    background: #f0f6ff;
+    border-radius: 1.2rem;
+    box-shadow: 0 4px 24px 0 rgba(37, 99, 235, 0.08);
+    padding: 2rem 1rem;
+} */
+
+.table {
+    background: #f0f6ff !important;
+    /* Match container background */
+    border-radius: 1rem;
+    overflow: hidden;
+}
+
+.table thead {
+    background: #e3f0ff;
+}
+
+.table th,
+.table td {
+    vertical-align: middle;
+    padding: 1.25rem 2rem;
+    /* Increased padding */
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #b6d0fa;
+}
+
+.icon-btn {
+    border: none;
+    background: #e3f0ff;
+    font-size: 1.3em;
+    cursor: pointer;
+    border-radius: 0.5rem;
+    width: 44px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 8px 0 rgba(37, 99, 235, 0.07);
+}
+
+.icon-btn.approve {
+    color: #28a745;
+}
+
+.icon-btn.reject {
+    color: #dc3545;
+}
+
+.icon-btn:active,
+.icon-btn:focus {
+    background: #d0e6ff;
+    outline: none;
+}
+
+.form-select {
+    background: #f0f6ff;
+    border: 1px solid #b6d0fa;
+    font-size: 0.95rem;
+    border-radius: 5px;
+    ;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem 0.2rem;
+    }
+
+    .table th,
+    .table td {
+        font-size: 0.95rem;
+        padding: 0.5rem;
+    }
+
+    h1 {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .table-responsive {
+        border-radius: 1rem;
+        box-shadow: 0 2px 8px 0 rgba(37, 99, 235, 0.07);
+    }
+
+    .table th,
+    .table td {
+        font-size: 0.9rem;
+        padding: 0.4rem;
+    }
+}

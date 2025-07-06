@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Degree Admin Design Demo</title>
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'executives/css/degree_management.css' %}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css?family=Poppins:400,500,600,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+<body>
+  <script>
+      all_courses = '{{all_courses|escapejs}}';
+      all_courses = all_courses.replaceAll("'", '"');
+      window.ALL_COURSES = JSON.parse(all_courses);
+      console.log(window.ALL_COURSES);
+
+      all_faculties = '{{all_faculties|escapejs}}';
+      all_faculties = all_faculties.replaceAll("'", '"');
+      window.ALL_FACULTIES = JSON.parse(all_faculties);
+      console.log(window.ALL_FACULTIES);
+
+      all_degrees = '{{all_degrees|escapejs}}';
+      all_degrees = all_degrees.replaceAll("'", '"');
+      window.ALL_DEGREES = JSON.parse(all_degrees);
+  </script>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <button class="nav-hamburger" id="sidebarToggle" aria-label="Toggle sidebar">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+    <img src="./img/university-logo.png" alt="Logo" class="nav-logo">
+    <span class="nav-title">University of Computer Studies</span>
+    <span class="nav-bell"><i class="fa-regular fa-bell"></i></span>
+  </nav>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebarMenu">
+    <div class="sidebar-header">
+      <h2>Menu</h2>
+    </div>
+    <ul class="sidebar-list">
+      <li><a href="#"><i class="fa-solid fa-building-columns"></i> University Information</a></li>
+      <li><a href="#"><i class="fa-solid fa-book"></i> Courses & Syllabi</a></li>
+      <li><a href="#"><i class="fa-solid fa-chalkboard-user"></i> Instructor Management</a></li>
+      <li><a href="#"><i class="fa-solid fa-users"></i> Student Management</a></li>
+      <li><a href="#"><i class="fa-solid fa-gear"></i> Setting</a></li>
+      <li><a href="#"><i class="fa-solid fa-right-from-bracket"></i> Log Out</a></li>
+    </ul>
+  </aside>
+
+  <!-- Main content -->
+  <div class="main-content" id="mainContent">
+    <div class="admin-header">
+      <div class="search-box">
+        <input type="text" id="degreeSearchInput" placeholder="Find by name or code..." />
+        <button id="degreeSearchBtn" aria-label="Find">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+      </div>
+      <button class="add-btn" id="showAddModalBtn">+ Add</button>
+      
+    </div>
+    <div id="degreeGrid" class="degree-grid"></div>
+  </div>
+
+  <script src="{% static 'executives/javascripts/degree_management.js' %}"></script>
+</body>
+</html>

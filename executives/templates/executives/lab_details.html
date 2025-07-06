@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Lab Details Page</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'executives/css/lab_details.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+</head>
+
+<body>
+    <script>
+        window.editor = true;
+        window.allProjectLeaders = {{all_project_leaders | safe}};
+        window.allProjectMembers = {{all_project_members | safe}};
+        window.allLabHeads = {{all_lab_heads | safe}};
+        window.currentLabKey = '{{lab_key | safe}}';
+    </script>
+    <section class="hero">
+        <div class="toggle-group">
+            <button class="toggle-btn active" id="labBtn" onclick="showSection('lab')">Lab Details</button>
+            <button class="toggle-btn" id="projectsBtn" onclick="showSection('projects')">Projects</button>
+        </div>
+        <div class="hero-content" id="heroContent">
+            <div id="labSection">
+                <h1 class="editable-group">
+                    {{lab_data.lab_name | default:"Anonymous"}}
+                    <span class="edit-icon" title="Edit">&#9998;</span>
+                </h1>
+                <div class="lab-location editable-group">
+                    <span class="lab-location-icon"></span> {{lab_data.location | default:"Location: Not Known"}}
+                    <span class="edit-icon" title="Edit">&#9998;</span>
+                </div>
+                <div class="lab-head-info">
+                    <div>
+                        <img src="
+                            {% if head_of_lab.profile_picture %}
+                                /media/{{ head_of_lab.profile_picture }}
+                            {% else %}
+                                https://thumbs.dreamstime.com/b/anonymous-user-flat-icon-vector-illustration-long-shadow-anonymous-user-flat-icon-105446565.jpg
+                            {% endif %}
+                        " alt="{{head_of_lab.full_name | default:'Not Known'}}" class="lab-head-photo" loading="lazy">
+                        <span class="edit-icon edit-icon-photo" title="Edit">&#9998;</span>
+                    </div>
+                    <div class="lab-head-details">
+                        <div class="lab-head-name">
+                            Head of Lab
+                        </div>
+                        <div class="lab-head-title editable-group">
+                            {{head_of_lab.full_name | default:'Name: Not Known'}}
+                            <span class="edit-icon" title="Edit">&#9998;</span>
+                        </div>
+                        <div class="lab-head-dept">
+                            {{ lab_head_dept | default:'Department: Not Known'}}
+                        </div>
+                    </div>
+                </div>
+                <div class="lab-description editable-group">
+                    <span id="labDescText" description="{{lab_data.description | default:'No description provided yet'}}">
+                        {{lab_data.description | default:'No description provided yet'}}
+                    </span>
+                    <span id="labDescToggle" class="lab-desc-toggle">
+                        &#x25BC;
+                    </span>
+                    <span class="edit-icon" title="Edit">&#9998;</span>
+                </div>
+                <div class="lab-photos-block">
+                    <div class="lab-photos-title">
+                        Lab Photos
+                        <span class="edit-icon" title="Edit">&#9998;</span>
+                    </div>
+                    <div class="lab-photos">
+                        {% if lab_data.images %}
+                            {% for img in lab_data.images%}
+                            <div class="editable-group">
+                                <img src="/media/{{img}}" alt="Lab Photo 1" class="lab-photo" loading="lazy">
+                                <span class="edit-icon edit-icon-photo" title="Edit">&#9998;</span>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div>
+                                <img src="https://media.istockphoto.com/id/922962354/vector/no-image-available-sign.jpg?s=612x612&w=0&k=20&c=xbGzQiL_UIMFDUZte1U0end0p3E8iwocIOGt_swlywE=" alt="Lab Photo 1" class="lab-photo" loading="lazy">
+                            </div>
+                        {% endif%}
+                        <div class="add-photo-btn-container">
+                            <button class="add-photo-btn" title="Add Photo" onclick="handleAddPhotoClick(event)">
+                                <i class="fa fa-plus"></i>
+                            </button>
+                            <input type="file" accept="image/*" id="addPhotoInput" style="display:none" onchange="handlePhotoInputChange(event)">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="projectsSection" style="display:none;">
+                <h1>Projects</h1>
+                {% for key, project in projects.items %}
+                <div class="project-card">
+                    <div class="project-header">
+                        <div class="project-title editable-group">
+                            {{project.title}}
+                            <span class="edit-icon" title="Edit">&#9998;</span>
+                        </div>
+                        <div class="project-tags editable-group">
+                            {% for tag_key, tag in project.tags.items %}
+                                <span class="project-tag">{{tag}}</span>
+                            {% endfor %}
+                            <span class="edit-icon project-tags-edit" title="Edit">&#9998;</span>
+                        </div>
+                    </div>
+                    <div class="project-photo-block">
+                        {% if project.project_photo %}
+                        <img src="/media/{{project.project_photo}}" alt="Project Photo" class="project-photo" loading="lazy">
+                        {% else %}
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg" alt="Project Photo" class="project-photo" loading="lazy">
+                        {% endif %}
+                    </div>
+                    <div class="project-desc-block">
+                        <span class="project-desc-text editable-group" id="projectDescText1" data-full="{{project.description}}">{{project.description}}
+                            <span class="edit-icon" title="Edit">&#9998;</span>
+                        </span>
+                        <span class="project-desc-toggle" data-target="1">&#x25BC;</span>
+                    </div>
+                    <div class="project-leader-block">
+                        <img src="media/{{project.project_lead.profile_picture}}" alt="{{project.project_lead.name}}" class="project-leader-photo">
+                        <span class="project-leader-name editable-group">{{project.project_lead.name | default:'Add Project Leader'}}
+                            <span class="edit-icon" title="Edit">&#9998;</span>
+                        </span>
+                    </div>
+                    <div class="project-members-block">
+                        <div class="project-members-title">Members:
+                            <span class="edit-icon" title="Edit">&#9998;</span>
+                        </div>
+                        <div class="project-members-list editable-group">
+                            {% for member in project.members %}
+                            <div class="project-member">
+                                <img src="member.profile_picture" alt="Priya Singh" class="project-member-photo">
+                                <span class="project-member-name">{{member.name}}</span>
+                                <span class="fa fa-trash"></span>
+                            </div>
+                            {% endfor %}
+                            <div>
+                                Add new member <span class="fa fa-plus" style="margin-top: 15px;"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="project-links-block">
+                        <span class="editable-group">
+                            <a href="{{project.project_link}}" class="project-link" target="_blank"><i class="fa fa-github"></i> GitHub</a>
+                            <span class="edit-icon" title="Edit">&#9998;</span>
+                        </span>
+                        <span class="editable-group">
+                            <a href="{{project.project_demo}}" class="project-link" target="_blank"><i class="fa fa-external-link"></i> Live Demo</a>
+                            <span class="edit-icon" title="Edit">&#9998;</span>
+                        </span>
+                        <span class="editable-group">
+                            <a href="{{project.attachment | default:'project1_attachment.pdf'}}" class="project-link project-attachment-link" target="_blank"><i class="fa fa-file-pdf-o"></i> Attachment</a>
+                            <span class="edit-icon" title="Edit">&#9998;</span>
+                        </span>
+                    </div>
+                </div>
+                {% endfor %}
+                <!-- Add New Project Button -->
+        <div class="add-project-btn-container" style="text-align:center; margin: 40px 0;">
+            <span class="fa fa-plus add-project-btn" title="Add New Project" style="font-size: 48px; cursor: pointer; color: #888;" id="addProjectBtn"></span>
+            <span style="font-size: 48px; color: #888;">Add New Project</span>
+        </div>
+            </div>
+        </div>
+        
+    </section>
+    <script src="{% static 'executives/javascripts/lab_details.js' %}"></script>
+    <script>
+        function handleAddPhotoClick(e) {
+            e.preventDefault();
+            document.getElementById('addPhotoInput').click();
+        }
+    </script>
+</body>
+
+</html>

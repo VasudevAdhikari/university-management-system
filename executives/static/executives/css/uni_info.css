@@ -1,0 +1,562 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins&display=swap');
+
+* {
+    font-family: "Poppins", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    padding: 0;
+    margin: 0;
+    border-radius: none;
+    box-sizing: border-box;
+    list-style: none;
+}
+
+:root {
+    --sidebar-color: #546bd4;
+
+
+}
+
+body {
+    height: 100vh;
+    width: 100%;
+}
+
+header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 70px;
+    background-color: #e6e65e;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    z-index: 1000;
+
+
+}
+
+.menu-icon {
+    background-color: #d3ddcf;
+    border-radius: 7px;
+    padding: 4px 7px;
+    margin-right: 5px;
+    font-size: 22px;
+    cursor: pointer;
+
+}
+
+.nav-left {
+    display: flex;
+    align-items: center;
+}
+
+.uni-logo {
+    width: 54px;
+    height: 50px;
+    border-radius: 7px;
+    padding: 4px;
+    margin-right: 10px;
+}
+
+.uni-name {
+
+    font-size: 18px;
+    color: rgb(16, 15, 15);
+    font-weight: 600;
+}
+
+.noti {
+    font-size: 22px;
+    cursor: pointer;
+}
+
+/* header section */
+
+/* sidebar Menu */
+.sidebar {
+    position: fixed;
+    top: 70px;
+    left: 0;
+    width: 350px;
+    height: 100vh;
+    background-color: var(--sidebar-color);
+    overflow-y: auto;
+    transform: translateX(0);
+    transition: transform 0.3s ease-in-out;
+
+}
+
+.menu-list {
+    background-color: #fff;
+    margin: 0 18px;
+    margin-top: 20px;
+    width: 300px;
+    border-radius: 3px;
+}
+
+.menu ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 5px;
+    padding-top: 5px;
+
+}
+
+.menu li .icon {
+    min-width: 60px;
+    font-size: 17px;
+
+}
+
+.menu ul li .sidebar-text {
+    color: black;
+
+}
+
+.menu ul li {
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #ddd;
+}
+
+.menu ul li a {
+    padding: 17px 15px;
+    text-decoration: none;
+    margin: 2px;
+    width: 100%;
+    border-radius: 6px;
+}
+
+.menu ul li a i {
+    margin-right: -8px;
+}
+
+.log-out ul {
+    margin-top: 25px;
+}
+
+.menu ul li a:hover,
+.menu ul li a:active {
+    background-color: #9aa9d6;
+}
+
+
+/* sidebar Menu */
+
+/* university Information  */
+.container {
+    border: 1px solid rgb(191, 155, 155);
+    box-shadow: 0 2px 4px rgb(228, 188, 195), 0 4px 8px rgb(80, 80, 126);
+    margin-top: 90px;
+    padding-left: 20px;
+    margin-left: 390px;
+    width: 1000px;
+    max-width: 100%;
+    background: #fff;
+    /* Add horizontal padding for small screens */
+    padding-right: 20px;
+    box-sizing: border-box;
+}
+
+.info-title {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.university-information {
+    padding: 9px 250px;
+}
+
+.uni-logo1 {
+    border: 1px solid rgb(193, 201, 238);
+    height: 80px;
+    width: 100px;
+}
+
+.info-description {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    /* Limit to 3 lines */
+    -webkit-box-orient: vertical;
+    line-clamp: 3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.info-description a {
+    color: #007bff;
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 15px;
+    margin-left: 4px;
+}
+
+.info-line {
+    display: flex;
+}
+
+/* university Information  */
+
+/* university photos */
+.university-photos {
+    padding: 9px 250px;
+    margin-left: 5rem;
+}
+
+.card-img-top {
+    height: 200px;
+    object-fit: cover;
+}
+
+/* university photos */
+
+/* University Certificate Start */
+.certificate-title {
+    font-size: 17px;
+    padding: 2px;
+}
+
+.certificate-preview {
+    height: 200px;
+    width: 100%;
+    object-fit: cover;
+
+    border: 1px solid #ddd;
+}
+
+.iframe {
+    overflow: hidden;
+    scrollbar-width: none;
+}
+
+.section-border {
+
+    padding: 20px;
+    border-radius: 10px;
+    position: relative;
+}
+
+.upload-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
+.certificate-desc,
+.certificate-title {
+    font-size: 15px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    max-width: 100%;
+}
+
+.certificate-card {
+    min-height: 280px;
+
+}
+
+.certificate-buttons {
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.certi-title {
+    display: flex;
+    justify-content: center;
+}
+
+/* University Certificate End */
+
+/* University Lab start */
+.lab-section-title {
+    display: flex;
+    justify-content: center;
+}
+
+.lab-card .card-img-top {
+    height: 220px;
+    object-fit: cover;
+    border-radius: 6px 6px 0 0;
+}
+
+.lab-card .card-title {
+    font-size: 16px;
+    font-weight: 400;
+}
+
+.upload-btn {
+    z-index: 2;
+}
+
+
+/* Responsive Styles */
+@media (max-width: 1200px) {
+    .container {
+        width: 90vw;
+        margin-left: 20px;
+        margin-right: 20px;
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+}
+
+@media (max-width: 992px) {
+    .container {
+        width: 98vw;
+        margin-left: 0;
+        margin-right: 0;
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+    .sidebar {
+        width: 250px;
+    }
+    .menu-list {
+        width: 90%;
+        margin: 0 auto;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        width: 100vw !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        padding: 10px !important;
+        box-sizing: border-box;
+    }
+
+    .sidebar {
+        width: 80vw;
+        min-width: 200px;
+        max-width: 300px;
+        transform: translateX(-100%);
+        z-index: 1000;
+    }
+
+    .sidebar.active {
+        transform: translateX(0);
+    }
+
+    .overlay.active {
+        display: block;
+    }
+
+    .menu-icon {
+        display: block;
+    }
+
+    .university-information,
+    .university-photos {
+        padding: 10px !important;
+        font-size: 18px;
+        text-align: center;
+    }
+
+    .info-title {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+    }
+
+    .info-line {
+        flex-direction: column;
+    }
+
+    .uni-logo1 {
+        margin: auto;
+        display: block;
+    }
+
+    .info-description {
+        -webkit-line-clamp: unset;
+        line-clamp: unset;
+        display: block;
+    }
+
+    .row {
+        flex-direction: column;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+
+    .col-sm-6,
+    .col-md-4,
+    .col-8 {
+        width: 100% !important;
+        max-width: 100% !important;
+        flex: 0 0 100% !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
+    .card-img-top {
+        height: auto;
+        max-width: 100%;
+        object-fit: cover;
+    }
+
+    .upload-btn {
+        position: static !important;
+        margin-top: 10px;
+        width: 100%;
+        display: block;
+    }
+
+    .section-border {
+        padding: 10px;
+    }
+
+    .lab-section-title,
+    .certi-title {
+        font-size: 1.1rem;
+        padding: 0.5rem 0;
+    }
+}
+
+/* Extra small devices */
+@media (max-width: 480px) {
+    .container {
+        padding: 5px !important;
+    }
+    .sidebar {
+        width: 95vw;
+        min-width: 140px;
+        max-width: 100vw;
+    }
+    .menu-list {
+        width: 98%;
+        margin: 0 auto;
+    }
+    .info-title {
+        font-size: 1rem;
+    }
+    .university-information,
+    .university-photos {
+        font-size: 1rem;
+        padding: 5px !important;
+    }
+    .lab-section-title,
+    .certi-title {
+        font-size: 1rem;
+    }
+}
+
+/* file input button design */
+.file-upload-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+
+.file-upload-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.file-upload-label:hover {
+    background-color: #146c43 !important;
+}
+
+.file-upload-name {
+    font-size: 14px;
+    color: #555;
+}
+
+.visually-hidden {
+    display: none;
+}
+
+
+/*Sidebar hidden on small screens */
+
+/* Sidebar styles */
+.sidebar {
+    position: fixed;
+    top: 70px;
+    left: 0;
+    width: 350px;
+    height: calc(100vh - 70px);
+    background-color: var(--sidebar-color);
+    overflow-y: auto;
+    transform: translateX(0);
+    transition: transform 0.3s ease-in-out;
+    z-index: 1000;
+}
+
+/* Overlay styles */
+.overlay {
+    display: none;
+    position: fixed;
+    top: 70px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    transition: opacity 0.3s ease;
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 280px;
+        transform: translateX(-100%);
+    }
+
+    .sidebar.active {
+        transform: translateX(0);
+    }
+
+    .overlay.active {
+        display: block;
+    }
+
+
+    .container {
+        transition: margin-left 0.3s ease;
+    }
+
+    .sidebar.active~.container {
+        margin-left: 280px;
+    }
+}
+
+/* Add/override styles for university info logo preview in modal */
+.uni-info-logo-preview-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.uni-info-logo-preview-img {
+    max-width: 80px;
+    max-height: 80px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: #f8f8f8;
+    object-fit: contain;
+}
+
+.uni-info-logo-filename {
+    font-size: 14px;
+    color: #444;
+    word-break: break-all;
+    background: #f3f3f3;
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid #e0e0e0;
+}

@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Management</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(120deg, #e6eeff 0%, #f1f5fa 100%);
+            color: #1e293b;
+            margin: 0;
+            padding: 0;
+            font-size: 1.13rem; /* slightly larger */
+        }
+        .title-main {
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: #2563eb;
+            text-align: center;
+            margin: 2.7rem 0 1.7rem 0;
+            letter-spacing: 1px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.2rem 2rem 1.2rem;
+        }
+        .faculty-actions-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.7rem;
+            gap: 1.2rem;
+            flex-wrap: wrap;
+        }
+        .search-box {
+            position: relative;
+            width: 180px;
+            min-width: 0;
+            flex-shrink: 1;
+        }
+        .search-box input {
+            width: 100%;
+            padding: 11px 36px 11px 38px;
+            border: 1.5px solid #2563eb;
+            border-radius: 2rem;
+            font-size: 1.09rem;
+            background: #f7faff;
+            color: #2563eb;
+            transition: border 0.2s;
+            outline: none;
+        }
+        .search-box input:focus {
+            border-color: #1e40af;
+            background: #e6eeff;
+        }
+        .search-box .fa-search {
+            position: absolute;
+            left: 13px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #2563eb;
+            font-size: 1.18rem;
+            opacity: 0.8;
+        }
+        .add-faculty-btn {
+            background: linear-gradient(90deg, #2563eb 60%, #4eafff 100%);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 54px;
+            height: 54px;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.09);
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+        }
+        .add-faculty-btn:hover,
+        .add-faculty-btn:focus {
+            background: linear-gradient(90deg, #1e40af 60%, #2563eb 100%);
+            color: #fff;
+            box-shadow: 0 4px 16px rgba(37, 99, 235, 0.13);
+        }
+        .faculty-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2.2rem 2.2rem;
+        }
+        @media (max-width: 800px) {
+            .faculty-list {
+                grid-template-columns: 1fr;
+            }
+            .container {
+                padding: 0 0.5rem 2rem 0.5rem;
+            }
+            .search-box {
+                width: 100%;
+                margin-top: 1rem;
+            }
+        }
+        .faculty-card {
+            background: #fff;
+            border-radius: 1.3rem;
+            box-shadow: 0 2px 12px rgba(37,99,235,0.07);
+            padding: 2.2rem 2.2rem 1.6rem 2.2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.1rem;
+            position: relative;
+            transition: box-shadow 0.2s, transform 0.2s;
+            min-width: 0;
+            font-size: 1.13rem;
+        }
+        .faculty-card:hover {
+            box-shadow: 0 8px 32px rgba(37,99,235,0.13);
+            transform: translateY(-4px) scale(1.01);
+        }
+        .faculty-card .faculty-actions {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            display: flex;
+            gap: 0.7rem;
+            opacity: 0;
+            transition: opacity 0.18s;
+            z-index: 2;
+        }
+        .faculty-card:hover .faculty-actions {
+            opacity: 1;
+        }
+        .faculty-action-icon {
+            background: #e6eeff;
+            color: #2563eb;
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+            border: none;
+            outline: none;
+        }
+        .faculty-action-icon:hover {
+            background: #2563eb;
+            color: #fff;
+        }
+        .faculty-header-row {
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+        }
+        .faculty-image {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #2563eb;
+            background: #f7faff;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.08);
+            flex-shrink: 0;
+        }
+        .faculty-main-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+            min-width: 0;
+        }
+        .faculty-name {
+            font-size: 1.45rem;
+            font-weight: 700;
+            color: #2563eb;
+            margin-bottom: 0.1rem;
+            letter-spacing: 0.2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .faculty-head {
+            font-size: 1.12rem;
+            color: #1e40af;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .faculty-head .fa-user-tie {
+            color: #4eafff;
+            font-size: 1.18rem;
+        }
+        .faculty-contact-row {
+            display: flex;
+            gap: 1.2rem;
+            flex-wrap: wrap;
+            margin-top: 0.2rem;
+        }
+        .faculty-contact {
+            font-size: 1.08rem;
+            color: #334155;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            opacity: 0.95;
+        }
+        .faculty-contact .fa-envelope,
+        .faculty-contact .fa-phone,
+        .faculty-contact .fa-location-dot {
+            color: #2563eb;
+            font-size: 1.13rem;
+        }
+        .faculty-description {
+            font-size: 1.13rem;
+            color: #334155;
+            background: #f7faff;
+            border-radius: 0.8rem;
+            padding: 1.2rem 1.3rem;
+            line-height: 1.7;
+            min-height: 70px;
+            max-height: 140px;
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 0.2rem;
+            font-family: 'Poppins', sans-serif;
+            transition: max-height 0.2s;
+        }
+        .faculty-description.description-full {
+            max-height: 600px;
+            overflow: auto;
+        }
+        .read-more-btn {
+            background: none;
+            color: #2563eb;
+            border: none;
+            font-size: 1.13rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 0.2rem;
+            margin-left: 0;
+            padding: 0;
+            transition: color 0.2s;
+        }
+        .read-more-btn:hover {
+            color: #1e40af;
+            text-decoration: underline;
+        }
+        /* Edit Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(30, 41, 59, 0.18);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background: #fff;
+            border-radius: 1.2rem;
+            box-shadow: 0 8px 32px rgba(37, 99, 235, 0.13);
+            padding: 2.7rem 2.7rem 1.7rem 2.7rem;
+            min-width: 340px;
+            max-width: 700px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 1.2rem;
+            position: relative;
+        }
+        .modal-content h3 {
+            font-size: 1.55rem;
+            font-weight: 600;
+            color: #2563eb;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+        .modal-content .profile-input {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.7rem;
+        }
+        .modal-content .profile-input .icon {
+            font-size: 1.7rem;
+            color: #2563eb;
+            margin-bottom: 0.2rem;
+        }
+        .modal-content .profile-preview {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 0.2rem;
+            border: 2px dashed #2563eb;
+            background: #f7faff;
+        }
+        .modal-content input, .modal-content select, .modal-content textarea {
+            width: 100%;
+            padding: 13px 16px;
+            margin: 7px 0;
+            border: 1.5px solid #2563eb;
+            border-radius: 7px;
+            font-size: 1.13rem;
+            background: #f7faff;
+            color: #2563eb;
+            transition: border 0.2s;
+            outline: none;
+            font-family: 'Poppins', sans-serif;
+        }
+        .modal-content input[type="file"] {
+            padding: 0;
+            background: #f7faff;
+            border: none;
+            font-size: 1.13rem;
+        }
+        .modal-content input[type="file"]::-webkit-file-upload-button,
+        .modal-content input[type="file"]::file-selector-button {
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 18px;
+            font-size: 1.13rem;
+            font-family: 'Poppins', sans-serif;
+            cursor: pointer;
+            margin-right: 10px;
+            transition: background 0.2s;
+        }
+        .modal-content input[type="file"]:hover::-webkit-file-upload-button,
+        .modal-content input[type="file"]:hover::file-selector-button {
+            background: #1e40af;
+        }
+        .modal-content textarea {
+            min-height: 110px;
+            max-height: 350px;
+            resize: vertical;
+            font-family: 'Poppins', sans-serif;
+        }
+        .modal-content textarea:focus {
+            border-color: #1e40af;
+            background: #e6eeff;
+        }
+        .modal-content .button-group {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+        .modal-content .button-group button {
+            background: linear-gradient(90deg, #2563eb 60%, #4eafff 100%);
+            color: #fff;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 1.13rem;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        .modal-content .button-group button.cancel-btn {
+            background: #f7faff;
+            color: #2563eb;
+            border: 1.5px solid #2563eb;
+        }
+        .modal-content .button-group button.cancel-btn:hover {
+            background: #e6eeff;
+            color: #1e40af;
+        }
+        .modal-content .button-group button:hover {
+            background: linear-gradient(90deg, #1e40af 60%, #2563eb 100%);
+        }
+        /* Head of Faculty Select Popup */
+        .head-popup-backdrop {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(30, 41, 59, 0.18);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .head-popup {
+            background: #fff;
+            border-radius: 1.2rem;
+            box-shadow: 0 8px 32px rgba(37, 99, 235, 0.13);
+            padding: 2.2rem 2rem 1.5rem 2rem;
+            min-width: 320px;
+            max-width: 800px;
+            width: 100%;
+            max-height: 70vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 1.2rem;
+            position: relative;
+        }
+        .head-popup-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #2563eb;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+        .head-popup-search {
+            width: 100%;
+            padding: 10px 16px;
+            border: 1.5px solid #2563eb;
+            border-radius: 7px;
+            font-size: 1.13rem;
+            background: #f7faff;
+            color: #2563eb;
+            margin-bottom: 0.7rem;
+            font-family: 'Poppins', sans-serif;
+        }
+        .head-popup-list {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.1rem 1.1rem;
+        }
+        @media (max-width: 900px) {
+            .head-popup-list {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 600px) {
+            .head-popup-list {
+                grid-template-columns: 1fr;
+            }
+        }
+        .head-popup-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.9rem 1.2rem;
+            border-radius: 0.7rem;
+            background: #f7faff;
+            cursor: pointer;
+            transition: background 0.18s, box-shadow 0.18s;
+            border: 2px solid transparent;
+        }
+        .head-popup-item:hover,
+        .head-popup-item.selected {
+            background: #e6eeff;
+            border-color: #2563eb;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.09);
+        }
+        .head-popup-img {
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #2563eb;
+            background: #fff;
+        }
+        .head-popup-name {
+            font-size: 1.13rem;
+            color: #222;
+            font-weight: 500;
+        }
+        .head-popup-nores {
+            text-align: center;
+            color: #64748b;
+            padding: 1.2rem 0;
+            font-size: 1.13rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="title-main">Faculty Management</div>
+    <div class="container">
+        <div class="faculty-actions-row">
+            <button class="add-faculty-btn" onclick="openAddModal()" title="Add New Faculty"><i class="fa fa-plus"></i></button>
+            <div class="search-box">
+                <i class="fa fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Search faculties..." onkeyup="searchFaculties()">
+            </div>
+        </div>
+        <div class="faculty-list" id="facultyList">
+            <!-- Faculty Cards -->
+            {% for faculty in faculties %}
+            <div class="faculty-card" data-name="{{faculty.name}}">
+                <div class="faculty-actions">
+                    <button class="faculty-action-icon" onclick="openEditModal('{{faculty.name|escapejs}}', '{{faculty.email|escapejs}}', '{{faculty.phone|escapejs}}', '{{faculty.location|escapejs}}', '{{faculty.description|escapejs}}', '{{faculty.head|escapejs}}', `{{faculty.photo|escapejs}}`, '{{faculty.id|escapejs}}')"><i class="fa fa-pen"></i></button>
+                    <button class="faculty-action-icon" onclick="confirmDelete('{{faculty.name}}', '{{faculty.id}}')"><i class="fa fa-trash"></i></button>
+                </div>
+                <div class="faculty-header-row">
+                    <img src="{{faculty.photo}}" alt="{{faculty.name}}" class="faculty-image">
+                    <div class="faculty-main-info">
+                        <div class="faculty-name">{{faculty.name}}</div>
+                        <div class="faculty-head"><i class="fa fa-user-tie"></i> Head: <span>{{faculty.head}}</span></div>
+                        <div class="faculty-contact-row">
+                            <div class="faculty-contact"><i class="fa fa-envelope"></i> {{faculty.email}}</div>
+                            <div class="faculty-contact"><i class="fa fa-phone"></i> {{faculty.phone}}</div>
+                            <div class="faculty-contact"><i class="fa fa-location-dot"></i>{{faculty.location}}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="faculty-description description-truncate">
+                    {{faculty.description}}
+                </div>
+                <button class="read-more-btn" onclick="toggleDescription(this)">Read more</button>
+            </div>
+            {% endfor %}
+            <!-- Add more faculty cards as needed -->
+        </div>
+    </div>
+
+    <!-- Edit Faculty Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <h3>Edit Faculty</h3>
+            <div class="profile-input">
+                <span class="icon"><i class="fa fa-user-circle"></i></span>
+                <input type="file" id="facultyImage" accept="image/*" onchange="previewImage(event, 'facultyImagePreview')">
+                <img id="facultyImagePreview" class="profile-preview" src="https://via.placeholder.com/240x180?text=Photo" alt="Faculty Image">
+            </div>
+            <input type="text" id="facultyName" placeholder="Faculty Name">
+            <input type="email" id="facultyEmail" placeholder="Email">
+            <input type="text" id="facultyPhone" placeholder="Phone">
+            <input type="text" id="facultyLocation" placeholder="Location">
+            <textarea id="facultyDescription" placeholder="Description"></textarea>
+            <div style="display:flex;align-items:center;gap:0.7rem;">
+                <input type="text" id="headOfFacultyDisplay" placeholder="Head of Faculty" readonly style="flex:1;cursor:pointer;background:#f7faff;" onclick="openHeadPopup('edit')">
+                <button type="button" class="faculty-action-icon" style="background:#e6eeff;" onclick="openHeadPopup('edit')" title="Select Head"><i class="fa fa-user-tie"></i></button>
+            </div>
+            <div class="button-group">
+                <button class="cancel-btn" onclick="closeModal('editModal')">Cancel</button>
+                <button onclick="saveFaculty()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Faculty Modal -->
+    <form id="facultyForm" action="" method="POST">
+    {% csrf_token %}
+    <div id="addModal" class="modal">
+        <div class="modal-content">
+            <h3>Add New Faculty</h3>
+            <div class="profile-input">
+                <span class="icon"><i class="fa fa-user-circle"></i></span>
+                <input type="file" id="newFacultyImage" accept="image/*" onchange="previewImage(event, 'newFacultyImagePreview')">
+                <img id="newFacultyImagePreview" class="profile-preview" src="https://via.placeholder.com/240x180?text=Photo" alt="New Faculty Image">
+            </div>
+            <input type="text" id="newFacultyName" placeholder="Faculty Name">
+            <input type="email" id="newFacultyEmail" placeholder="Email">
+            <input type="text" id="newFacultyPhone" placeholder="Phone">
+            <input type="text" id="newFacultyLocation" placeholder="Location">
+            <textarea id="newFacultyDescription" placeholder="Description"></textarea>
+            <div style="display:flex;align-items:center;gap:0.7rem;">
+                <input type="text" id="newHeadOfFacultyDisplay" placeholder="Head of Faculty" readonly style="flex:1;cursor:pointer;background:#f7faff;" onclick="openHeadPopup('add')">
+                <button type="button" class="faculty-action-icon" style="background:#e6eeff;" onclick="openHeadPopup('add')" title="Select Head"><i class="fa fa-user-tie"></i></button>
+            </div>
+            <div class="button-group">
+                <button class="cancel-btn" onclick="closeModal('addModal')">Cancel</button>
+                <button onclick="addFaculty()">Add</button>
+            </div>
+        </div>
+    </div>
+    </form>
+
+    <!-- Head of Faculty Select Popup -->
+    <div id="headPopup" class="head-popup-backdrop" style="display:none;">
+        <div class="head-popup">
+            <div class="head-popup-title">Select Head of Faculty</div>
+            <input type="text" class="head-popup-search" id="headPopupSearch" placeholder="Search users...">
+            <div class="head-popup-list" id="headPopupList">
+                <!-- User list will be rendered here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample users for head of faculty selection
+        // const users = [
+        //     { name: "John Doe", img: "https://mamcollegeofpharmacy.ac.in/images/faculty.jpg" },
+        //     { name: "Jane Smith", img: "https://mamcollegeofpharmacy.ac.in/images/faculty.jpg" },
+        //     { name: "Priya Singh", img: "https://randomuser.me/api/portraits/women/44.jpg" },
+        //     { name: "Amit Kumar", img: "https://randomuser.me/api/portraits/men/32.jpg" },
+        //     { name: "Sara Lee", img: "https://randomuser.me/api/portraits/women/68.jpg" },
+        //     { name: "David Brown", img: "https://randomuser.me/api/portraits/men/65.jpg" }
+        // ];
+        let instructors = '{{instructors|escapejs}}';
+        instructors = instructors.replaceAll("'", '"');
+        // alert(instructors);
+        console.log(instructors);
+        instructors = JSON.parse(instructors);
+        let headPopupTarget = null;
+        const  users = instructors;
+
+        function toggleDescription(button) {
+            const desc = button.parentElement.querySelector('.faculty-description');
+            if (desc.classList.contains('description-truncate')) {
+                desc.classList.remove('description-truncate');
+                desc.classList.add('description-full');
+                button.textContent = 'Read less';
+            } else {
+                desc.classList.remove('description-full');
+                desc.classList.add('description-truncate');
+                button.textContent = 'Read more';
+            }
+        }
+
+        function openEditModal(name, email, phone, location, description, head, image, id) {
+            document.getElementById('facultyName').value = name;
+            document.getElementById('facultyEmail').value = email;
+            document.getElementById('facultyPhone').value = phone;
+            document.getElementById('facultyLocation').value = location;
+            document.getElementById('facultyDescription').value = description;
+            document.getElementById('facultyImagePreview').src = image;
+            document.getElementById('headOfFacultyDisplay').value = head;
+            document.getElementById('editModal').style.display = 'flex';
+            headPopupTarget = 'edit';
+            sessionStorage.setItem('editing-faculty', id);
+        }
+
+        function openAddModal() {
+            document.getElementById('newFacultyName').value = '';
+            document.getElementById('newFacultyEmail').value = '';
+            document.getElementById('newFacultyPhone').value = '';
+            document.getElementById('newFacultyLocation').value = '';
+            document.getElementById('newFacultyDescription').value = '';
+            document.getElementById('newFacultyImagePreview').src = 'https://via.placeholder.com/240x180?text=Photo';
+            document.getElementById('newHeadOfFacultyDisplay').value = '';
+            document.getElementById('addModal').style.display = 'flex';
+            headPopupTarget = 'add';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // --- Faculty CRUD AJAX logic ---
+        // --- Add Faculty ---
+        function addFaculty() {
+            if (confirm('Are you sure to add this')) {
+                                const name = document.getElementById('newFacultyName').value.trim();
+                const email = document.getElementById('newFacultyEmail').value.trim();
+                const phone = document.getElementById('newFacultyPhone').value.trim();
+                const location = document.getElementById('newFacultyLocation').value.trim();
+                const description = document.getElementById('newFacultyDescription').value.trim();
+                // Get head id instead of name
+                const headName = document.getElementById('newHeadOfFacultyDisplay').value.trim();
+                let headId = "";
+                if (headName) {
+                    const userObj = (window.instructors || []).find(u => u.name === headName);
+                    headId = userObj ? userObj.id : "";
+                }
+                const photoInput = document.getElementById('newFacultyImage');
+                const photo = photoInput.files[0];
+
+                const formData = new FormData();
+                formData.append('name', name);
+                formData.append('email', email);
+                formData.append('phone', phone);
+                formData.append('location', location);
+                formData.append('description', description);
+                formData.append('head', sessionStorage.getItem('fac_head'));
+                if (photo) formData.append('photo', photo);
+
+                fetch('/executives/api/faculty/add/', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        // sessionStorage.removeItem('fac_head');
+                        location.reload();
+                    } else {
+                        // sessionStorage.removeItem('fac_head');
+                        alert('Failed to add faculty: ' + (data.error || 'Unknown error'));
+                    }
+                });
+        
+            }
+            location.reload();
+        }
+
+        // --- Edit Faculty ---
+        function openEditModalData(id) {
+            fetch(`/executives/api/faculty/list/`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        const faculty = data.faculties.find(f => f.id === id);
+                        if (faculty) {
+                            editingFacultyId = id;
+                            document.getElementById('facultyName').value = faculty.name;
+                            document.getElementById('facultyEmail').value = faculty.email;
+                            document.getElementById('facultyPhone').value = faculty.phone;
+                            document.getElementById('facultyLocation').value = faculty.location;
+                            document.getElementById('facultyDescription').value = faculty.description;
+                            document.getElementById('facultyImagePreview').src = faculty.photo || 'https://via.placeholder.com/240x180?text=Photo';
+                            document.getElementById('headOfFacultyDisplay').value = faculty.head;
+                            document.getElementById('editModal').style.display = 'flex';
+                        }
+                    }
+                });
+        }
+
+        function saveFaculty() {
+            const name = document.getElementById('facultyName').value.trim();
+            const email = document.getElementById('facultyEmail').value.trim();
+            const phone = document.getElementById('facultyPhone').value.trim();
+            const location = document.getElementById('facultyLocation').value.trim();
+            const description = document.getElementById('facultyDescription').value.trim();
+            // Get head id instead of name
+            const headName = document.getElementById('headOfFacultyDisplay').value.trim();
+            let headId = "";
+            if (headName) {
+                const userObj = (window.instructors || []).find(u => u.name === headName);
+                headId = userObj ? userObj.id : "";
+            }
+            const photoInput = document.getElementById('facultyImage');
+            const photo = photoInput.files[0];
+
+            const formData = new FormData();
+            formData.append('name', name);
+            formData.append('email', email);
+            formData.append('phone', phone);
+            formData.append('location', location);
+            formData.append('description', description);
+            formData.append('head', sessionStorage.getItem('fac_head'));
+            if (photo) formData.append('photo', photo);
+            editingFacultyId=sessionStorage.getItem('editing-faculty');
+            
+
+            fetch(`/executives/api/faculty/edit/${editingFacultyId}/`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    alert('Failed to edit faculty: ' + (data.error || 'Unknown error'));
+                    window.location.reload();
+                }
+            });
+            // sessionStorage.removeItem('editing-faculty');
+            // sessionStorage.removeItem('fac_head');
+            // location.reload();
+        }
+
+        // --- Delete Faculty ---
+        function confirmDelete(name, id) {
+            if (confirm(`Are you sure you want to delete ${name}?`)) {
+                fetch(`/executives/api/faculty/delete/${id}/`, {
+                    method: 'POST'
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Failed to delete faculty: ' + (data.error || 'Unknown error'));
+                    }
+                });
+            }
+        }
+
+        function previewImage(event, previewId) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById(previewId).src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+
+        function searchFaculties() {
+            const input = document.getElementById('searchInput').value.toLowerCase();
+            const facultyCards = document.querySelectorAll('.faculty-card');
+            facultyCards.forEach(card => {
+                const name = card.getAttribute('data-name').toLowerCase();
+                if (name.includes(input)) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Head of Faculty Popup
+        function openHeadPopup(mode) {
+            document.getElementById('headPopup').style.display = 'flex';
+            renderHeadPopupList('');
+            document.getElementById('headPopupSearch').value = '';
+            document.getElementById('headPopupSearch').focus();
+            headPopupTarget = mode;
+        }
+        document.getElementById('headPopupSearch').oninput = function() {
+            renderHeadPopupList(this.value);
+        };
+        function renderHeadPopupList(filter) {
+            const list = document.getElementById('headPopupList');
+            list.innerHTML = '';
+            const filtered = users.filter(u => !filter || u.name.toLowerCase().includes(filter.toLowerCase()));
+            if (!filtered.length) {
+                const nores = document.createElement('div');
+                nores.className = 'head-popup-nores';
+                nores.textContent = 'No users found.';
+                list.appendChild(nores);
+                return;
+            }
+            filtered.forEach(user => {
+                const item = document.createElement('div');
+                item.className = 'head-popup-item';
+                item.innerHTML = `
+                    <img src="${user.img}" alt="${user.name}" class="head-popup-img">
+                    <span class="head-popup-name">${user.name}</span>
+                `;
+                item.onclick = function() {
+                    // alert(user.id);
+                    if (headPopupTarget === 'edit') {
+                        sessionStorage.setItem('fac_head', user.id);
+                        document.getElementById('headOfFacultyDisplay').value = user.name;
+                    } else {
+                        sessionStorage.setItem('fac_head', user.id);
+                        document.getElementById('newHeadOfFacultyDisplay').value = user.name;
+                    }
+                    document.getElementById('headPopup').style.display = 'none';
+                };
+                list.appendChild(item);
+            });
+        }
+        document.getElementById('headPopup').onclick = function(e) {
+            if (e.target === this) this.style.display = 'none';
+        };
+    </script>
+</body>
+</html>

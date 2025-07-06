@@ -1,0 +1,114 @@
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
+from django.core.files.storage import default_storage
+from django.shortcuts import get_object_or_404
+from authorization.models import Faculty, UniversityDetails, Instructor, User
+import json
+from django.shortcuts import render
+
+def faculty_to_dict(faculty):
+    return {
+        "id": faculty.id,
+        "name": faculty.name,
+        "email": faculty.contact_email,
+        "phone": faculty.contact_phone,
+        "location": faculty.location,
+        "description": faculty.description,
+        "head": faculty.head_of_faculty.full_name if faculty.head_of_faculty else None,
+        "photo": faculty.faculty_photo.url if faculty.faculty_photo else "",
+    }
+
+def show_faculty_management(request):
+    uni_info = UniversityDetails.objects.filter(name='university_info').first().details
+    photos = UniversityDetails.objects.filter(name='photos').first().details.keys()
+    fac = Faculty.objects.all().order_by('id')
+    faculties = [faculty_to_dict(f) for f in fac]
+
+    # to fix. List all the user details of instructors
+    # instructors_details = Instructor.objects.all()
+    # instructors = []
+    # for instructor in instructors_details:
+    #     # instructors.append(instructor.u)
+    #     instructors.append({'name': instructor.user.full_name, 'img': instructor.user.profile_picture})
+
+    users = User.objects.all()
+    instructors = []
+    for instructor in users:
+        instructors.append({'name': instructor.full_name, 'img': instructor.profile_picture.url, 'id': instructor.pk})
+    # print(instructors)
+    data = {
+        'photos': photos,
+        'university_name': uni_info.get('name'),
+        'university_profile': uni_info.get('profile'),
+        'faculties': faculties,
+        'instructors': instructors,
+    }
+    # print(data)
+    return render(request, 'executives/faculty_management.html', context=data)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def faculty_add(request):
+    try:
+        if request.content_type.startswith("application/json"):
+            data = json.loads(request.body)
+            photo = None
+        else:
+            data = request.POST
+            photo = request.FILES.get("photo")
+        print(data)
+        print(f'head is {request.COOKIES.get('fac_head')}')
+
+        faculty = Faculty(
+            pk= int(Faculty.objects.all().last().pk) + 1,
+            name=data.get("name", ""),
+            contact_email=data.get("email", ""),
+            contact_phone=data.get("phone", ""),
+            location=data.get("location", ""),
+            description=data.get("description", ""),
+            head_of_faculty= User.objects.get(pk=int(data.get("head"))) if data.get("head") else None
+        )
+        if photo:
+            faculty.faculty_photo = default_storage.save(f"faculty/{photo.name}", photo)
+        faculty.save()
+        return JsonResponse({"success": True, "faculty": faculty_to_dict(faculty)})
+    except Exception as e:
+        print(e)
+        return JsonResponse({"success": False, "error": str(e)})
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def faculty_edit(request, faculty_id):
+    try:
+        faculty = get_object_or_404(Faculty, pk=faculty_id)
+        if request.content_type.startswith("application/json"):
+            data = json.loads(request.body)
+            photo = None
+        else:
+            data = request.POST
+            photo = request.FILES.get("photo")
+        print(data)
+        faculty.name = data.get("name", faculty.name)
+        faculty.contact_email = data.get("email", faculty.contact_email)
+        faculty.contact_phone = data.get("phone", faculty.contact_phone)
+        faculty.location = data.get("location", faculty.location)
+        faculty.description = data.get("description", faculty.description)
+        faculty.head_of_faculty = User.objects.get(pk=int(data.get("head"))) if data.get("head") else faculty.head_of_faculty
+        if photo:
+            faculty.faculty_photo = default_storage.save(f"faculty/{photo.name}", photo)
+        faculty.save()
+        return JsonResponse({"success": True, "faculty": faculty_to_dict(faculty)})
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)})
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def faculty_delete(request, faculty_id):
+    try:
+        faculty = get_object_or_404(Faculty, pk=int(faculty_id))
+        faculty.delete()
+        return JsonResponse({"success": True})
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)})
