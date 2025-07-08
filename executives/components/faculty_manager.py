@@ -1,3 +1,4 @@
+# executives/components/faculty_manager.py
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
@@ -20,8 +21,8 @@ def faculty_to_dict(faculty):
     }
 
 def show_faculty_management(request):
-    uni_info = UniversityDetails.objects.filter(name='university_info').first().details
-    photos = UniversityDetails.objects.filter(name='photos').first().details.keys()
+    uni_info = UniversityDetails.objects.filter(name='university_info').first().details if UniversityDetails.objects.filter(name='university_info').exists() else {}
+    photos = UniversityDetails.objects.filter(name='photos').first().details.keys() if UniversityDetails.objects.filter(name='photos').exists() else []
     fac = Faculty.objects.all().order_by('id')
     faculties = [faculty_to_dict(f) for f in fac]
 
@@ -44,7 +45,6 @@ def show_faculty_management(request):
         'faculties': faculties,
         'instructors': instructors,
     }
-    # print(data)
     return render(request, 'executives/faculty_management.html', context=data)
 
 
