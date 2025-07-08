@@ -1,3 +1,5 @@
+# executives/views.py
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
@@ -97,11 +99,11 @@ def uni_info_edit(request):
 
 
 def show_uni_info(request):
-    university_info = UniversityDetails.objects.filter(name='university_info').first().details
-    partnerships = UniversityDetails.objects.filter(name='partnerships').first()
-    certificates = UniversityDetails.objects.filter(name='certificates').first()
-    photos = UniversityDetails.objects.filter(name='photos').first()
-    labs = UniversityDetails.objects.filter(name='labs').first()
+    university_info = UniversityDetails.objects.filter(name='university_info').first().details if UniversityDetails.objects.filter(name='university_info').exists() else {}
+    partnerships = UniversityDetails.objects.filter(name='partnerships').first() if UniversityDetails.objects.filter(name='partnerships').exists() else None
+    certificates = UniversityDetails.objects.filter(name='certificates').first() if UniversityDetails.objects.filter(name='certificates').exists() else None
+    photos = UniversityDetails.objects.filter(name='photos').first() if UniversityDetails.objects.filter(name='photos').exists() else None
+    labs = UniversityDetails.objects.filter(name='labs').first() if UniversityDetails.objects.filter(name='labs').exists() else None
     data = {
         'university_info': university_info,
         'partnerships': dict(partnerships.details).items() if partnerships else {},
@@ -126,7 +128,7 @@ def show_lab_details(request, lab_name):
     lab_heads = User.objects.all()
     all_lab_heads = get_formatted_lab_members(lab_heads)
 
-    head_of_lab = User.objects.get(pk=int(current_lab.get('head_of_lab')))
+    head_of_lab = User.objects.get(pk=int(current_lab.get('head_of_lab'))) if current_lab.get('head_of_lab') else None
     lab_head_dept = get_head_of_labs_department(head_of_lab)
     projects = current_lab.get('projects')
     
