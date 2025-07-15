@@ -20,9 +20,10 @@ function renderDegrees(degrees) {
       </div>
       <h2>${degree.title}</h2>
       <p>Degree Code: ${degree.code}</p>
-      <p>Duration: ${degree.duration}</p>
+      <p>Duration (Years): ${degree.duration}</p>
       <p>Total Credit: ${degree.credit}</p>
       <p>Total Courses: ${degree.courses}</p>
+      <p>Faculty : ${degree.faculty.name}</p>
       <div class="card-actions">
         <button class="view-btn">View</button>
         <button class="delete-btn">Delete</button>
@@ -35,9 +36,14 @@ function renderDegrees(degrees) {
     // Delete button functionality
     card.querySelector('.delete-btn').onclick = function () {
       showDeleteConfirm(() => {
-        degrees.splice(index, 1);
-        saveDegrees(degrees);
-        renderDegrees(degrees);
+        // Redirect to backend delete URL
+        if (degree.id) {
+          window.location.href = `/executives/degree/delete/${degree.id}`;
+        } else if (degree.code) {
+          window.location.href = `/executives/degree/delete/${degree.code}`;
+        } else {
+          showWarningBox('Cannot delete: degree ID or code missing.');
+        }
       });
     };
     grid.appendChild(card);
@@ -178,11 +184,11 @@ function showDegreeDetailsModal(degree, degreeIndex = null, isAddMode = false) {
     // Faculty selection UI and Degree Description textarea
     let facultyHtml = '';
     if (editing) {
-      facultyHtml = `
+      facultyHtml = `x
         <div style="margin-bottom:16px;">
           <label style="font-weight:600;">Faculty</label><br>
           <button id="chooseFacultyBtn" style="margin-top:6px;background:#1da1ff;color:#fff;border:none;padding:6px 18px;border-radius:8px;cursor:pointer;">
-            ${selectedFaculty ? `<img src="${selectedFaculty.photo}" alt="Faculty Photo" style="width:32px;height:32px;border-radius:50%;vertical-align:middle;margin-right:8px;">${selectedFaculty.name}` : 'Choose Faculty'}
+            ${selectedFaculty ? `<img src="${window.ALL_FACULTIES.find(faculty => faculty.id === selectedFaculty.id).photo}" alt="Faculty Photo" style="width:32px;height:32px;border-radius:50%;vertical-align:middle;margin-right:8px;">${selectedFaculty.name}` : 'Choose Faculty'}
           </button>
         </div>
         <div style="margin-bottom:16px;">
@@ -191,7 +197,7 @@ function showDegreeDetailsModal(degree, degreeIndex = null, isAddMode = false) {
         </div>
       `;
     } else {
-      facultyHtml = `<div style="margin-bottom:16px;"><label style="font-weight:600;">Faculty</label><br>${selectedFaculty ? `<img src="${selectedFaculty.photo}" alt="Faculty Photo" style="width:32px;height:32px;border-radius:50%;vertical-align:middle;margin-right:8px;">${selectedFaculty.name}` : '<span style="color:#888;">Not chosen</span>'}</div>`;
+      facultyHtml = `<div style="margin-bottom:16px;"><label style="font-weight:600;">Faculty</label><br>${selectedFaculty ? `<img src="${window.ALL_FACULTIES.find(faculty => faculty.id === selectedFaculty.id).photo}" alt="Faculty Photo" style="width:32px;height:32px;border-radius:50%;vertical-align:middle;margin-right:8px;">${selectedFaculty.name}` : '<span style="color:#888;">Not chosen</span>'}</div>`;
       facultyHtml += `<div style=\"margin-bottom:16px;\"><label style=\"font-weight:600;\">Degree Description</label><br><div style=\"white-space:pre-wrap;color:#444;\">${tempDegree.description ? tempDegree.description : '<span style=\"color:#888;\">No description</span>'}</div></div>`;
     }
 
@@ -199,7 +205,7 @@ function showDegreeDetailsModal(degree, degreeIndex = null, isAddMode = false) {
     let actionsHtml = '';
     if (editing) {
       actionsHtml = `
-        <button id="saveDegreeBtn" title="Save" class="modal-action-btn"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+        <button id="saveDegreeBtn" title="Save" class="modal-action-btn"><i class="fa-solid fa-floppy-disk"></i> Save</button>:
         <button id="cancelEditBtn" title="Cancel" class="modal-action-btn"><i class="fa-solid fa-xmark"></i> Cancel</button>
       `;
     } else {
@@ -244,7 +250,7 @@ function showDegreeDetailsModal(degree, degreeIndex = null, isAddMode = false) {
               <td>${field("code", tempDegree.code)}</td>
             </tr>
             <tr>
-              <td style="font-weight:600;">Duration</td>
+              <td style="font-weight:600;">Duration (Years)</td>
               <td>${field("duration", tempDegree.duration)}</td>
             </tr>
             <tr>
@@ -314,7 +320,6 @@ function showDegreeDetailsModal(degree, degreeIndex = null, isAddMode = false) {
     if (saveBtn) saveBtn.onclick = () => {
       // Validate all courses: code and title must not be empty
       let invalid = false;
-      let invalidMsg = "";
       if (tempDegree.syllabus && tempDegree.syllabus.length) {
         tempDegree.syllabus.forEach((sem, sIdx) => {
           sem.courses.forEach((course, cIdx) => {
@@ -357,8 +362,9 @@ function showDegreeDetailsModal(degree, degreeIndex = null, isAddMode = false) {
       const imgPreview = modal.querySelector('#degreeImagePreview');
       if (imgPreview && imgPreview.src) tempDegree.image = imgPreview.src;
 
-      // Prepare data for server
+      // Add mode: keep previous logic
       if (isAddMode) {
+        // ...existing code...
         // Compose degreeData for server
         const degreeData = {
           name: tempDegree.title,
@@ -398,8 +404,18 @@ function showDegreeDetailsModal(degree, degreeIndex = null, isAddMode = false) {
           if (data.success) {
             showWarningBox('Degree added successfully!');
             modal.remove();
-            // Optionally reload or update UI
-            renderDegrees(getDegrees());
+            // Fetch updated degrees from server
+            fetch('/executives/api/degree/list/')
+              .then(res => res.json())
+              .then(listData => {
+                if (listData.success && Array.isArray(listData.degrees)) {
+                  window.ALL_DEGREES = listData.degrees;
+                  renderDegrees(window.ALL_DEGREES);
+                } else {
+                  renderDegrees(data.all_degrees);
+                }
+              })
+              .catch(() => renderDegrees(getDegrees()));
           } else {
             showWarningBox('Error: ' + (data.message || 'Unknown error'));
           }
@@ -408,15 +424,100 @@ function showDegreeDetailsModal(degree, degreeIndex = null, isAddMode = false) {
           showWarningBox('Error: ' + (err.message || 'Unknown error'));
         });
       } else {
-        // Edit mode: update localStorage only
-        const degrees = getDegrees();
-        const idx = degrees.findIndex(d => d.title === degree.title && d.code === degree.code);
-        if (idx !== -1) {
-          degrees[idx] = tempDegree;
+        // Edit mode: confirm before saving
+        const degreeId = degree.id || degree.code;
+        if (!degreeId) {
+          showWarningBox('Cannot edit: degree ID or code missing.');
+          return;
         }
-        saveDegrees(degrees);
-        renderDegrees(degrees);
-        modal.remove();
+        // Show confirm modal
+        const confirmModal = document.createElement('div');
+        confirmModal.id = 'confirmEditModal';
+        confirmModal.style.position = 'fixed';
+        confirmModal.style.top = '0';
+        confirmModal.style.left = '0';
+        confirmModal.style.width = '100vw';
+        confirmModal.style.height = '100vh';
+        confirmModal.style.background = 'rgba(0,0,0,0.25)';
+        confirmModal.style.display = 'flex';
+        confirmModal.style.alignItems = 'center';
+        confirmModal.style.justifyContent = 'center';
+        confirmModal.style.zIndex = 6000;
+        confirmModal.innerHTML = `
+          <div style="background:#fff;border-radius:16px;padding:32px 28px;min-width:320px;max-width:90vw;text-align:center;box-shadow:0 8px 32px rgba(44,44,44,0.13),0 2px 8px rgba(0,0,0,0.08);font-family:'Poppins',Arial,sans-serif;">
+            <h2 style='color:#1da1ff;font-size:1.2rem;margin-bottom:18px;'>Confirm Save</h2>
+            <div style='color:#444;font-size:1.08rem;margin-bottom:22px;'>Are you sure you want to save the changes to this degree?</div>
+            <button id='confirmEditSaveBtn' style='background:#1da1ff;color:#fff;border:none;padding:10px 32px;border-radius:10px;font-size:1.08rem;font-weight:600;margin-right:18px;cursor:pointer;'>Save</button>
+            <button id='cancelEditSaveBtn' style='background:#eee;color:#444;border:none;padding:10px 32px;border-radius:10px;font-size:1.08rem;font-weight:600;cursor:pointer;'>Cancel</button>
+          </div>
+        `;
+        document.body.appendChild(confirmModal);
+        document.getElementById('confirmEditSaveBtn').onclick = function() {
+          confirmModal.remove();
+          // Compose degreeData for server
+          const degreeData = {
+            name: tempDegree.title,
+            code: tempDegree.code,
+            faculty: tempDegree.faculty && tempDegree.faculty.id ? tempDegree.faculty.id : null,
+            description: tempDegree.description || '',
+            duration: document.getElementById('edit-duration').value,
+            total_credits: tempDegree.credit,
+            total_courses: tempDegree.courses,
+            total_hours: tempDegree.total_hours,
+            degree_image: tempDegree.image,
+            semesters: (tempDegree.syllabus || []).map((sem, idx) => ({
+              semester_name: `Semester ${sem.semester || idx + 1}`,
+              duration_weeks: sem.total_weeks || 16,
+              syllabus_structure: (sem.courses || []).map(course => ({
+                course_code: course.code,
+                course_name: course.title,
+                course_credits: course.credit,
+                course_hours: course.hours,
+                type: course.type
+              }))
+            }))
+          };
+          // Add CSRF token if available
+          const headers = {
+            'Content-Type': 'application/json'
+          };
+          if (window.getCSRFToken) {
+            headers['X-CSRFToken'] = window.getCSRFToken();
+          }
+          fetch(`/executives/api/degree/edit/${degreeId}/`, {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify(degreeData)
+          })
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              showWarningBox('Degree updated successfully!', true);
+              
+              modal.remove();
+              // Fetch updated degrees from server
+              fetch('/executives/api/degree/list/')
+                .then(res => res.json())
+                .then(listData => {
+                  if (listData.success && Array.isArray(listData.degrees)) {
+                    window.ALL_DEGREES = listData.degrees;
+                    renderDegrees(window.ALL_DEGREES);
+                  } else {
+                    renderDegrees(getDegrees());
+                  }
+                })
+                .catch(() => renderDegrees(getDegrees()));
+            } else {
+              showWarningBox('Error: ' + (data.message || 'Unknown error'));
+            }
+          })
+          .catch(err => {
+            showWarningBox('Error: ' + (err.message || 'Unknown error'));
+          });
+        };
+        document.getElementById('cancelEditSaveBtn').onclick = function() {
+          confirmModal.remove();
+        };
       }
     };
   }
@@ -873,7 +974,7 @@ function showDeleteConfirm(onConfirm) {
 }
 
 // Warning box function
-function showWarningBox(message) {
+function showWarningBox(message, reload=false) {
   // Remove any existing warning
   const oldWarn = document.getElementById('customWarningBox');
   if (oldWarn) oldWarn.remove();
@@ -928,7 +1029,10 @@ function showWarningBox(message) {
     </div>
   `;
   document.body.appendChild(warn);
-  document.getElementById('closeWarningBoxBtn').onclick = () => warn.remove();
+  document.getElementById('closeWarningBoxBtn').onclick = () => {
+    warn.remove();
+    if (reload) window.location.reload();
+  }
 }
 
 // Render on page load

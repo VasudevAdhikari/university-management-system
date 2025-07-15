@@ -23,6 +23,8 @@ urlpatterns = [
 
     # Degree API
     path('api/degree/add/', degree_manager.add_degree_api, name='add_degree_api'),
+    path('api/degree/edit/<int:degree_id>/', degree_manager.edit_degree_api, name='edit_degree_api'),
+    path('degree/delete/<str:degree_id>/', degree_manager.delete_degree, name='delete_degree'),
 
     # API Endpoints for Partnerships
     path('partnerships/add/', views.add_partnership_ajax, name='add_partnership_ajax'),
