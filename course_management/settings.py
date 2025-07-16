@@ -14,6 +14,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -90,16 +91,18 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'course_management',
-        'USER': 'root',
-        'PASSWORD': 'root',
-        'HOST': 'localhost',
-        'PORT': '3306',
-        'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-            'charset': 'utf8mb4',
-        }
+        # 'USER': 'root',
+        # 'PASSWORD': os.getenv('DB_PASSWORD'),
+        # 'HOST': 'localhost',
+        # 'PORT': '3306',
+        # 'OPTIONS': {
+        #     'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+        #     'charset': 'utf8mb4',
+        # }
     }
 }
+
+DATABASES['default'] = dj_database_url.parse("postgresql://vasudevadhikari:fsF43n5osuo5W1PbwomCLtJ6sDzW4n2T@dpg-d1rs1hqdbo4c738hiokg-a.oregon-postgres.render.com/course_management_iawe")
 
 
 # Password validation
