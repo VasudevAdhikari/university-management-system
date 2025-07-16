@@ -1,7 +1,110 @@
-.error-message {
-    color: #dc3545;
-    font-size: 0.875rem;
-    margin-top: 0.25rem;
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+/* 60/30/10: 60% neutral, 30% primary, 10% accent */
+:root {
+    --primary: #003366;
+    --primary-light: #1a4d80;
+    --primary-dark: #00264d;
+    --secondary: #FFD700;
+    --bg-light: #FFFFFF;
+    --bg-gray: #F5F5F5;
+    --input-bg: #F5F5F5;
+    --input-border: #dbe3ec;
+    --text-main: #222;
+    --text-muted: #6c7a89;
+    --error: #e74c3c;
+    --success: #27ae60;
+    --shadow: 0 4px 32px rgba(0, 51, 102, 0.08);
+}
+
+/* Global font and background */
+body {
+    font-family: 'Poppins', sans-serif;
+    color: var(--text-main);
+    background: var(--bg-gray);
+    margin: 0;
+    min-height: 100vh;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Card container for the form */
+.auth-container {
+    background: var(--bg-light);
+    box-shadow: var(--shadow);
+    border-radius: 18px;
+    padding: 3.5rem 3.5rem 2.5rem 3.5rem;
+    max-width: 800px;
+    width: 100%;
+    margin: 3rem auto;
+    border-top: 6px solid var(--secondary);
+}
+
+/* Section headers */
+.auth-header h1 {
+    color: var(--primary);
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    text-align: center;
+    letter-spacing: 1px;
+    font-size: 2.5rem;
+}
+
+.auth-header p {
+    color: var(--text-muted);
+    text-align: center;
+    margin-bottom: 2rem;
+    font-weight: 500;
+    font-size: 1.1rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+label {
+    font-weight: 600;
+    color: var(--primary-dark);
+    margin-bottom: 0.25rem;
+    display: block;
+    font-size: 1.05rem;
+}
+
+input, select, button, label {
+    font-family: 'Poppins', sans-serif;
+}
+
+input.form-control {
+    border: 1.5px solid var(--input-border);
+    border-radius: 10px;
+    padding: 1rem 1.2rem;
+    font-size: 1.1rem;
+    background: var(--input-bg);
+    margin-bottom: 0.25rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input.form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px #00336622;
+    outline: none;
+    background: #fff;
+}
+
+input:disabled {
+    background-color: #e9ecef !important;
+    cursor: not-allowed !important;
+    color: #b0b8c1;
+}
+
+.error-message,
+.account-suspended {
+    color: var(--error);
+    font-size: 0.95rem;
+    margin-top: 0.1rem;
+    margin-bottom: 0.5rem;
     display: none;
 }
 
@@ -11,19 +114,95 @@
 }
 
 .forgot-password a {
-    color: #6c757d;
+    color: var(--text-muted);
     text-decoration: none;
-    font-size: 0.875rem;
+    font-size: 0.95rem;
+    transition: color 0.2s;
 }
 
 .forgot-password a:hover {
-    color: #0d6efd;
+    color: var(--primary);
     text-decoration: underline;
 }
 
-.account-suspended {
-    color: #dc3545;
-    font-size: 0.875rem;
+button[type="submit"], .btn-primary {
+    background-color: var(--primary) !important;
+    border: none;
+    color: #fff !important;
+    font-weight: 700;
+    border-radius: 10px;
+    padding: 1rem 1.5rem;
+    font-size: 1.1rem;
+    transition: background 0.2s, color 0.2s;
+    width: 100%;
     margin-top: 0.5rem;
-    display: none;
-} 
+    box-shadow: 0 2px 8px var(--shadow);
+    letter-spacing: 0.5px;
+}
+
+button[type="submit"]:hover, .btn-primary:hover:not(:disabled) {
+    background-color: var(--secondary) !important;
+    color: var(--primary) !important;
+}
+
+button[type="submit"]:disabled, .btn-primary:disabled {
+    background-color: #e3eaf2 !important;
+    color: #fff !important;
+    opacity: 0.7 !important;
+    cursor: not-allowed !important;
+}
+
+.auth-footer {
+    margin-top: 1.5rem;
+    text-align: center;
+    font-size: 0.85em;
+}
+
+.auth-footer a {
+    color: var(--primary);
+    font-weight: 600;
+    text-decoration: underline;
+    font-size: 1em;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .auth-container {
+        max-width: 650px;
+        padding: 2.5rem 2rem 2rem 2rem;
+    }
+}
+
+@media (max-width: 900px) {
+    .auth-container {
+        max-width: 98vw;
+        padding: 2rem 1rem 1.5rem 1rem;
+    }
+    .form-group {
+        margin-bottom: 1.2rem;
+    }
+}
+
+@media (max-width: 600px) {
+    .auth-container {
+        padding: 1.2rem 0.3rem 1rem 0.3rem;
+        border-radius: 0;
+        margin: 0;
+        box-shadow: none;
+        border-top: 4px solid var(--secondary);
+    }
+    .auth-header h1 {
+        font-size: 2rem;
+    }
+    .auth-header p {
+        font-size: 1rem;
+    }
+    input.form-control {
+        font-size: 1rem;
+        padding: 0.8rem 0.8rem;
+    }
+    button[type="submit"], .btn-primary {
+        font-size: 1rem;
+        padding: 0.8rem 1rem;
+    }
+}
