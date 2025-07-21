@@ -1,0 +1,349 @@
+            @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins&display=swap');
+
+*{
+    font-family: "Poppins", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  padding: 0;
+  margin: 0;
+  border-radius: none;
+ box-sizing: border-box;
+ list-style: none;
+}
+
+:root{
+    --sidebar-color: #517fb8;
+    --title-font-size: 25px;
+
+}
+body{
+    height: 100vh;
+    width: 100%;
+}
+
+header{
+    position: fixed;
+    top:0;
+    left: 0;
+    right: 0;
+    height: 70px;
+    background-color: #e6e65e ;
+  
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    z-index: 1000;
+
+   
+}
+.menu-icon{
+    background-color: #d3ddcf;
+    border-radius: 7px;
+    padding: 4px 7px;
+    margin-right: 5px;
+    font-size: 22px;
+    cursor: pointer;
+
+}
+.nav-left{
+    display: flex;
+    align-items: center;
+}
+.uni-logo{
+width: 54px;
+height: 50px;
+border-radius: 7px;
+padding: 4px;
+margin-right: 10px;
+}
+.uni-name{
+   
+    font-size: 18px;
+    color: rgb(16, 15, 15);
+    font-weight: 600;
+}
+.noti{
+font-size: 22px;
+cursor: pointer;
+justify-content: center;
+align-items: center;
+}
+
+.header-profile{
+  width: 60px;  
+  height: 60px;
+  border-radius: 50px;
+  margin-left: 20px;
+  border: 1px solid rgb(144, 164, 195);
+  object-fit: cover;
+}
+.nav-right{
+    display: flex;
+    align-items: center;
+    margin-right: 4rem;
+
+}
+/* header section */
+
+/* sidebar Menu */
+.sidebar{
+   position: fixed;
+  top: 70px;
+  left: 0;
+  width: 350px;
+  height: 100vh;
+  background-color: var(--sidebar-color);
+  overflow-y: auto;
+
+  /* This hides it to the left */
+  transform: translateX(-100%);
+  transition: transform 0.5s ease;
+  z-index: 1001; /
+}
+.sidebar.show{
+transform: translateX(0);
+}
+#main-content{
+  
+  transition: transform 0.5s ease;
+}
+#main-content.with-sidebar{
+ margin-left: 390px;
+ transition: transform 0.8s ease;
+}
+/* menu icons */
+    .overlay{
+      position: fixed;
+      top: 0;
+      left: 0;
+      display: none;
+      z-index: 999;
+    }
+    .overlay.show{
+      display: block;
+    }
+     @media (min-width: 768px) {
+      
+      .sidebar {
+        left: 0;
+      }
+      .overlay {
+        display: none !important;
+      }
+    }
+
+.menu-list{
+    background-color: #fff;
+    margin: 0 18px;
+    margin-top: 20px;
+    width: 300px;
+    border-radius: 3px;
+}
+.menu ul{
+    list-style-type: none;
+   padding: 0;
+   margin: 5px;
+   padding-top: 5px;
+   
+}
+.menu li .icon{
+    min-width: 60px;
+    font-size: 17px;
+   
+}
+.menu ul li .sidebar-text{
+    color: black;
+
+}
+.menu ul li{
+    display: flex;
+    align-items: center;
+   border-bottom: 1px solid #ddd;
+}
+.menu ul li a{
+    padding: 17px 15px;
+    text-decoration: none;  
+   margin: 2px;
+   width: 100%;
+   border-radius: 6px;
+}
+.menu ul li a i{
+    margin-right: -8px;
+}
+.log-out ul{
+margin-top: 25px;
+}
+.menu ul li a:hover,.menu ul li a:active{
+background-color: #9aa9d6;
+}
+   
+/* sidebar Menu */
+
+/*body */
+
+.container {
+ border: 1px solid rgb(191, 155, 155);
+ box-shadow: 0 2px 4px rgb(228, 188, 195),0 4px 8px rgb(80, 80, 126);
+  margin-top: 90px; 
+  padding-left: 30px;
+  
+  width: 1100px;
+  transition: marign-left 0.3s ease;
+}
+.home-title{
+    padding: 12px;
+    margin-left: 25rem;
+    font-size: var(--title-font-size);
+}
+   
+/* Search button */
+form{
+position: relative;
+top: 50%;
+left: 80%;
+transform: translate(-30%,-20%);
+transition: all 1s;
+border-radius: 25px;
+width: 50px;
+height: 50px;
+padding: 5px;
+
+}
+
+input{
+    position: absolute;
+    top: 0;
+    left: 0;
+    line-height: 30px;
+    width: 100%;
+    height: 40px;
+    outline: 0;
+    border: 0;
+    display: none;
+    padding: 0 20px;
+    font-size: 1rem;
+    border: 1px solid rgb(117, 145, 165);
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgb(206, 215, 185),0 4px 8px rgb(190, 190, 224);
+}
+
+.search-icon{
+    box-sizing: border-box;
+    padding: 10px;
+    width: 40px;
+    height: 40px;
+    position: absolute;
+    top: 0;
+    right: 0;
+    border-radius: 50%;
+    color: rgb(64, 97, 216);
+    text-align: center;
+    transform: all 1s;
+    font-size: 1.5rem;
+}
+form:hover{
+    width: 300px;
+    cursor: pointer;
+}
+form:hover input{
+    display: block;
+}
+form:hover .search-icon{
+    background-color: rgb(89, 123, 224);
+    color: white;
+    font-size: 1.2rem;
+}
+/* 
+Course Section */
+.course-card {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      cursor: pointer;
+      border: 1px solid rgb(216, 226, 194);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .course-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .course-card img {
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+    }
+
+    h5 {
+      border-left: 5px solid #007bff;
+      padding-left: 10px;
+    }
+
+    .card-body h6 {
+      font-weight: 600;
+    }
+    
+    .course-photo{
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+        border: 0.5px solid gray;
+        display: block;
+    }
+
+    
+    /* responsive  design*/
+     
+    @media (max-width: 768px) {
+  .container {
+    width: 100% !important;
+    padding: 15px !important;
+    margin-top: 80px !important;
+    margin-left: 0 !important;
+  }
+
+  #main-content.with-sidebar {
+    margin-left: 0 !important;
+  }
+
+  .home-title {
+    margin-left: 0 !important;
+    text-align: center;
+    font-size: 20px;
+  }
+
+  form {
+    position: relative;
+    left: 0;
+    top: 0;
+    transform: none;
+    margin: 10px auto;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    max-width: 350px;
+  }
+
+  form input {
+    display: block !important;
+    width: 100% !important;
+    height: 40px;
+  }
+
+  .search-icon {
+    right: 10px;
+  }
+
+  .nav-right {
+    margin-right: 0;
+  }
+
+  .sidebar {
+    width: 80%;
+    max-width: 280px;
+  }
+
+  .course-photo {
+    height: 140px;
+  }
+}
