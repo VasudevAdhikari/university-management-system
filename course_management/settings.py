@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'course_manager',
     'executives',
     'students',
+    'faculty',
 ]
 
 MIDDLEWARE = [
@@ -147,6 +148,7 @@ STATICFILES_DIRS = [
     BASE_DIR / 'public/static',
     BASE_DIR / 'executives/static',
     BASE_DIR / 'students/static',
+    BASE_DIR / 'faculty/static'
 ]
 
 # Media files
