@@ -59,10 +59,10 @@ def faculty_add(request):
             data = request.POST
             photo = request.FILES.get("photo")
         print(data)
-        print(f'head is {request.COOKIES.get('fac_head')}')
+        print(f'head is {User.objects.get(pk=int(data.get("head")))}')
 
         faculty = Faculty(
-            pk= int(Faculty.objects.all().last().pk) + 1,
+            pk= int(Faculty.objects.all().last().pk) + 1 if Faculty.objects.all() else int(1),
             name=data.get("name", ""),
             contact_email=data.get("email", ""),
             contact_phone=data.get("phone", ""),

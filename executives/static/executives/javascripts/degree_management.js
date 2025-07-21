@@ -11,7 +11,7 @@ function getDegrees() {
 function renderDegrees(degrees) {
   const grid = document.getElementById('degreeGrid');
   grid.innerHTML = '';
-  degrees.forEach((degree, index) => {
+  if (degrees) degrees.forEach((degree, index) => {
     const card = document.createElement('div');
     card.className = 'degree-card';
     card.innerHTML = `
@@ -673,16 +673,7 @@ function showDegreeDetailsModal(degree, degreeIndex = null, isAddMode = false) {
 
       // Fetch all courses (simulate with mock data or fetch from backend if available)
       // Replace this with an AJAX call if you have an API endpoint
-      const allCourses = window.ALL_COURSES || [
-        { course_code: "CS101", course_name: "Intro to CS", course_credits: 3, course_hours: 45 },
-        { course_code: "MA101", course_name: "Calculus I", course_credits: 3, course_hours: 45 },
-        { course_code: "EN101", course_name: "English I", course_credits: 2, course_hours: 30 },
-        { course_code: "PH101", course_name: "Physics I", course_credits: 3, course_hours: 45 },
-        { course_code: "IT101", course_name: "IT Fundamentals", course_credits: 3, course_hours: 45 },
-        { course_code: "CS102", course_name: "Programming I", course_credits: 3, course_hours: 45 },
-        { course_code: "MA102", course_name: "Discrete Math", course_credits: 3, course_hours: 45 },
-        { course_code: "PE101", course_name: "Physical Ed", course_credits: 1, course_hours: 15 }
-      ];
+      const allCourses = window.ALL_COURSES;
 
       let filteredCourses = allCourses;
 
@@ -701,7 +692,7 @@ function showDegreeDetailsModal(degree, degreeIndex = null, isAddMode = false) {
 
       function renderCourseList() {
         const rows = filteredCourses.map(course => `
-          <tr class="course-select-row" style="cursor:pointer;" data-code="${course.course_code}">
+          <tr class="course-select-row" style="cursor:pointer;" data-code="${course.course_code}" course-id="${course.course_id}">
             <td>${course.course_code}</td>
             <td>${course.course_name}</td>
             <td>${course.course_credits}</td>
@@ -753,6 +744,7 @@ function showDegreeDetailsModal(degree, degreeIndex = null, isAddMode = false) {
         modal.querySelectorAll('.course-select-row').forEach(row => {
           row.onclick = function() {
             const code = this.getAttribute('data-code');
+            const id = this.getAttribute('course-id');
             const course = allCourses.find(c => c.course_code === code);
             if (course) {
               modal.remove();
@@ -772,11 +764,7 @@ function showDegreeDetailsModal(degree, degreeIndex = null, isAddMode = false) {
       const oldModal = document.getElementById('facultySelectionModal');
       if (oldModal) oldModal.remove();
       // Use window.ALL_FACULTIES if available, else mock
-      const faculties = window.ALL_FACULTIES || [
-        { id: 1, name: 'Faculty of Science', photo: 'https://via.placeholder.com/64?text=Science' },
-        { id: 2, name: 'Faculty of Engineering', photo: 'https://via.placeholder.com/64?text=Eng' },
-        { id: 3, name: 'Faculty of Arts', photo: 'https://via.placeholder.com/64?text=Arts' }
-      ];
+      const faculties = window.ALL_FACULTIES;
       let filtered = faculties;
       const modal = document.createElement('div');
       modal.id = 'facultySelectionModal';

@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views, lab_api
-from executives.components import faculty_manager, department_manager, course_manager, degree_manager
+from executives.components import faculty_manager, department_manager, course_manager, degree_manager, term_manager, batch_manager
 
 app_name = 'executives'
 
@@ -67,4 +67,18 @@ urlpatterns = [
     path('api/department/add/', department_manager.department_add, name='department_add_api'),
     path('api/department/edit/<int:department_id>/', department_manager.department_edit, name='department_edit_api'),
     path('api/department/delete/<int:department_id>/', department_manager.department_delete, name='department_delete_api'),
+
+    #API Endpoints for Term Management
+    path('show_term_management/', term_manager.show_term_management, name='show_term_management'),
+    path('terms/', term_manager.list_terms, name='list_terms'),
+    path('terms/create/', term_manager.create_term, name='create_term'),
+    path('terms/<int:term_id>/update/', term_manager.update_term, name='update_term'),
+    path('terms/<int:term_id>/delete/', term_manager.delete_term, name='delete_term'),
+
+    #API Endpoints for Batch Management
+    path('batches/<int:term_id>/', batch_manager.show_batch_management, name='show_batch_management'),
+    path('batches/edit/', batch_manager.edit_batch, name='edit_batch'),
+    path('batches/list/', batch_manager.list_batches, name='list_batch'),
+    path('batch_instructor/edit/', batch_manager.edit_batch_instructor, name='edit_batch_instructor'),
+    path('batch_instructor/delete/', batch_manager.delete_batch_instructor, name='delete_batch_instructor'),
 ]

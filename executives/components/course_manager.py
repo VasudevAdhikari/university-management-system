@@ -40,7 +40,7 @@ def add_course(request):
 
     # Save the new course to the database
     new_course.save()
-    return show_course_management(request)
+    return redirect('/executives/show_course_management')
 
 
 @csrf_exempt
