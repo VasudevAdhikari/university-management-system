@@ -8,7 +8,8 @@ urlpatterns = [
     # Dashboard and Home
     path('', views.executive_home, name='executive_home'),
     path('unapproved_students/', views.get_unapproved_students, name='unapproved_students'),
-    path('approve_student/', views.approve_student, name='approve_student'),
+    path('approve_student/<str:user_id>/', views.approve_student, name='approve_student'),
+    path('reject_student/<str:user_id>/', views.reject_student, name='reject_student'),
     path('unapproved_instructors/', views.show_unapproved_instructors, name='unapproved_instructors'),
     path('uni_info/', views.show_uni_info, name='show_uni_info'),
     path('uni_info_edit/', views.uni_info_edit, name='uni_info_edit'),

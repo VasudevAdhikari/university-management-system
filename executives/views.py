@@ -12,6 +12,7 @@ import json
 from authorization.models import UniversityDetails
 from django.views.decorators.http import require_POST
 from .additional_business_logics.additionals import *
+from .additional_business_logics.data_formatter import get_student_for_approval
 from .lab_api import lab_edit_api, lab_delete_photo_api, lab_edit_project_api
 
 def is_executive(user):
@@ -31,27 +32,34 @@ def executive_home(request):
     return render(request, 'executives/home.html', context=data)
 
 def get_unapproved_students(request):
+    unapproved_student_data = Student.objects.filter(status=StudentStatus.UNAPPROVED)
+    rejected_student_data = Student.objects.filter(status=StudentStatus.REJECTED)
+
+    unapproved_students, rejected_students = [], []
+    for student in unapproved_student_data:
+        unapproved_students.append(get_student_for_approval(student))
+
+    for student in rejected_student_data:
+        rejected_students.append(get_student_for_approval(student))
+
     data = {
-        'unapproved_students': Student.objects.select_related('user').all().filter(status=StudentStatus.UNAPPROVED)
+        'unapproved_students': unapproved_students,
+        'rejected_students': rejected_students,
     }
-    for student in data['unapproved_students']:
-        print(student.user.username)
+    print(data)
     return render(request, 'executives/unapproved_students.html', context=data)
 
-def approve_student(request):
-    print(request.POST)
-    if request.method == 'POST':
-        data = request.body.decode('utf-8')
-        data = json.loads(data)
-        student_id = data.get('student_id')
-        print(f'student id is {student_id}')
-        student = Student.objects.get(student_number=student_id)
-        print(student.status)
-        student.status = StudentStatus.ACTIVE
-        print(student.status)
-        student.save()
-        return JsonResponse({'success': True})
-    return JsonResponse({'success': False})
+def approve_student(request, user_id):
+    student = Student.objects.get(user__id=int(user_id))
+    student.status = StudentStatus.ACTIVE
+    student.save()
+    return redirect('/executives/unapproved_students/')
+
+def reject_student(request, user_id):
+    student = Student.objects.get(user__id=int(user_id))
+    student.status = StudentStatus.REJECTED
+    student.save()
+    return redirect('/executives/unapproved_students/')
 
 
 @csrf_exempt
