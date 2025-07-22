@@ -10,15 +10,26 @@ urlpatterns = [
     path('unapproved_students/', views.get_unapproved_students, name='unapproved_students'),
     path('approve_student/<str:user_id>/', views.approve_student, name='approve_student'),
     path('reject_student/<str:user_id>/', views.reject_student, name='reject_student'),
+
     path('unapproved_instructors/', views.show_unapproved_instructors, name='unapproved_instructors'),
+    path('approve_instructor/<str:user_id>/<str:dept_id>/<str:role>/', views.approve_instructor, name='approve_instructor'),
+    path('reject_instructor/<str:user_id>/', views.reject_instructor, name='reject_instructor'),
+
     path('uni_info/', views.show_uni_info, name='show_uni_info'),
     path('uni_info_edit/', views.uni_info_edit, name='uni_info_edit'),
+
+
     path('show_lab_details/<str:lab_name>', views.show_lab_details, name='show_lab_details'),
+
+
     path('show_degree_management', degree_manager.show_degree_management, name='show_degree_management'),
+
+
     path('show_course_management', course_manager.show_course_management, name='show_course_management'),
     path('course/add', course_manager.add_course, name='add_course'),
     path('course/edit/<str:course_id>', course_manager.edit_course, name='edit_course'),
     path('course/delete/<str:course_id>', course_manager.delete_course, name='delete_course'),
+
     # path('show_department_management', views.show_department_management, name='show_department_management'),
     path('show_faculty_management', faculty_manager.show_faculty_management, name='show_faculty_management'),
 

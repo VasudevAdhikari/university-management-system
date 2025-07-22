@@ -21,9 +21,10 @@ class AdminLevel(models.TextChoices):
 class EmploymentStatus(models.TextChoices):
     UNAPPROVED = 'U', 'Unapproved'
     TRANSFERRED = 'T', 'Transferred'
+    REJECTED = 'R', 'Rejected'
     ACTIVE = 'A', 'Active'
     ON_LEAVE = 'L', 'OnLeave'
-    RETIRED = 'R', 'Retired'
+    RETIRED = 'E', 'Retired'
 
 class DegreeType(models.TextChoices):
     BACHELORS = 'B', 'Bachelors'
@@ -45,6 +46,7 @@ class AssessmentType(models.TextChoices):
 
 class StudentStatus(models.TextChoices):
     UNAPPROVED = 'U', 'Unapproved'
+    REJECTED = 'R', 'Rejected'
     ACTIVE = 'A', 'Active'
     GRADUATED = 'G', 'Graduated'
     SUSPENDED = 'S', 'Suspended'
@@ -167,8 +169,6 @@ class Instructor(BaseModel):
     degree = models.CharField(max_length=100, default='')
     position_in_university = models.CharField(max_length=100, default='')
     department = models.ForeignKey(Department, default='', null=True, on_delete=models.CASCADE)
-    is_hod = models.BooleanField(default=False)
-    is_hof = models.BooleanField(default=False)
     joined_date = models.DateField(default=timezone.now)
     specialization = models.CharField(max_length=100, default='')
     employment_status = models.CharField(max_length=1, choices=EmploymentStatus.choices, default=EmploymentStatus.UNAPPROVED)
@@ -217,11 +217,11 @@ class Course(BaseModel):
 
 # Term Model
 class Term(BaseModel):
-    year = models.PositiveIntegerField(default=timezone.now().year)
-    term_name =models.CharField(max_length=100, default='')
-    start_date = models.DateField(default=timezone.now)
-    end_date = models.DateField(default=timezone.now)
-    result_date = models.DateField(default=timezone.now)
+    year = models.PositiveIntegerField(default=timezone.now().year, null=True)
+    term_name =models.CharField(max_length=100, default='', null=True)
+    start_date = models.DateField(default=timezone.now, null=True)
+    end_date = models.DateField(default=timezone.now, null=True)
+    result_date = models.DateField(default=timezone.now, null=True)
 
 class Batch(BaseModel):
     name = models.CharField(max_length=100, default='')
@@ -231,8 +231,9 @@ class Batch(BaseModel):
 # Term Instructor Model
 class BatchInstructor(BaseModel):
     batch = models.ForeignKey(Batch, on_delete=models.CASCADE)
-    instructor = models.ForeignKey(Instructor, on_delete=models.CASCADE)
+    instructor = models.ForeignKey(Instructor, on_delete=models.CASCADE, null=True)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    room_data = models.JSONField(default=dict(), null=True, blank=True)
     assigned_date = models.DateField(default=timezone.now)
 
 # Student Model

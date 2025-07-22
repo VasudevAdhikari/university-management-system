@@ -12,7 +12,7 @@ import json
 from authorization.models import UniversityDetails
 from django.views.decorators.http import require_POST
 from .additional_business_logics.additionals import *
-from .additional_business_logics.data_formatter import get_student_for_approval
+from .additional_business_logics.data_formatter import get_student_for_approval, get_instructor_for_approval
 from .lab_api import lab_edit_api, lab_delete_photo_api, lab_edit_project_api
 
 def is_executive(user):
@@ -517,4 +517,48 @@ def show_department_management(request):
     return render(request, 'executives/department_management.html')
 
 def show_unapproved_instructors(request):
-    return render(request, 'executives/unapproved_instructors.html')
+    unapproved_instructor_data = Instructor.objects.filter(employment_status=EmploymentStatus.UNAPPROVED)
+    rejected_instructor_data = Instructor.objects.filter(employment_status=EmploymentStatus.REJECTED)
+
+    unapproved_instructors, rejected_instructors = [], []
+    unapproved_instructors.extend(
+        get_instructor_for_approval(instructor)
+        for instructor in unapproved_instructor_data
+    )
+
+    rejected_instructors.extend(
+        get_instructor_for_approval(instructor)
+        for instructor in rejected_instructor_data
+    )
+
+    data = {
+        'unapproved_instructors': unapproved_instructors,
+        'rejected_instructors': rejected_instructors,
+        'departments': list(Department.objects.all().values('id', 'name')),
+    }
+
+    # print(data)
+    return render(request, 'executives/unapproved_instructors.html', context=data)
+
+def approve_instructor(request, user_id, dept_id, role):
+    try:
+        instructor = Instructor.objects.get(user__id=int(user_id))
+        instructor.employment_status = EmploymentStatus.ACTIVE
+        instructor.department = Department.objects.get(pk=int(dept_id))
+        instructor.position_in_university = role
+        instructor.save()
+        messages.success(request, "User approved successfully")
+    except Exception as e:
+        messages.error(request, f"Error approving user: {e}")
+    return redirect('/executives/unapproved_instructors/')
+
+def reject_instructor(request, user_id):
+    try:
+        instructor = Instructor.objects.get(user__id=int(user_id))
+        instructor.employment_status = EmploymentStatus.REJECTED
+        instructor.save()
+        messages.success(request, "User rejected successfully")
+    except Exception as e:
+        messages.error(request, f"Error rejecting user: {e}")
+    return redirect('/executives/unapproved_instructors/')
+
