@@ -1,7 +1,7 @@
-from django.urls import path
+from django.urls import path, re_path
 from .views import faculty_dashboard
 from .components import course_management
-from faculty.components import document_manager, quiz_manager
+from faculty.components import document_manager, quiz_manager, assignment_manager
 
 urlpatterns = [
     path('', faculty_dashboard, name='faculty_dashboard'),
@@ -20,4 +20,11 @@ urlpatterns = [
 
     path('quiz_creation/<int:assessment_id>/', quiz_manager.show_quiz_creation, name='show_quiz_creation'),
     path('create_quiz/', quiz_manager.create_quiz, name='creat_quiz'),
+
+    re_path(
+        r'^(assignment|midterm|final|project|labtest|practical|thesis|labproject|labassessment)_creation/(?P<assessment_id>\d+)/$',
+        assignment_manager.show_assignment_creation,
+        name='show_assignment_creation'
+    ),
+    path('create_assignment/', assignment_manager.create_assignment, name='create_assignment'),
 ]

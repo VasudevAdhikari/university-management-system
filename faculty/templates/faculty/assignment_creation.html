@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'faculty/css/quiz_creator.css' %}">
+    <title>Assignment Creator</title>
+</head>
+<body>
+    <script>
+        students = '{{students|escapejs }}'.replaceAll("'", '"');
+        window.ALL_STUDENTS = JSON.parse(students);
+        window.ASSESSMENT_ID = '{{assessment.id}}';
+        window.BATCH_INSTRUCTOR_ID = '{{batch_instructor_id}}';
+        window.CSRF_TOKEN = '{{csrf_token}}';
+        window.assignment_data = JSON.parse('{{assignment_data|escapejs}}');
+    </script>
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-file-alt"></i> Manage {{assessment_type}}</h1>
+            <p>Create and assign {{assessment_type}} to your students</p>
+        </header>
+
+        <form id="assignmentForm">
+            <!-- Assignment Title Section -->
+            <section class="form-section">
+                <h2><i class="fas fa-heading"></i> {{assessment_type}} Title</h2>
+                <div class="form-group">
+                    <input type="text" id="assignmentTitle" placeholder="Enter assignment title" required value="{{assessment.assessment.title|escapejs}}">
+                </div>
+            </section>
+
+            <!-- Student Selection Section -->
+            <section class="form-section">
+                <h2><i class="fas fa-users"></i> Select Students</h2>
+                <div class="student-selector">
+                    <span id="selectedCount">0 students selected</span>
+                    <button type="button" id="openStudentModal" class="btn-primary">
+                        <i class="fas fa-user-plus"></i> Choose Students
+                    </button>
+                </div>
+            </section>
+
+            <!-- Assignment Scheduling Section -->
+            <section class="form-section">
+                <h2><i class="fas fa-calendar-alt"></i> Schedule Assignment</h2>
+                <br>
+                <div class="scheduling-grid">
+                    <div class="form-group">
+                        <label for="assignmentStart"><i class="fas fa-play"></i> Start Date & Time:</label>
+                        <input type="datetime-local" id="assignmentStart" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="assignmentEnd"><i class="fas fa-stop"></i> End Date & Time:</label>
+                        <input type="datetime-local" id="assignmentEnd" required>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Timer Setting Section -->
+            <section class="form-section">
+                <h2><i class="fas fa-clock"></i> Timer Settings</h2>
+                <div class="timer-container">
+                    <div class="clock-display">
+                        <div class="clock-face">
+                            <div class="clock-center"></div>
+                            <div class="clock-hand hour-hand" id="hourHand"></div>
+                            <div class="clock-hand minute-hand" id="minuteHand"></div>
+                        </div>
+                        <span id="timeDisplay">00:30</span>
+                    </div>
+                    <div class="timer-controls">
+                        <label>Duration (minutes):</label>
+                        <div class="duration-input">
+                            <button type="button" class="time-btn" onclick="adjustTime(-5)">-5</button>
+                            <button type="button" class="time-btn" onclick="adjustTime(-1)">-1</button>
+                            <input type="number" id="assignmentDuration" min="1" max="300" value="30" required>
+                            <button type="button" class="time-btn" onclick="adjustTime(1)">+1</button>
+                            <button type="button" class="time-btn" onclick="adjustTime(5)">+5</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Assignment Question Section -->
+            <section class="form-section">
+                <h2><i class="fas fa-question-circle"></i> {{assessment_type}} Question</h2>
+                <div class="form-group">
+                    <textarea id="assignmentQuestion" placeholder="Enter your assignment question here..." required rows="4"></textarea>
+                </div>
+            </section>
+
+            <!-- Assignment Files Section -->
+            <section class="form-section">
+                <h2><i class="fas fa-paperclip"></i> {{assessment_type}} Files</h2>
+                <div class="form-group">
+                    <input type="file" id="assignmentFiles" multiple>
+                    <div id="filesPreview" class="file-preview-list"></div>
+                </div>
+            </section>
+
+            <!-- Assignment Images Section -->
+            <section class="form-section">
+                <h2><i class="fas fa-image"></i> {{assessment_type}} Images</h2>
+                <div class="form-group">
+                    <input type="file" id="assignmentImages" multiple accept="image/*">
+                    <div id="imagesPreview" class="file-preview-list"></div>
+                </div>
+            </section>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-primary btn-large">
+                    <i class="fas fa-save"></i> Create Assignment
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Student Selection Modal -->
+    <div id="studentModal" class="modal">
+        <div class="modal-content">
+            <header class="modal-header">
+                <h3><i class="fas fa-users"></i> Select Students</h3>
+                <button type="button" class="close-modal" onclick="closeStudentModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </header>
+            <div class="modal-body">
+                <div class="student-controls">
+                    <div class="search-container">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="studentSearch" placeholder="Search students...">
+                    </div>
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="selectAllStudents" onchange="toggleSelectAll()">
+                        <span class="checkmark"></span>
+                        Select All Students
+                    </label>
+                </div>
+                <div class="students-grid" id="studentsGrid">
+                    <!-- Students will be populated by JavaScript -->
+                </div>
+            </div>
+            <footer class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="closeStudentModal()">Cancel</button>
+                <button type="button" class="btn-primary" onclick="confirmStudentSelection()">
+                    <i class="fas fa-check"></i> Confirm Selection
+                </button>
+            </footer>
+        </div>
+    </div>
+    <script src="{% static 'faculty/js/assignment_creator.js' %}"></script>
+</body>
+</html>
