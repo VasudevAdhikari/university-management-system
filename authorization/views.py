@@ -281,8 +281,8 @@ def save_student(request):
             user.save()
             instructor = Instructor.objects.create(
                 user=user,
-                is_hod=False,  # Default to not HOD
-                is_hof=False,  # Default to not HOF
+                # is_hod=False,  # Default to not HOD
+                # is_hof=False,  # Default to not HOF
                 degree=request.POST.get('degree'),
                 specialization=request.POST.get('specialization'),
                 employment_status=EmploymentStatus.UNAPPROVED

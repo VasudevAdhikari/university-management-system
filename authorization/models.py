@@ -42,6 +42,7 @@ class AssessmentType(models.TextChoices):
     THESIS = 'H', 'Thesis'
     LABPROJECT = 'B', 'Lab Project'
     LABASSESSMENT = 'J', 'Lab Assessment'
+    CLASS_PARTICIPATION = 'C', 'Class Participation'
 
 
 class StudentStatus(models.TextChoices):
@@ -233,7 +234,7 @@ class BatchInstructor(BaseModel):
     batch = models.ForeignKey(Batch, on_delete=models.CASCADE)
     instructor = models.ForeignKey(Instructor, on_delete=models.CASCADE, null=True)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
-    room_data = models.JSONField(default=dict(), null=True, blank=True)
+    room_data = models.JSONField(default=None, null=True, blank=True)
     assigned_date = models.DateField(default=timezone.now)
 
 # Student Model
@@ -289,7 +290,7 @@ class SISForm(BaseModel):
 
 # Student Term Model
 class StudentBatch(BaseModel):
-    batch = models.ForeignKey(Batch, on_delete=models.CASCADE)
+    batch_instructor = models.ForeignKey(BatchInstructor, on_delete=models.CASCADE, default=None, null=True)
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     result = models.JSONField(default=dict)
 
@@ -305,8 +306,13 @@ class Document(BaseModel):
     name = models.CharField(max_length=100, default='')
     description = models.TextField(default='')
     file_link = models.URLField(default='')
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, null=True, blank=True)
     uploaded_by = models.ForeignKey(User, on_delete=models.CASCADE)
     access_status = models.CharField(max_length=1, choices=DocumentType.choices, default=DocumentType.PUBLIC)
+
+class BatchInstructorDocument(BaseModel):
+    batch_instructor = models.ForeignKey(BatchInstructor, on_delete=models.CASCADE, null=True)
+    document = models.ForeignKey(Document, on_delete=models.CASCADE, null=True)
 
 # Video Conference Model
 class VideoConference(BaseModel):
@@ -319,7 +325,7 @@ class VideoConference(BaseModel):
 
 # Assessment Scheme Model
 class AssessmentScheme(BaseModel):
-    batch_instructor = models.ForeignKey(BatchInstructor, on_delete=models.CASCADE)
+    batch_instructor = models.OneToOneField(BatchInstructor, on_delete=models.CASCADE)
     scheme = models.JSONField(default=dict)
 
 # Assessment Model
@@ -327,8 +333,8 @@ class Assessment(BaseModel):
     assessment_scheme = models.ForeignKey(AssessmentScheme, on_delete=models.CASCADE)
     assessment_type = models.TextField(max_length=1, choices=AssessmentType.choices)
     assessment = models.JSONField(default=dict)
-    assigned_date = models.DateField(default=timezone.now)
-    due_date = models.DateField(default=timezone.now)
+    assigned_date = models.DateTimeField(auto_now_add=True)
+    due_date = models.DateTimeField(auto_now_add=True)
 
 # Assessment Result Model
 class AssessmentResult(BaseModel):

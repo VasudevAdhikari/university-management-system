@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en"> 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'faculty/css/quiz_creator.css' %}">
+    <title>Quiz Creator</title>
+</head>
+<body>
+    <script>
+        students = '{{students|escapejs }}'.replaceAll("'", '"');
+        window.ALL_STUDENTS = JSON.parse(students);
+        window.ASSESSMENT_ID = '{{assessment.id}}';
+        window.BATCH_INSTRUCTOR_ID = '{{batch_instructor_id}}';
+        window.CSRF_TOKEN = '{{csrf_token}}';
+        window.quiz_data = JSON.parse('{{quiz_data|escapejs}}');
+        console.log('{{assessment.assessment.title|escapejs}}');
+        console.log(window.ASSESSMENT_ID);
+    </script>
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-graduation-cap"></i> Manage Quiz</h1>
+            <p>Design an engaging quiz for your students</p>
+        </header>
+
+        <form id="quizForm">
+            <!-- Quiz Title Section -->
+            <section class="form-section">
+                <h2><i class="fas fa-heading"></i> Quiz Title</h2>
+                <div class="form-group">
+                    <input type="text" id="quizTitle" placeholder="Enter quiz title" required value="{{assessment.assessment.title|escapejs}}">
+                </div>
+            </section>
+
+            <!-- Student Selection Section -->
+            <section class="form-section">
+                <h2><i class="fas fa-users"></i> Select Students</h2>
+                <div class="student-selector">
+                    <span id="selectedCount">0 students selected</span>
+                    <button type="button" id="openStudentModal" class="btn-primary">
+                        <i class="fas fa-user-plus"></i> Choose Students
+                    </button>
+                </div>
+            </section>
+
+            <!-- Quiz Scheduling Section -->
+            <section class="form-section">
+                <h2><i class="fas fa-calendar-alt"></i> Schedule Quiz</h2>
+                <br>
+                <div class="scheduling-grid">
+                    <div class="form-group">
+                        <label for="quizStart"><i class="fas fa-play"></i> Start Date & Time:</label>
+                        <input type="datetime-local" id="quizStart" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="quizEnd"><i class="fas fa-stop"></i> End Date & Time:</label>
+                        <input type="datetime-local" id="quizEnd" required>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Timer Setting Section -->
+            <section class="form-section">
+                <h2><i class="fas fa-clock"></i> Timer Settings</h2>
+                <div class="timer-container">
+                    <div class="clock-display">
+                        <div class="clock-face">
+                            <div class="clock-center"></div>
+                            <div class="clock-hand hour-hand" id="hourHand"></div>
+                            <div class="clock-hand minute-hand" id="minuteHand"></div>
+                        </div>
+                        <span id="timeDisplay">00:30</span>
+                    </div>
+                    <div class="timer-controls">
+                        <label>Duration (minutes):</label>
+                        <div class="duration-input">
+                            <button type="button" class="time-btn" onclick="adjustTime(-5)">-5</button>
+                            <button type="button" class="time-btn" onclick="adjustTime(-1)">-1</button>
+                            <input type="number" id="quizDuration" min="1" max="300" value="30" required>
+                            <button type="button" class="time-btn" onclick="adjustTime(1)">+1</button>
+                            <button type="button" class="time-btn" onclick="adjustTime(5)">+5</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Questions Section -->
+            <h2><i class="fas fa-question-circle"></i> Questions</h2>
+            <div id="questionsContainer">
+                <div class="question" data-question="1">
+                    <div class="question-header">
+                        <span class="question-number">Question 1</span>
+                        <div class="question-actions">
+                            <label for="questionImg1" class="file-upload-label">
+                                <i class="fas fa-image"></i>
+                            </label>
+                            <input type="file" accept="image/*" id="questionImg1" onchange="previewQuestionImage(this)" style="display: none;">
+                            <button type="button" class="btn-danger remove-question" onclick="removeQuestion(this)">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="question-content">
+                        <div class="form-group">
+                            <label>Question Text:</label>
+                            <textarea placeholder="Enter your question here..." required rows="1"></textarea>
+                        </div>
+
+                        <div class="image-preview" id="imagePreview1" style="display: none;">
+                            <img src="" alt="Question Image Preview" class="preview-img">
+                            <button type="button" class="btn-danger remove-image" onclick="removeQuestionImage(1)">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+
+                        <div class="options-section">
+                            <div class="options-header">
+                                <label>Answer Options:</label>
+                                <button type="button" class="btn-secondary add-option" onclick="addOption(this)">
+                                    <i class="fas fa-plus"></i> Add Option
+                                </button>
+                            </div>
+
+                            <div class="options-container">
+                                <div class="option-content">
+                                    <input type="text" placeholder="Option 1" required onchange="updateCorrectPreview(this)">
+                                    <div class="option-actions">
+                                        <label for="optionImg1" class="file-upload-label">
+                                            <i class="fas fa-image"></i>
+                                        </label>
+                                        <input type="file" accept="image/*" id="optionImg1" onchange="previewOptionImage(this)" style="display: none;">
+                                        <button type="button" class="btn-danger remove-option" onclick="removeOption(this)">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                    <div class="option-image-preview" id="optionImagePreview1" style="display: none;">
+                                        <img src="" alt="Option Image Preview" class="preview-img">
+                                        <button type="button" class="btn-danger remove-image" onclick="removeOptionImage(1)">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="option-content">
+                                    <input type="text" placeholder="Option 2" required onchange="updateCorrectPreview(this)">
+                                    <div class="option-actions">
+                                        <label for="optionImg2" class="file-upload-label">
+                                            <i class="fas fa-image"></i>
+                                        </label>
+                                        <input type="file" accept="image/*" id="optionImg2" onchange="previewOptionImage(this)" style="display: none;">
+                                        <button type="button" class="btn-danger remove-option" onclick="removeOption(this)">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                    <div class="option-image-preview" id="optionImagePreview2" style="display: none;">
+                                        <img src="" alt="Option Image Preview" class="preview-img">
+                                        <button type="button" class="btn-danger remove-image" onclick="removeOptionImage(2)">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="correct-answer-section">
+                            <div class="correct-answer-header">
+                                <label>Correct Answer:</label>
+                                <div class="points-input">
+                                    <label for="points1">Points:</label>
+                                    <input type="number" id="points1" name="points1" min="1" value="1" class="points-field">
+                                </div>
+                            </div>
+                            <div class="correct-options-preview" id="correctPreview1">
+                                <div class="preview-option" data-value="1" onclick="selectCorrectOption(this, 1)">
+                                    <span class="option-label">A</span>
+                                    <span class="option-text">
+                                        <img src="" alt="Option Image" class="option-image">
+                                        Option 1
+                                    </span>
+                                </div>
+                                <div class="preview-option" data-value="2" onclick="selectCorrectOption(this, 1)">
+                                    <span class="option-label">B</span>
+                                    <span class="option-text">
+                                        <img src="" alt="Option Image" class="option-image">
+                                        Option 2
+                                    </span>
+                                </div>
+                            </div>
+                            <input type="hidden" class="correct-answer" name="correctAnswer1">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" id="addQuestion" class="btn-success">
+                <i class="fas fa-plus"></i> Add Question
+            </button>
+
+            <!-- Questions per Student Section -->
+            <section class="form-section">
+                <h2><i class="fas fa-random"></i> Questions per Student</h2>
+                <div class="form-group">
+                    <input type="number" id="questionsPerStudent" min="1" placeholder="Enter number of questions per student" required>
+                    <small class="form-text">Maximum number of questions: <span id="maxQuestions">0</span></small>
+                </div>
+            </section>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-primary btn-large">
+                    <i class="fas fa-save"></i> Create Quiz
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Student Selection Modal -->
+    <div id="studentModal" class="modal">
+        <div class="modal-content">
+            <header class="modal-header">
+                <h3><i class="fas fa-users"></i> Select Students</h3>
+                <button type="button" class="close-modal" onclick="closeStudentModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </header>
+
+            <div class="modal-body">
+                <div class="student-controls">
+                    <div class="search-container">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="studentSearch" placeholder="Search students...">
+                    </div>
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="selectAllStudents" onchange="toggleSelectAll()">
+                        <span class="checkmark"></span>
+                        Select All Students
+                    </label>
+                </div>
+
+                <div class="students-grid" id="studentsGrid">
+                    <!-- Students will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <footer class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="closeStudentModal()">Cancel</button>
+                <button type="button" class="btn-primary" onclick="confirmStudentSelection()">
+                    <i class="fas fa-check"></i> Confirm Selection
+                </button>
+            </footer>
+        </div>
+    </div>
+
+    <script src="{% static 'faculty/js/quiz_creator.js' %}"></script>
+</body>
+</html>

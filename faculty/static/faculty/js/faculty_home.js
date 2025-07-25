@@ -12,5 +12,5 @@ menuIcon.addEventListener("click", () => {
 sidebarOverlay.addEventListener("click", () => {
   sidebarMenu.classList.remove("show");
   sidebarOverlay.classList.remove("show");
-  mainContent.classList.remove("with-sidebar");
+  mainContent.classList.remove("with-sidebar"); 
 });
