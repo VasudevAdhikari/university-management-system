@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Student Course Details</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- <link rel="stylesheet" href="css/instructor_course_management.css"> -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* Extra styles for student view */
+    .readonly-table input,
+    .readonly-table select,
+    .readonly-table button {
+      pointer-events: none;
+      background: #f7f7f7 !important;
+      color: #888 !important;
+      border: none !important;
+    }
+    .readonly-table {
+      opacity: 0.95;
+    }
+    .quiz-card, .assignment-card {
+      border-radius: 12px;
+      padding: 18px 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: box-shadow 0.15s;
+      position: relative;
+    }
+    .quiz-not-answered { background: #f8f9fc; border-left: 6px solid #4e73df; }
+    .quiz-done { background: #e6f7ec; border-left: 6px solid #1cc88a; }
+    .quiz-overdue { background: #fff5f5; border-left: 6px solid #e74a3b; }
+    .quiz-title { font-weight: 600; font-size: 1.1rem; }
+    .quiz-time { font-size: 0.95rem; color: #666; }
+    .quiz-status {
+      position: absolute;
+      top: 12px;
+      right: 16px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 2px 10px;
+      border-radius: 8px;
+      color: #fff;
+    }
+    .status-not-answered { background: #4e73df; }
+    .status-done { background: #1cc88a; }
+    .status-overdue { background: #e74a3b; }
+    .item-card-download {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #1877f2;
+      font-size: 1.2rem;
+      margin-left: 4px;
+    }
+    .item-card-download:active { color: #0d5abf; }
+    .item-card-image img, .item-card-image i {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      display: block;
+      margin: 0 auto;
+    }
+    .item-card-title {
+      margin-top: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 170px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar-demo">
+    <button class="nav-hamburger" id="sidebarToggle" aria-label="Toggle sidebar">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+    <span class="nav-title">Student Portal</span>
+    <span class="nav-user"><i class="fa-solid fa-user"></i> {{student_name}}</span>
+  </nav>
+
+  <!-- Sidebar -->
+  <aside class="sidebar-demo" id="sidebarMenu">
+    <div class="sidebar-header-demo">
+      <span class="sidebar-logo"><i class="fa-solid fa-graduation-cap"></i></span>
+      <span class="sidebar-title">Menu</span>
+    </div>
+    <ul class="sidebar-list-demo">
+      <li><a href="#"><i class="fa-solid fa-book"></i> My Courses</a></li>
+      <li><a href="#"><i class="fa-solid fa-user-graduate"></i> Profile</a></li>
+      <li><a href="#"><i class="fa-solid fa-clipboard-list"></i> Results</a></li>
+      <li><a href="#"><i class="fa-solid fa-gear"></i> Settings</a></li>
+      <li><a href="#"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+    </ul>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main-content-demo">
+    <!-- Course Detail Card -->
+    <div class="course-card">
+      <h2 class="course-title">{{course.course_code}} ({{course.course_name}})</h2>
+      <div class="course-desc-box" style="margin-bottom:18px;">
+        <div style="display:flex;align-items:flex-start;gap:18px;">
+          <img src="https://randomuser.me/api/portraits/women/65.jpg" alt="Dr. Ni Ni Hla" style="width:80px;height:80px;border-radius:12px;object-fit:cover;border:2px solid #e4eaf7;">
+          <div style="flex:1;">
+            <div class="course-description" style="font-size:1.08rem; color:#233876; margin-bottom:10px;">
+              {{course.description}}
+            </div>
+            <div class="instructor-info-short" style="font-size:1.02rem; color:#444; margin-bottom:8px;">
+              <b>Instructor:</b> {{instructor.full_name}}<br>
+              {{instructor_role}} with {{experience}} years of experience.
+            </div>
+            <div style="margin-top:8px;">
+              <span style="color:#1877f2; font-weight:600;">
+                <i class="fa-solid fa-envelope"></i> {{instructor.email}}
+              </span>
+              <span style="margin-left:24px; color:#1cc88a; font-weight:600;">
+                <i class="fa-solid fa-phone"></i> {{instructor.phone}}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="markingSchemeSection"></div>
+
+      <!-- Activities Section -->
+      <div id="activitySection">
+        <div class="item-section-title">{{assessment}}</div>
+        <div id="quizGrid"></div>
+        <div class="item-section-title">Assignments</div>
+        <div id="assignmentGrid"></div>
+      </div>
+
+      <!-- Referred Documents Section -->
+      <div class="item-section-title-row">
+        <span class="item-section-title">Referred Documents</span>
+      </div>
+      <div class="item-grid" id="referredDocsGrid"></div>
+    </div>
+  </div>
+
+  <script>
+    // Sidebar toggle logic
+    const sidebar = document.getElementById('sidebarMenu');
+    const toggleBtn = document.getElementById('sidebarToggle');
+    toggleBtn.onclick = function() {
+      sidebar.classList.toggle('hide');
+      document.body.classList.toggle('sidebar-open', !sidebar.classList.contains('hide'));
+    };
+
+    // Read/Hide instructor description logic
+    document.addEventListener('DOMContentLoaded', function() {
+      const readMoreBtn = document.getElementById('readMoreBtn');
+      const shortDesc = document.querySelector('.instructor-info-short');
+      const fullDesc = document.getElementById('instructorFullDesc');
+      if (readMoreBtn && fullDesc && shortDesc) {
+        readMoreBtn.onclick = function() {
+          shortDesc.style.display = 'none';
+          fullDesc.style.display = '';
+          // Attach the hide button event after showing
+          setTimeout(() => {
+            const readLessBtn = document.getElementById('readLessBtn');
+            if (readLessBtn) {
+              readLessBtn.onclick = function() {
+                fullDesc.style.display = 'none';
+                shortDesc.style.display = '';
+              };
+            }
+          }, 10);
+        };
+      }
+    });
+
+    // Example Marking Scheme (read-only)
+    const markingScheme = JSON.parse('{{scheme|escapejs}}');
+    function renderMarkingScheme() {
+      const section = document.getElementById('markingSchemeSection');
+      section.innerHTML = `
+        <div class="marking-header"><span>Marking Scheme</span></div>
+        <table class="marking-table readonly-table">
+          ${markingScheme.map(row => `
+            <tr>
+              <td>
+                <select disabled>
+                  <option>${row.type}</option>
+                </select>
+              </td>
+              <td>
+                <input type="number" value="${row.mark}" disabled style="width:70px;"> %
+              </td>
+            </tr>
+          `).join('')}
+        </table>
+      `;
+    }
+    renderMarkingScheme();
+
+    // Example referred documents (view/download only)
+    const referredDocs = [
+      { title: "Cyber Security.pdf", previewUrl: "", fileName: "Cyber Security.pdf" },
+      { title: "Test2.docx", previewUrl: "", fileName: "Test2.docx" }
+    ];
+    function renderReferredDocs() {
+      document.getElementById('referredDocsGrid').innerHTML = referredDocs.map((doc, i) => `
+        <div class="item-card">
+          <div style="display:flex;align-items:center;gap:6px;padding:8px;">
+            <button class="item-card-download" title="Download" onclick="downloadReferredDoc(${i})"><i class="fa-solid fa-download"></i></button>
+          </div>
+          <div class="item-card-image">
+            ${doc.previewUrl
+              ? `<img src="${doc.previewUrl}" style="width:80px;height:80px;object-fit:cover;">`
+              : '<i class="fa-solid fa-file" style="font-size:40px;color:#888;"></i>'}
+          </div>
+          <div class="item-card-title" title="${doc.title}">${doc.title}</div>
+        </div>
+      `).join('');
+    }
+    function downloadReferredDoc(idx) {
+      const doc = referredDocs[idx];
+      // Replace with real download logic
+      alert('Downloading: ' + doc.title);
+    }
+    renderReferredDocs();
+
+    // Example quizzes and assignments with status
+    const quizzes = [
+      { title: "Quiz 1", status: "not-answered", start: "2025-07-10 09:00", end: "2025-07-12 23:59" },
+      { title: "Quiz 2", status: "done", start: "2025-07-01 09:00", end: "2025-07-05 23:59" },
+      { title: "Quiz 3", status: "overdue", start: "2025-06-20 09:00", end: "2025-06-22 23:59" }
+    ];
+    const assignments = [
+      { title: "Assignment 1", status: "done", start: "2025-07-01 09:00", end: "2025-07-10 23:59" },
+      { title: "Assignment 2", status: "not-answered", start: "2025-07-15 09:00", end: "2025-07-20 23:59" },
+      { title: "Assignment 3", status: "overdue", start: "2025-06-10 09:00", end: "2025-06-15 23:59" }
+    ];
+    function renderQuizAssignmentCards(list, containerId, type) {
+      document.getElementById(containerId).innerHTML = list.map(item => `
+        <div class="${type}-card quiz-${item.status}">
+          <span class="quiz-title">${item.title}</span>
+          <span class="quiz-time">Start: ${item.start}</span>
+          <span class="quiz-time">End: ${item.end}</span>
+          <span class="quiz-status status-${item.status}">
+            ${item.status === "not-answered" ? "Not Answered" : item.status === "done" ? "Done" : "Overdue"}
+          </span>
+        </div>
+      `).join('');
+    }
+    renderQuizAssignmentCards(quizzes, "quizGrid", "quiz");
+    renderQuizAssignmentCards(assignments, "assignmentGrid", "assignment");
+  </script>
+</body>
+</html>

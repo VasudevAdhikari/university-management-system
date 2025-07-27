@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from authorization.models import Assessment, Student
+from authorization.models import Assessment, Student, AssessmentResult
 from django.contrib import messages
 from django.core.files.storage import FileSystemStorage
 from django.http import JsonResponse
@@ -116,3 +116,30 @@ def create_assignment(request):
     except Exception as e:
         print("Error in create_assignment:", e)
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
+    
+def show_assessment_submissions(request, assessment_id):
+    assessment_submissions = AssessmentResult.objects.filter(
+        assessment__id=assessment_id
+    ).select_related(
+        'assessment',
+        'student',
+        'student__user',
+    )
+
+    data = {
+        'assessment_submissions': assessment_submissions,
+    }
+    print(data)
+
+    return render(request, 'faculty/assessment_submissions.html', context=data)
+
+
+def update_assessment_mark(request, assessment_id, mark):
+    try:
+        assessment = AssessmentResult.objects.get(pk=assessment_id)
+        assessment.mark = mark
+        assessment.save()
+        return JsonResponse({'success': True, 'message': 'Mark updated successfully'})
+    except Exception as e:
+        print(e)
+        return JsonResponse({'success': False, 'error': f"{e}"})

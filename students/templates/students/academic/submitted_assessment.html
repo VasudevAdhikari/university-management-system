@@ -1,0 +1,140 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ result.assessment.assessment.title }} - Submitted Assessment</title>
+    <link rel="stylesheet" href="{% static 'students/academic/styles/assessment.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="assessment-container">
+        {% if result %}
+            <!-- Header -->
+            <div class="assessment-header">
+                <div class="assessment-title">
+                    <h1>{{ result.assessment.assessment.title }}</h1>
+                    <span class="assessment-type">{{ result.assessment.get_assessment_type_display }}</span>
+                </div>
+                <div class="timer-section">
+                    <div class="timer-display">
+                        <i class="fas fa-check-circle"></i>
+                        <span style="font-size:1.2rem;">Submitted</span>
+                    </div>
+                    <div class="timer-status" id="timer-status">
+                        Submitted at: 
+                        {% if result.answer.submitted_at %}
+                            {{ result.answer.submitted_at}}
+                        {% else %}
+                            {{ result.created_at}}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Assessment Content -->
+            <div class="assessment-content">
+                <!-- Question Section -->
+                <div class="question-section">
+                    <h2>Question</h2>
+                    <div class="question-text">
+                        {{ result.assessment.assessment.question }}
+                    </div>
+
+                    <!-- Question Images -->
+                    {% if result.assessment.assessment.images %}
+                    <div class="question-images">
+                        <h3>Reference Images</h3>
+                        <div class="image-gallery">
+                            {% for image in result.assessment.assessment.images %}
+                            <div class="image-item">
+                                <img src="/media/assignment_images/{{ image }}" alt="Question Image" loading="lazy">
+                                <div class="image-overlay">
+                                    <i class="fas fa-expand"></i>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Question Files -->
+                    {% if result.assessment.assessment.files %}
+                    <div class="question-files">
+                        <h3>Reference Files</h3>
+                        <div class="file-list">
+                            {% for file in result.assessment.assessment.files %}
+                            <div class="file-item">
+                                <i class="fas fa-file-alt"></i>
+                                <span class="file-name">{{ file|slice:"0:-4" }}</span>
+                                <a href="/media/assignment_files/{{ file }}" download class="download-btn">
+                                    <i class="fas fa-download"></i>
+                                </a>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Submission Section -->
+                <div class="submission-section">
+                    <h2>Your Submission</h2>
+                    {% if result %}
+                        <div style="margin-bottom: 1.5rem;">
+                            <strong>Total Time Taken:</strong>
+                            {{ result.answer.total_time_taken_formatted|default:"N/A" }}
+                        </div>
+
+                        <!-- Uploaded Images -->
+                        {% if result.answer.images %}
+                        <div class="upload-section">
+                            <h3>Uploaded Images</h3>
+                            <div class="uploaded-images">
+                                {% for image in result.answer.images %}
+                                <div class="uploaded-item">
+                                    <img src="/media/{{ image }}" alt="Uploaded Image">
+                                    <div class="uploaded-item-info">
+                                        <div class="uploaded-item-name">{{ image|cut:'assessment_submissions/' }}</div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Uploaded Files -->
+                        {% if result.answer.files %}
+                        <div class="upload-section">
+                            <h3>Uploaded Files</h3>
+                            <div class="uploaded-files">
+                                {% for file in result.answer.files %}
+                                <div class="uploaded-item">
+                                    <i class="fas fa-file" style="font-size: 2rem; color: #667eea;"></i>
+                                    <div class="uploaded-item-info">
+                                        <div class="uploaded-item-name">{{ file|cut:'assessment_submissions/' }}</div>
+                                    </div>
+                                    <a href="/media/{{ file }}" download class="download-btn">
+                                        <i class="fas fa-download"></i>
+                                    </a>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="alert alert-danger">
+                            No submission found or you do not have access to this assessment result.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% else %}
+            <div class="alert alert-danger" style="margin:2rem;">
+                No submission found or you do not have access to this assessment result.
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>

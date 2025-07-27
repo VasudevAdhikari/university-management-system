@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from authorization.models import Assessment, Student
+from authorization.models import Assessment, Student, AssessmentResult
 from django.contrib import messages
 from django.core.files.storage import FileSystemStorage
 from django.http import JsonResponse
@@ -129,4 +129,17 @@ def create_quiz(request):
     except Exception as e:
         print("Error in create_quiz:", e)
         return JsonResponse({'success': False, 'error': str(e)}, status=500) 
+    
+def show_quiz_results(request, quiz_id):
+    quiz_results = AssessmentResult.objects.filter(
+        assessment__id=quiz_id
+    ).select_related('assessment', 'student', 'student__user')
+
+    quiz_name = quiz_results[0].assessment.assessment.get('title') if quiz_results else ''
+
+    data = {
+        'quiz_results': quiz_results,
+        'quiz_name': quiz_name,
+    }
+    return render(request, 'faculty/quiz_results.html', context=data)
 

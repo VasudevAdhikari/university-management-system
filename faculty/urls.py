@@ -27,4 +27,10 @@ urlpatterns = [
         name='show_assignment_creation'
     ),
     path('create_assignment/', assignment_manager.create_assignment, name='create_assignment'),
+
+    path('quiz_results/<int:quiz_id>/', quiz_manager.show_quiz_results, name='show_quiz_results'),
+
+    path('assessment_submissions/<int:assessment_id>/', assignment_manager.show_assessment_submissions, name='show_assessment_submissions'),
+
+    path('assessment_mark/update/<int:assessment_id>/<int:mark>/', assignment_manager.update_assessment_mark, name='update_assessment_mark'),
 ]

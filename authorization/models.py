@@ -10,7 +10,7 @@ from django.core.exceptions import ValidationError
 class Gender(models.TextChoices):
     MALE = 'M', 'Male'
     FEMALE = 'F', 'Female'
-    OTHER = 'O', 'Other'
+    OTHER = 'O', 'Other' 
 
 class AdminLevel(models.TextChoices):
     ROOT = 'R', 'Root'
@@ -240,10 +240,22 @@ class BatchInstructor(BaseModel):
 # Student Model
 class Student(BaseModel):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+    roll_no = models.TextField(blank=True)  # No default here
     student_number = models.CharField(max_length=20, unique=True, default='')
     degree = models.ForeignKey(Degree, on_delete=models.CASCADE, null=True, blank=True)
     enrollment_date = models.DateField(default=timezone.now)
     status = models.CharField(max_length=1, choices=StudentStatus.choices, default=StudentStatus.ACTIVE)
+
+    def save(self, *args, **kwargs):
+        # Save first to generate pk if it doesn't exist
+        is_new = self._state.adding and not self.pk
+        super().save(*args, **kwargs)
+
+        # Generate roll_no based on pk if not already set
+        if is_new and not self.roll_no:
+            self.roll_no = f'STU-{self.pk}'
+            # Save again with roll_no
+            super().save(update_fields=['roll_no'])
 
 class SISForm(BaseModel):
     # Student's information
@@ -329,7 +341,7 @@ class AssessmentScheme(BaseModel):
     scheme = models.JSONField(default=dict)
 
 # Assessment Model
-class Assessment(BaseModel):
+class Assessment(BaseModel): 
     assessment_scheme = models.ForeignKey(AssessmentScheme, on_delete=models.CASCADE)
     assessment_type = models.TextField(max_length=1, choices=AssessmentType.choices)
     assessment = models.JSONField(default=dict)
@@ -339,11 +351,9 @@ class Assessment(BaseModel):
 # Assessment Result Model
 class AssessmentResult(BaseModel):
     assessment = models.ForeignKey(Assessment, on_delete=models.CASCADE)
-    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, null=True, blank=True)
     answer = models.JSONField(default=dict)
     mark = models.PositiveIntegerField(default=0)
-    graded_by = models.ForeignKey(Instructor, on_delete=models.CASCADE)
-    graded_at = models.DateTimeField(default=timezone.now)
 
 # Mailbox Admin Model
 class MailboxAdmin(BaseModel):
