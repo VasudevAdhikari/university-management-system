@@ -1,10 +1,11 @@
-from django.urls import path
+from django.urls import path, include
 from . import views
 from students.mailbox import views as mailbox_views
 
 app_name = 'students'
 
 urlpatterns = [
+    path('academics/', include('students.academic_urls')),
     path('mailbox/', views.mailbox, name='mailbox'),
     path('mailbox/post/', views.handle_post, name='handle_post'),
     path('mailbox/load_more/', views.load_more_posts, name='load_more_posts'),

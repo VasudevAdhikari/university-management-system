@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views, lab_api
-from executives.components import faculty_manager, department_manager, course_manager, degree_manager
+from executives.components import faculty_manager, department_manager, course_manager, degree_manager, term_manager, batch_manager
 
 app_name = 'executives'
 
@@ -8,16 +8,28 @@ urlpatterns = [
     # Dashboard and Home
     path('', views.executive_home, name='executive_home'),
     path('unapproved_students/', views.get_unapproved_students, name='unapproved_students'),
-    path('approve_student/', views.approve_student, name='approve_student'),
+    path('approve_student/<str:user_id>/', views.approve_student, name='approve_student'),
+    path('reject_student/<str:user_id>/', views.reject_student, name='reject_student'),
+
     path('unapproved_instructors/', views.show_unapproved_instructors, name='unapproved_instructors'),
+    path('approve_instructor/<str:user_id>/<str:dept_id>/<str:role>/', views.approve_instructor, name='approve_instructor'),
+    path('reject_instructor/<str:user_id>/', views.reject_instructor, name='reject_instructor'),
+
     path('uni_info/', views.show_uni_info, name='show_uni_info'),
     path('uni_info_edit/', views.uni_info_edit, name='uni_info_edit'),
+
+
     path('show_lab_details/<str:lab_name>', views.show_lab_details, name='show_lab_details'),
+
+
     path('show_degree_management', degree_manager.show_degree_management, name='show_degree_management'),
+
+
     path('show_course_management', course_manager.show_course_management, name='show_course_management'),
     path('course/add', course_manager.add_course, name='add_course'),
     path('course/edit/<str:course_id>', course_manager.edit_course, name='edit_course'),
     path('course/delete/<str:course_id>', course_manager.delete_course, name='delete_course'),
+
     # path('show_department_management', views.show_department_management, name='show_department_management'),
     path('show_faculty_management', faculty_manager.show_faculty_management, name='show_faculty_management'),
 
@@ -67,4 +79,18 @@ urlpatterns = [
     path('api/department/add/', department_manager.department_add, name='department_add_api'),
     path('api/department/edit/<int:department_id>/', department_manager.department_edit, name='department_edit_api'),
     path('api/department/delete/<int:department_id>/', department_manager.department_delete, name='department_delete_api'),
+
+    #API Endpoints for Term Management
+    path('show_term_management/', term_manager.show_term_management, name='show_term_management'),
+    path('terms/', term_manager.list_terms, name='list_terms'),
+    path('terms/create/', term_manager.create_term, name='create_term'),
+    path('terms/<int:term_id>/update/', term_manager.update_term, name='update_term'),
+    path('terms/<int:term_id>/delete/', term_manager.delete_term, name='delete_term'),
+
+    #API Endpoints for Batch Management
+    path('batches/<int:term_id>/', batch_manager.show_batch_management, name='show_batch_management'),
+    path('batches/edit/', batch_manager.edit_batch, name='edit_batch'),
+    path('batches/list/', batch_manager.list_batches, name='list_batch'),
+    path('batch_instructor/edit/', batch_manager.edit_batch_instructor, name='edit_batch_instructor'),
+    path('batch_instructor/delete/', batch_manager.delete_batch_instructor, name='delete_batch_instructor'),
 ]

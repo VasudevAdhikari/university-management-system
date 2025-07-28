@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ assessment.assessment.title }} - Assessment Submission</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'students/academic/styles/assessment.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="assessment-container">
+        <!-- Header with Timer -->
+        <div class="assessment-header">
+            <div class="assessment-title">
+                <h1>{{ assessment.assessment.title }}</h1>
+                <span class="assessment-type">{{ assessment.get_assessment_type_display }}</span>
+            </div>
+            <div class="timer-section">
+                <div class="timer-display">
+                    <i class="fas fa-clock"></i>
+                    <span id="timer">--:--:--</span>
+                </div>
+                <div class="timer-status" id="timer-status">Time Remaining</div>
+            </div>
+        </div>
+
+        <!-- Assessment Content -->
+        <div class="assessment-content">
+            <!-- Question Section -->
+            <div class="question-section">
+                <h2>Question</h2>
+                <div class="question-text">
+                    {{ assessment.assessment.question }}
+                </div>
+
+                <!-- Question Images -->
+                {% if assessment.assessment.images %}
+                <div class="question-images">
+                    <h3>Reference Images</h3>
+                    <div class="image-gallery">
+                        {% for image in assessment.assessment.images %}
+                        <div class="image-item" onclick="openLightbox('{{ image }}', 'question')">
+                            <img src="/media/assignment_images/{{ image }}" alt="Question Image" loading="lazy">
+                            <div class="image-overlay">
+                                <i class="fas fa-expand"></i>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Question Files -->
+                {% if assessment.assessment.files %}
+                <div class="question-files">
+                    <h3>Reference Files</h3>
+                    <div class="file-list">
+                        {% for file in assessment.assessment.files %}
+                        <div class="file-item">
+                            <i class="fas fa-file-alt"></i>
+                            <span class="file-name">{{ file|slice:"0:-4" }}</span>
+                            <a href="/media/assignment_files/{{ file }}" download class="download-btn">
+                                <i class="fas fa-download"></i>
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Submission Section -->
+            <div class="submission-section">
+                <h2>Your Submission</h2>
+                
+                <!-- Image Upload -->
+                <div class="upload-section">
+                    <h3>Upload Images</h3>
+                    <div class="upload-area" id="image-upload-area">
+                        <input type="file" id="image-input" accept="image/*" multiple style="display: none;">
+                        <div class="upload-placeholder" onclick="document.getElementById('image-input').click()">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Click to upload images or drag and drop</p>
+                            <span>Supports: JPG, PNG, GIF, WEBP</span>
+                        </div>
+                    </div>
+                    <div class="uploaded-images" id="uploaded-images"></div>
+                </div>
+
+                <!-- File Upload -->
+                <div class="upload-section">
+                    <h3>Upload Files</h3>
+                    <div class="upload-area" id="file-upload-area">
+                        <input type="file" id="file-input" multiple style="display: none;">
+                        <div class="upload-placeholder" onclick="document.getElementById('file-input').click()">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Click to upload files or drag and drop</p>
+                            <span>Supports: PDF, DOC, DOCX, TXT, ZIP, RAR</span>
+                        </div>
+                    </div>
+                    <div class="uploaded-files" id="uploaded-files"></div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="submit-section">
+                    <button id="submit-btn" class="submit-btn" onclick="submitAssessment()">
+                        <i class="fas fa-paper-plane"></i>
+                        Submit Assessment
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lightbox Modal -->
+    <div id="lightbox" class="lightbox" onclick="closeLightbox()">
+        <div class="lightbox-content">
+            <span class="close-lightbox" onclick="closeLightbox()">&times;</span>
+            <img id="lightbox-image" src="" alt="Lightbox Image">
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirm-modal" class="modal">
+        <div class="modal-content">
+            <h3>Confirm Submission</h3>
+            <p>Are you sure you want to submit this assessment? This action cannot be undone.</p>
+            <div class="modal-buttons">
+                <button onclick="closeConfirmModal()" class="cancel-btn">Cancel</button>
+                <button onclick="confirmSubmit()" class="confirm-btn">Submit</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Modal -->
+    <div id="loading-modal" class="modal">
+        <div class="modal-content">
+            <div class="loading-spinner"></div>
+            <p>Submitting assessment...</p>
+        </div>
+    </div>
+
+    <script>
+        // Assessment data
+        const assessmentData = {
+            id: parseInt('{{ assessment.id }}'),
+            dueDate: '{{ assessment.due_date|date:"Y-m-d H:i:s" }}',
+            timeLimit: parseInt('{{ assessment.assessment.time_limit|default:0 }}'),
+            title: '{{ assessment.assessment.title|escapejs }}'
+        };
+    </script>
+    <script src="{% static 'students/academic/javascripts/assessment.js' %}"></script>
+</body>
+</html>

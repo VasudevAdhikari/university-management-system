@@ -3,193 +3,213 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Beautiful DataTable Example</title>
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/2.2.2/css/jquery.dataTables.min.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 20px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-        }
-
-        th,
-        td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-
-        .profile-pic {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        .details-button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        .details-button:hover {
-            background-color: #0056b3;
-        }
-
-        .hidden-data {
-            display: none;
-            background-color: #e9ecef;
-            padding: 10px;
-            border-radius: 5px;
-            margin-top: 10px;
-            animation: fadeIn 0.5s;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
-        }
-    </style>
+    <title>Student Registration Approval</title>
+    <!-- Bootstrap CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <!-- Poppins Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'executives/css/unapproved_students.css' %}">
 </head>
 
 <body>
-    <table id="myTable" class="display">
-        <thead>
-            <tr>
-                <th>Profile</th>
-                <th>Full Name</th>
-                <th>Registered Date</th>
-                <th>Email</th>
-                <th colspan="2">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for student in unapproved_students %}
-            <tr>
-                <td><img src="/media/{{student.user.profile_picture}}" class="profile-pic"
-                        alt="media/{{student.profile_picture}}"></td>
-                <td>{{student.user.full_name}}</td>
-                <td>{{student.user.created_at}}</td>
-                <td>{{student.user.email}}{{student.student_number}}</td>
-                <td style="display: none;" id="student-{{forloop.counter}}">{{student.student_number}}</td>
-                <td><button class="details-button">Details</button></td>
-                <td><button class="details-button" id="approve-button" onclick="approveStudent({{forloop.counter}})">Approve</button></td>
-            </tr>
-            <tr class="hidden-data">
-                <td colspan="5">
-                    <strong>Phone:</strong> 123-456-7890<br>
-                    <strong>City:</strong> New York<br>
-                    <strong>Date of Birth:</strong> 1990-01-01<br>
-                    <strong>Age:</strong> 33<br>
-                    <strong>Gender:</strong> Male<br>
-                    <strong>Emergency Contact Name:</strong> Jane Doe<br>
-                    <strong>Emergency Contact Email:</strong> jane.doe@example.com<br>
-                    <strong>Emergency Contact Phone:</strong> 098-765-4321<br>
-                    <strong>Relation:</strong> Sister
-                </td>
-            </tr>
-            {% endfor %}
-            <!-- Add more rows as needed -->
-        </tbody>
-    </table>
-
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.datatables.net/2.2.2/js/jquery.dataTables.min.js"></script>
+    {% for stu in unapproved_students %}
     <script>
-        $(document).ready(function () {
-            var table = $('#myTable').DataTable({
-                "columnDefs": [
-                    {
-                        "targets": 0,
-                        "orderable": false
-                    },
-                    {
-                        "targets": 4,
-                        "orderable": false
-                    }
-                ]
-            });
-
-            // Toggle hidden data on button click
-            $('#myTable tbody').on(' click', '.details-button', function () {
-                var row = $(this).closest('tr').next('.hidden-data');
-                row.toggle();
-            });
-        });
-
-        function approveStudent(s_id) {
-            console.log('Approve student with ID:', s_id);
-            student_number = document.getElementById(`student-${s_id}`).innerText;
-            console.log(student_number);
-            if (confirm('Are you sure you want to approve this student?')) {
-                fetch('/executives/approve_student/', { // Replace '/approve_student/' with your actual Django URL
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': getCookie('csrftoken'), // Include CSRF token for Django
-                        'Content-Type': 'application/json' // Or other appropriate content type
-                    },
-                    // You might need to send some data, like the student ID
-                    body: JSON.stringify({
-                        student_id: student_number // Replace 'studentId' with the actual variable
-                    })
-                })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
-                        }
-                        return response.json(); // Or response.text() if your Django view returns plain text
-                    })
-                    .then(data => {
-                        // Handle the successful response from Django
-                        if (data.success) {
-                            alert('Student approved successfully!');
-                            // Optionally, update the UI to reflect the approval
-                        } else {
-                            alert('Failed to approve student.');
-                            console.error('Approval failed:', data.error); // Log the error for debugging
-                        }
-                    })
-                    .catch(error => {
-                        alert('Failed to approve student.');
-                        console.error('There was an error sending the request:', error);
-                    });
-            }
-        }
-
-        // Helper function to get the CSRF token from cookies
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    let cookie = cookies[i].trimStart();
-                    // Does this cookie string begin with the name we want?
-                    if (cookie.startsWith(name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
+        // console.log('{{unapproved_students | escapejs}}');
+        // console.log('{{rejected_students | escapejs}}');
+        console.log('{{stu|escapejs}}');
     </script>
+    {% endfor %}
+    <h1 class="text-center my-4">Student Registration Approve Table</h1>
+    <div class="container my-5">
+        <div class="row mb-3">
+            <div class="col-12 col-md-6 mx-auto">
+                <div class="position-relative">
+                    <input type="text" id="userSearch" class="form-control form-control-lg ps-5"
+                        style="font-family: 'Poppins', Arial, sans-serif;">
+                    <span class="position-absolute top-50 start-0 translate-middle-y ms-3 text-primary"
+                        style="pointer-events:none;">
+                        <i class="bi bi-search"></i>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table align-middle mb-0" id="userTable">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col">Pic</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Email</th>
+                        <th class="text-center">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- User 1 -->
+                    {% for student in unapproved_students %}
+                    <tr class="user-row" data-user="{{student.id}}" style="cursor:pointer;">
+                        <td data-label="Pic">
+                            <img class="avatar profile-pic" src="{{student.profile}}" alt="User Pic"
+                                data-img="{{student.profile}}">
+                        </td>
+                        <td data-label="Name">{{student.name}}</td>
+                        <td data-label="Email">{{student.email}}</td>
+                        <td class="text-center" data-label="Action">
+                            <div class="d-inline-flex gap-2">
+                                <button class="icon-btn approve" user-id="{{student.id}}" title="Approve">
+                                    <i class="bi bi-check"></i>
+                                </button>
+                                <button class="icon-btn reject" user-id={{student.id}} title="Reject">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr class="user-details-row" data-user="{{student.id}}" style="display:none;">
+                        <td colspan="4">
+                            <div class="row g-2 align-items-center user-details-content">
+                                <div class="col-12 col-md-6 mb-2 mb-md-0">
+                                    <div class="detail-item mb-2">
+                                        <i class="bi bi-telephone text-primary me-2"></i>
+                                        <span class="detail-label">Phone:</span>
+                                        <span class="detail-value">{{student.phone}}</span>
+                                    </div>
+                                    <div class="detail-item mb-2">
+                                        <i class="bi bi-geo-alt text-danger me-2"></i>
+                                        <span class="detail-label">City:</span>
+                                        <span class="detail-value">{{student.city}}</span>
+                                    </div>
+                                    <div class="detail-item mb-2">
+                                        <i class="bi bi-calendar-event text-success me-2"></i>
+                                        <span class="detail-label">DOB:</span>
+                                        <span class="detail-value">{{student.date_of_birth}}</span>
+                                    </div>
+                                    <div class="detail-item mb-2">
+                                        <i class="bi bi-telegram text-info me-2"></i>
+                                        <span class="detail-label">Telegram:</span>
+                                        <span class="detail-value">{{student.telegram_username}}</span>
+                                    </div>
+                                    <div class="detail-item mb-2">
+                                        <i class="bi bi-envelope-at text-secondary me-2"></i>
+                                        <span class="detail-label">Outlook:</span>
+                                        <span class="detail-value">{{student.outlook_mail}}</span>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <div class="detail-item mb-2">
+                                        <i class="bi bi-gender-male text-primary me-2"></i>
+                                        <span class="detail-label">Gender:</span>
+                                        <span class="detail-value">{{student.gender}}</span>
+                                    </div>
+                                    <div class="detail-item mb-2">
+                                        <i class="bi bi-person-heart text-warning me-2"></i>
+                                        <span class="detail-label">Emergency Name:</span>
+                                        <span class="detail-value">{{student.emergency_contact.name}}</span>
+                                    </div>
+                                    <div class="detail-item mb-2">
+                                        <i class="bi bi-envelope-paper text-secondary me-2"></i>
+                                        <span class="detail-label">Emergency Email:</span>
+                                        <span class="detail-value">{{student.emergency_contact.email}}</span>
+                                    </div>
+                                    <div class="detail-item mb-2">
+                                        <i class="bi bi-telephone-inbound text-danger me-2"></i>
+                                        <span class="detail-label">Emergency Phone:</span>
+                                        <span class="detail-value">{{student.emergency_contact.phone}}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+
+                    {% for student in rejected_students %}
+                    <!-- Rejected Users -->
+                    <tr class="user-row rejected-row" data-user="11" style="cursor:pointer;">
+                        <td data-label="Pic">
+                            <img class="avatar profile-pic" src="{{student.profile}}" alt="User Pic"
+                                data-img="{{student.profile}}">
+                        </td>
+                        <td data-label="Name">{{student.name}}</td>
+                        <td data-label="Email">{{student.email}}</td>
+                        <td class="text-center" data-label="Action">
+                            <div class="d-inline-flex gap-2">
+                                <button class="icon-btn approve" user-id="{{student.id}}" title="Approve">
+                                    <i class="bi bi-check"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr class="user-details-row" data-user="11" style="display:none;">
+                        <td colspan="4">
+                            <div class="row g-2 align-items-center user-details-content">
+                                <div class="col-12 col-md-6 mb-2 mb-md-0">
+                                    <div class="detail-item mb-2">
+                                        <i class="bi bi-telephone text-primary me-2"></i>
+                                        <span class="detail-label">Phone:</span>
+                                        <span class="detail-value">{{student.phone}}</span>
+                                    </div>
+                                    <div class="detail-item mb-2">
+                                        <i class="bi bi-geo-alt text-danger me-2"></i>
+                                        <span class="detail-label">City:</span>
+                                        <span class="detail-value">{{student.city}}</span>
+                                    </div>
+                                    <div class="detail-item mb-2">
+                                        <i class="bi bi-calendar-event text-success me-2"></i>
+                                        <span class="detail-label">DOB:</span>
+                                        <span class="detail-value">{{student.date_of_birth}}</span>
+                                    </div>
+                                    <div class="detail-item mb-2">
+                                        <i class="bi bi-telegram text-info me-2"></i>
+                                        <span class="detail-label">Telegram:</span>
+                                        <span class="detail-value">{{student.telegram_username}}</span>
+                                    </div>
+                                    <div class="detail-item mb-2">
+                                        <i class="bi bi-envelope-at text-secondary me-2"></i>
+                                        <span class="detail-label">Outlook:</span>
+                                        <span class="detail-value">{{student.outlook_mail}}</span>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <div class="detail-item mb-2">
+                                        <i class="bi bi-gender-male text-primary me-2"></i>
+                                        <span class="detail-label">Gender:</span>
+                                        <span class="detail-value">{{student.gender}}</span>
+                                    </div>
+                                    <div class="detail-item mb-2">
+                                        <i class="bi bi-person-heart text-warning me-2"></i>
+                                        <span class="detail-label">Emergency Name:</span>
+                                        <span class="detail-value">{{student.emergency_contact.name}}</span>
+                                    </div>
+                                    <div class="detail-item mb-2">
+                                        <i class="bi bi-envelope-paper text-secondary me-2"></i>
+                                        <span class="detail-label">Emergency Email:</span>
+                                        <span class="detail-value">{{student.emergency_contact.email}}</span>
+                                    </div>
+                                    <div class="detail-item mb-2">
+                                        <i class="bi bi-telephone-inbound text-danger me-2"></i>
+                                        <span class="detail-label">Emergency Phone:</span>
+                                        <span class="detail-value">1{{student.emergency_contact.phone}}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!-- Lightbox Modal -->
+    <div id="lightboxModal" class="lightbox-modal" style="display:none;">
+        <span class="lightbox-close">&times;</span>
+        <img class="lightbox-content" id="lightboxImg" src="" alt="Profile Picture">
+    </div>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'executives/javascripts/unapproved_students.js' %}"></script>
+
 </body>
 
 </html>

@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>User Approval Table</title>
+    <title>Instructor Approval Table</title>
     <!-- Bootstrap CSS CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons CDN -->
@@ -11,11 +11,18 @@
     <!-- Poppins Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     {% load static %}
-    <link rel="stylesheet" href="{% static 'executives/css/unapproved_instructors.css' %}">
+    <link rel="stylesheet" href="{% static 'executives/css/unapproved_students.css' %}">
 </head>
 
 <body>
-    <h1 class="text-center my-4">User Approve Table</h1>
+    <script>
+        console.log('{{unapproved_instructors|escapejs}}')
+        console.log('{{departments|escapejs}}')
+        {% for message in messages %}
+        alert('{{message|escapejs}}');
+        {% endfor %}
+    </script>
+    <h1 class="text-center my-4">Instructor Approve Table</h1>
     <div class="container my-5">
         <div class="row mb-3">
             <div class="col-12 col-md-6 mx-auto">
@@ -35,242 +42,235 @@
                     <tr>
                         <th scope="col">Pic</th>
                         <th scope="col">Name</th>
-                        <th scope="col">Email</th>
+                        <th scope="col">Department</th>
                         <th scope="col">Role</th>
                         <th class="text-center">Action</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td><img class="avatar" src="https://randomuser.me/api/portraits/men/1.jpg" alt="User Pic"></td>
-                        <td>John Doe</td>
-                        <td>john.doe@email.com</td>
-                        <td>
-                            <select class="form-select form-select-sm">
-                                <option>User</option>
-                                <option>Admin</option>
-                                <option>Moderator</option>
+
+                    {% for instructor in unapproved_instructors %}
+                    <tr class="user-row" data-user="4" style="cursor:pointer;">
+                        <td data-label="Pic">
+                            <img class="avatar profile-pic" src="{{instructor.profile}}" alt="User Pic"
+                                data-img="{{instructor.profile}}">
+                        </td>
+                        <td data-label="Name">{{instructor.name}}</td>
+                        <td data-label="Department">
+                            <select class="form-select form-select-sm" id="departmentSelection{{instructor.id}}">
+                                {% for department in departments %}
+                                <option value="{{department.id}}">{{department.name}}</option>
+                                {% endfor %}
                             </select>
                         </td>
-                        <td class="text-center">
+                        <td data-label="Role">
+                            <select class="form-select form-select-sm"id="roleSelection{{instructor.id}}">
+                                <option value="Professor">Professor</option>
+                                <option value="Associate Professor">Associate Professor</option>
+                                <option value="Senior Lecturer">Senior Lecturer</option>
+                                <option value="Junior Lecturer">Junior Lecturer</option>
+                                <option value="Lab Manager">Lab Manager</option>
+                                <option value="Intern">Intern</option>
+                            </select>
+                        </td>
+                        <td class="text-center" data-label="Action">
                             <div class="d-inline-flex gap-2">
-                                <button class="icon-btn approve" title="Approve">
+                                <button class="icon-btn approve" user-id="{{instructor.id}}" title="Approve">
                                     <i class="bi bi-check"></i>
                                 </button>
-                                <button class="icon-btn reject" title="Reject">
+                                <button class="icon-btn reject" user-id="{{instructor.id}}" title="Reject">
                                     <i class="bi bi-x"></i>
                                 </button>
                             </div>
                         </td>
                     </tr>
-                    <tr>
-                        <td><img class="avatar" src="https://randomuser.me/api/portraits/women/2.jpg" alt="User Pic">
+                    <tr class="user-details-row" data-user="4" style="display:none;">
+                        <td colspan="5">
+                            <div class="row g-2 align-items-center user-details-content">
+                                <div class="col-12 col-md-6 mb-2 mb-md-0">
+                                    <div class="detail-item mb-2">
+                                        <i class="bi bi-envelope-at text-secondary me-2"></i>
+                                        <span class="detail-label">Email:</span>
+                                        <span class="detail-value">{{instructor.email}}</span>
+                                    </div>
+                                    <div class="detail-item mb-2">
+                                        <i class="bi bi-telephone text-primary me-2"></i>
+                                        <span class="detail-label">Phone:</span>
+                                        <span class="detail-value">{{instructor.phone}}</span>
+                                    </div>
+                                    <div class="detail-item mb-2">
+                                        <i class="bi bi-geo-alt text-danger me-2"></i>
+                                        <span class="detail-label">City:</span>
+                                        <span class="detail-value">{{instructor.city}}</span>
+                                    </div>
+                                    <div class="detail-item mb-2">
+                                        <i class="bi bi-calendar-event text-success me-2"></i>
+                                        <span class="detail-label">DOB:</span>
+                                        <span class="detail-value">{{instructor.date_of_birth}}</span>
+                                    </div>
+                                    <div class="detail-item mb-2">
+                                        <i class="bi bi-telegram text-info me-2"></i>
+                                        <span class="detail-label">Telegram:</span>
+                                        <span class="detail-value">{{instructor.telegram_username}}</span>
+                                    </div>
+                                    <div class="detail-item mb-2">
+                                        <i class="bi bi-envelope text-secondary me-2"></i>
+                                        <span class="detail-label">Outlook:</span>
+                                        <span class="detail-value">{{instructor.outlook_mail}}</span>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <div class="detail-item mb-2">
+                                        <i class="bi bi-gender-male text-primary me-2"></i>
+                                        <span class="detail-label">Gender:</span>
+                                        <span class="detail-value">{{instructor.gender}}</span>
+                                    </div>
+                                    <div class="detail-item mb-2">
+                                        <i class="bi bi-mortarboard text-warning me-2"></i>
+                                        <span class="detail-label">Degree:</span>
+                                        <span class="detail-value">{{instructor.degree}}</span>
+                                    </div>
+                                    <div class="detail-item mb-2">
+                                        <i class="bi bi-lightbulb text-info me-2"></i>
+                                        <span class="detail-label">Specialization:</span>
+                                        <span class="detail-value">{{instructor.specialization}}</span>
+                                    </div>
+                                    <div class="detail-item mb-2">
+                                        <i class="bi bi-person-heart text-warning me-2"></i>
+                                        <span class="detail-label">Emergency Name:</span>
+                                        <span class="detail-value">{{instructor.emergency_contact.name}}</span>
+                                    </div>
+                                    <div class="detail-item mb-2">
+                                        <i class="bi bi-envelope-paper text-secondary me-2"></i>
+                                        <span class="detail-label">Emergency Email:</span>
+                                        <span class="detail-value">{{instructor.emergency_contact.email}}</span>
+                                    </div>
+                                    <div class="detail-item mb-2">
+                                        <i class="bi bi-telephone-inbound text-danger me-2"></i>
+                                        <span class="detail-label">Emergency Phone:</span>
+                                        <span class="detail-value">{{instructor.emergency_contact.phone}}</span>
+                                    </div>
+                                </div>
+                            </div>
                         </td>
-                        <td>Jane Smith</td>
-                        <td>jane.smith@email.com</td>
-                        <td>
-                            <select class="form-select form-select-sm">
-                                <option>User</option>
-                                <option>Admin</option>
-                                <option>Moderator</option>
+                    </tr>
+                    {% endfor %}
+
+
+                    {% for instructor in rejected_instructors %}
+                    <tr class="user-row" data-user="4"style="cursor:pointer;">
+                        <td data-label="Pic">
+                            <img class="avatar profile-pic" src="{{instructor.profile}}" alt="User Pic"
+                                data-img="{{instructor.profile}}">
+                        </td>
+                        <td data-label="Name">{{instructor.name}}</td>
+                        <td data-label="Department">
+                            <select class="form-select form-select-sm" id="departmentSelection{{instructor.id}}">
+                                {% for department in departments %}
+                                <option value="{{department.id}}">{{department.name}}</option>
+                                {% endfor %}
                             </select>
                         </td>
-                        <td class="text-center">
+                        <td data-label="Role">
+                            <select class="form-select form-select-sm"id="roleSelection{{instructor.id}}">
+                                <option value="Professor">Professor</option>
+                                <option value="Associate Professor">Associate Professor</option>
+                                <option value="Senior Lecturer">Senior Lecturer</option>
+                                <option value="Junior Lecturer">Junior Lecturer</option>
+                                <option value="Lab Manager">Lab Manager</option>
+                                <option value="Intern">Intern</option>
+                            </select>
+                        </td>
+                        <td class="text-center" data-label="Action">
                             <div class="d-inline-flex gap-2">
-                                <button class="icon-btn approve" title="Approve">
+                                <button class="icon-btn approve" user-id="{{instructor.id}}" title="Approve">
                                     <i class="bi bi-check"></i>
-                                </button>
-                                <button class="icon-btn reject" title="Reject">
-                                    <i class="bi bi-x"></i>
                                 </button>
                             </div>
                         </td>
                     </tr>
-                    <tr>
-                        <td><img class="avatar" src="https://randomuser.me/api/portraits/men/3.jpg" alt="User Pic"></td>
-                        <td>Michael Lee</td>
-                        <td>michael.lee@email.com</td>
-                        <td>
-                            <select class="form-select form-select-sm">
-                                <option>User</option>
-                                <option>Admin</option>
-                                <option>Moderator</option>
-                            </select>
-                        </td>
-                        <td class="text-center">
-                            <div class="d-inline-flex gap-2">
-                                <button class="icon-btn approve" title="Approve">
-                                    <i class="bi bi-check"></i>
-                                </button>
-                                <button class="icon-btn reject" title="Reject">
-                                    <i class="bi bi-x"></i>
-                                </button>
+                    <tr class="user-details-row" data-user="4" style="display:none;">
+                        <td colspan="5">
+                            <div class="row g-2 align-items-center user-details-content">
+                                <div class="col-12 col-md-6 mb-2 mb-md-0">
+                                    <div class="detail-item mb-2">
+                                        <i class="bi bi-envelope-at text-secondary me-2"></i>
+                                        <span class="detail-label">Email:</span>
+                                        <span class="detail-value">{{instructor.email}}</span>
+                                    </div>
+                                    <div class="detail-item mb-2">
+                                        <i class="bi bi-telephone text-primary me-2"></i>
+                                        <span class="detail-label">Phone:</span>
+                                        <span class="detail-value">{{instructor.phone}}</span>
+                                    </div>
+                                    <div class="detail-item mb-2">
+                                        <i class="bi bi-geo-alt text-danger me-2"></i>
+                                        <span class="detail-label">City:</span>
+                                        <span class="detail-value">{{instructor.city}}</span>
+                                    </div>
+                                    <div class="detail-item mb-2">
+                                        <i class="bi bi-calendar-event text-success me-2"></i>
+                                        <span class="detail-label">DOB:</span>
+                                        <span class="detail-value">{{instructor.date_of_birth}}</span>
+                                    </div>
+                                    <div class="detail-item mb-2">
+                                        <i class="bi bi-telegram text-info me-2"></i>
+                                        <span class="detail-label">Telegram:</span>
+                                        <span class="detail-value">{{instructor.telegram_username}}</span>
+                                    </div>
+                                    <div class="detail-item mb-2">
+                                        <i class="bi bi-envelope text-secondary me-2"></i>
+                                        <span class="detail-label">Outlook:</span>
+                                        <span class="detail-value">{{instructor.outlook_mail}}</span>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <div class="detail-item mb-2">
+                                        <i class="bi bi-gender-male text-primary me-2"></i>
+                                        <span class="detail-label">Gender:</span>
+                                        <span class="detail-value">{{instructor.gender}}</span>
+                                    </div>
+                                    <div class="detail-item mb-2">
+                                        <i class="bi bi-mortarboard text-warning me-2"></i>
+                                        <span class="detail-label">Degree:</span>
+                                        <span class="detail-value">{{instructor.degree}}</span>
+                                    </div>
+                                    <div class="detail-item mb-2">
+                                        <i class="bi bi-lightbulb text-info me-2"></i>
+                                        <span class="detail-label">Specialization:</span>
+                                        <span class="detail-value">{{instructor.specialization}}</span>
+                                    </div>
+                                    <div class="detail-item mb-2">
+                                        <i class="bi bi-person-heart text-warning me-2"></i>
+                                        <span class="detail-label">Emergency Name:</span>
+                                        <span class="detail-value">{{instructor.emergency_contact.name}}</span>
+                                    </div>
+                                    <div class="detail-item mb-2">
+                                        <i class="bi bi-envelope-paper text-secondary me-2"></i>
+                                        <span class="detail-label">Emergency Email:</span>
+                                        <span class="detail-value">{{instructor.emergency_contact.email}}</span>
+                                    </div>
+                                    <div class="detail-item mb-2">
+                                        <i class="bi bi-telephone-inbound text-danger me-2"></i>
+                                        <span class="detail-label">Emergency Phone:</span>
+                                        <span class="detail-value">{{instructor.emergency_contact.phone}}</span>
+                                    </div>
+                                </div>
                             </div>
                         </td>
                     </tr>
-                    <tr>
-                        <td><img class="avatar" src="https://randomuser.me/api/portraits/women/4.jpg" alt="User Pic">
-                        </td>
-                        <td>Emily Clark</td>
-                        <td>emily.clark@email.com</td>
-                        <td>
-                            <select class="form-select form-select-sm">
-                                <option>User</option>
-                                <option>Admin</option>
-                                <option>Moderator</option>
-                            </select>
-                        </td>
-                        <td class="text-center">
-                            <div class="d-inline-flex gap-2">
-                                <button class="icon-btn approve" title="Approve">
-                                    <i class="bi bi-check"></i>
-                                </button>
-                                <button class="icon-btn reject" title="Reject">
-                                    <i class="bi bi-x"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><img class="avatar" src="https://randomuser.me/api/portraits/men/5.jpg" alt="User Pic"></td>
-                        <td>Chris Evans</td>
-                        <td>chris.evans@email.com</td>
-                        <td>
-                            <select class="form-select form-select-sm">
-                                <option>User</option>
-                                <option>Admin</option>
-                                <option>Moderator</option>
-                            </select>
-                        </td>
-                        <td class="text-center">
-                            <div class="d-inline-flex gap-2">
-                                <button class="icon-btn approve" title="Approve">
-                                    <i class="bi bi-check"></i>
-                                </button>
-                                <button class="icon-btn reject" title="Reject">
-                                    <i class="bi bi-x"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><img class="avatar" src="https://randomuser.me/api/portraits/women/6.jpg" alt="User Pic">
-                        </td>
-                        <td>Linda Brown</td>
-                        <td>linda.brown@email.com</td>
-                        <td>
-                            <select class="form-select form-select-sm">
-                                <option>User</option>
-                                <option>Admin</option>
-                                <option>Moderator</option>
-                            </select>
-                        </td>
-                        <td class="text-center">
-                            <div class="d-inline-flex gap-2">
-                                <button class="icon-btn approve" title="Approve">
-                                    <i class="bi bi-check"></i>
-                                </button>
-                                <button class="icon-btn reject" title="Reject">
-                                    <i class="bi bi-x"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><img class="avatar" src="https://randomuser.me/api/portraits/men/7.jpg" alt="User Pic"></td>
-                        <td>David Kim</td>
-                        <td>david.kim@email.com</td>
-                        <td>
-                            <select class="form-select form-select-sm">
-                                <option>User</option>
-                                <option>Admin</option>
-                                <option>Moderator</option>
-                            </select>
-                        </td>
-                        <td class="text-center">
-                            <div class="d-inline-flex gap-2">
-                                <button class="icon-btn approve" title="Approve">
-                                    <i class="bi bi-check"></i>
-                                </button>
-                                <button class="icon-btn reject" title="Reject">
-                                    <i class="bi bi-x"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><img class="avatar" src="https://randomuser.me/api/portraits/women/8.jpg" alt="User Pic">
-                        </td>
-                        <td>Sarah Wilson</td>
-                        <td>sarah.wilson@email.com</td>
-                        <td>
-                            <select class="form-select form-select-sm">
-                                <option>User</option>
-                                <option>Admin</option>
-                                <option>Moderator</option>
-                            </select>
-                        </td>
-                        <td class="text-center">
-                            <div class="d-inline-flex gap-2">
-                                <button class="icon-btn approve" title="Approve">
-                                    <i class="bi bi-check"></i>
-                                </button>
-                                <button class="icon-btn reject" title="Reject">
-                                    <i class="bi bi-x"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><img class="avatar" src="https://randomuser.me/api/portraits/men/9.jpg" alt="User Pic"></td>
-                        <td>James Miller</td>
-                        <td>james.miller@email.com</td>
-                        <td>
-                            <select class="form-select form-select-sm">
-                                <option>User</option>
-                                <option>Admin</option>
-                                <option>Moderator</option>
-                            </select>
-                        </td>
-                        <td class="text-center">
-                            <div class="d-inline-flex gap-2">
-                                <button class="icon-btn approve" title="Approve">
-                                    <i class="bi bi-check"></i>
-                                </button>
-                                <button class="icon-btn reject" title="Reject">
-                                    <i class="bi bi-x"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><img class="avatar" src="https://randomuser.me/api/portraits/women/10.jpg" alt="User Pic">
-                        </td>
-                        <td>Olivia Garcia</td>
-                        <td>olivia.garcia@email.com</td>
-                        <td>
-                            <select class="form-select form-select-sm">
-                                <option>User</option>
-                                <option>Admin</option>
-                                <option>Moderator</option>
-                            </select>
-                        </td>
-                        <td class="text-center">
-                            <div class="d-inline-flex gap-2">
-                                <button class="icon-btn approve" title="Approve">
-                                    <i class="bi bi-check"></i>
-                                </button>
-                                <button class="icon-btn reject" title="Reject">
-                                    <i class="bi bi-x"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
+                    {% endfor %}
+                    
                 </tbody>
             </table>
         </div>
     </div>
     <!-- Bootstrap JS -->
+
+    <div id="lightboxModal" class="lightbox-modal" style="display:none;">
+        <span class="lightbox-close">&times;</span>
+        <img class="lightbox-content" id="lightboxImg" src="" alt="Profile Picture">
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{% static 'executives/javascripts/unapproved_instructors.js' %}"></script>
 

@@ -1,0 +1,247 @@
+
+
+body {
+    font-family: 'Poppins', Arial, sans-serif;
+    background: linear-gradient(135deg, #e3f0ff 0%, #f8fbff 100%);
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+}
+
+h1 {
+    font-weight: 600;
+    color: #2563eb;
+    letter-spacing: 1px;
+    text-align: center;
+    font-size: 2.2rem;
+    margin-bottom: 2rem;
+}
+
+/* .container {
+    background: #f0f6ff;
+    border-radius: 1.2rem;
+    box-shadow: 0 4px 24px 0 rgba(37, 99, 235, 0.08);
+    padding: 2rem 1rem;
+} */
+
+.container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.table-responsive {
+     border-radius: 1rem;
+    box-shadow: 0 2px 8px 0 rgba(37, 99, 235, 0.07);
+    overflow-x: auto;
+}
+
+.table {
+   background: #f0f6ff !important;
+    border-radius: 1rem;
+    overflow: hidden;
+    text-align: center;
+    min-width: 700px;
+}
+
+.table thead {
+    background: #e3f0ff;
+        text-align: center;
+
+}
+
+.table th,
+.table td {
+    vertical-align: middle;
+    padding: 1.25rem 2rem;
+    text-align: center;
+    font-size: 1.05rem;
+}
+
+.marks-input,
+.marks-text {
+    min-width: 120px !important;
+    max-width: 140px !important;
+    display: inline-block;
+    text-align: center;
+    font-size: 1.1rem;
+}
+
+.avatar {
+   width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #b6d0fa;
+    transition: width 0.2s, height 0.2s;
+}
+
+.icon-btn {
+    border: none;
+    background: #e3f0ff;
+    font-size: 1.3em;
+    cursor: pointer;
+    border-radius: 0.5rem;
+    width: 44px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, box-shadow 0.2s, width 0.2s, height 0.2s, font-size 0.2s;
+    box-shadow: 0 2px 8px 0 rgba(37, 99, 235, 0.07);
+}
+
+.icon-btn.approve,
+.icon-btn.reject {
+    display: none !important;
+}
+
+.icon-btn.edit {
+    color: #2563eb;
+}
+
+.icon-btn.save {
+    color: #22c55e;
+}
+
+.icon-btn.view {
+    color: #6366f1;
+}
+
+.icon-btn:active,
+.icon-btn:focus {
+    background: #d0e6ff;
+    outline: none;
+}
+
+.form-select {
+    background: #f0f6ff;
+    border: 1px solid #b6d0fa;
+    font-size: 0.95rem;
+    border-radius: 5px;
+    ;
+}
+
+@media (max-width: 992px) {
+    .container {
+        max-width: 98vw;
+        padding: 1.5rem 0.5rem;
+    }
+    .table {
+        min-width: 600px;
+    }
+    h1 {
+        font-size: 1.7rem;
+    }
+}
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem 0.2rem;
+    }
+    .table th,
+    .table td {
+        font-size: 0.95rem;
+        padding: 0.5rem;
+        text-align: center;
+    }
+    h1 {
+        font-size: 1.3rem;
+        text-align: center;
+    }
+    .avatar {
+        width: 32px;
+        height: 32px;
+    }
+    .icon-btn {
+        width: 36px;
+        height: 30px;
+        font-size: 1.1em;
+    }
+    .marks-input,
+    .marks-text {
+        min-width: 80px !important;
+        max-width: 100px !important;
+        font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .container {
+        padding: 0.5rem 0.1rem;
+    }
+    .table-responsive {
+        border-radius: 0.7rem;
+        box-shadow: 0 1px 4px 0 rgba(37, 99, 235, 0.07);
+        overflow-x: auto;
+    }
+    .table {
+        min-width: 480px;
+    }
+    .table th,
+    .table td {
+        font-size: 0.85rem;
+        padding: 0.3rem;
+        text-align: center;
+    }
+    .avatar {
+        width: 26px;
+        height: 26px;
+    }
+    .icon-btn {
+        width: 28px;
+        height: 22px;
+        font-size: 0.95em;
+    }
+    .marks-input,
+    .marks-text {
+        min-width: 60px !important;
+        max-width: 80px !important;
+        font-size: 0.85rem;
+    }
+    h1 {
+        font-size: 1.1rem;
+    }
+}
+
+/* Extra small devices (portrait phones, less than 400px) */
+@media (max-width: 400px) {
+    .container {
+        padding-left: 0.1rem;
+        padding-right: 0.1rem;
+    }
+    .table th,
+    .table td {
+        font-size: 0.75rem;
+        padding: 0.2rem;
+    }
+    .marks-input,
+    .marks-text {
+        min-width: 24px !important;
+        max-width: 36px !important;
+        font-size: 0.75rem !important;
+    }
+    .avatar {
+        width: 14px;
+        height: 14px;
+    }
+    .icon-btn {
+        width: 16px;
+        height: 16px;
+        font-size: 0.75em;
+    }
+    h1 {
+        font-size: 0.85rem;
+    }
+}
+
+/* Center marks column in table */
+#userTable td:nth-child(5),
+#userTable th:nth-child(5) {
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* Make table horizontally scrollable on small screens */
+.table-responsive {
+    overflow-x: auto;
+}

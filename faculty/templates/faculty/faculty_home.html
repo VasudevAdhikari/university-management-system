@@ -59,7 +59,6 @@
         <ul>
           <li><a href="#"><i class="fa-solid fa-right-from-bracket icon"></i><span class="sidebar-text">Log
                 Out</span></a></li>
-
         </ul>
       </div>
     </div>
@@ -84,7 +83,7 @@
     <div class="row g-5 d-flex justify-content-around">
       {% for bi in term_group.list %}
       <div class="col-md-3 col-sm-6 course-img-card">
-        <div class="card course-card" onclick="location.href='#'">
+        <div class="card course-card" onclick="window.location.href='/faculty/course_management/{{bi.id}}/'">
           <img
             src="https://img.freepik.com/premium-vector/english-language-lesson-school-idea-education_277904-2451.jpg"
             class="card-img-top course-photo img-fluid" alt="Course Image">

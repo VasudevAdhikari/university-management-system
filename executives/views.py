@@ -12,6 +12,7 @@ import json
 from authorization.models import UniversityDetails
 from django.views.decorators.http import require_POST
 from .additional_business_logics.additionals import *
+from .additional_business_logics.data_formatter import get_student_for_approval, get_instructor_for_approval
 from .lab_api import lab_edit_api, lab_delete_photo_api, lab_edit_project_api
 
 def is_executive(user):
@@ -31,27 +32,34 @@ def executive_home(request):
     return render(request, 'executives/home.html', context=data)
 
 def get_unapproved_students(request):
+    unapproved_student_data = Student.objects.filter(status=StudentStatus.UNAPPROVED)
+    rejected_student_data = Student.objects.filter(status=StudentStatus.REJECTED)
+
+    unapproved_students, rejected_students = [], []
+    for student in unapproved_student_data:
+        unapproved_students.append(get_student_for_approval(student))
+
+    for student in rejected_student_data:
+        rejected_students.append(get_student_for_approval(student))
+
     data = {
-        'unapproved_students': Student.objects.select_related('user').all().filter(status=StudentStatus.UNAPPROVED)
+        'unapproved_students': unapproved_students,
+        'rejected_students': rejected_students,
     }
-    for student in data['unapproved_students']:
-        print(student.user.username)
+    print(data)
     return render(request, 'executives/unapproved_students.html', context=data)
 
-def approve_student(request):
-    print(request.POST)
-    if request.method == 'POST':
-        data = request.body.decode('utf-8')
-        data = json.loads(data)
-        student_id = data.get('student_id')
-        print(f'student id is {student_id}')
-        student = Student.objects.get(student_number=student_id)
-        print(student.status)
-        student.status = StudentStatus.ACTIVE
-        print(student.status)
-        student.save()
-        return JsonResponse({'success': True})
-    return JsonResponse({'success': False})
+def approve_student(request, user_id):
+    student = Student.objects.get(user__id=int(user_id))
+    student.status = StudentStatus.ACTIVE
+    student.save()
+    return redirect('/executives/unapproved_students/')
+
+def reject_student(request, user_id):
+    student = Student.objects.get(user__id=int(user_id))
+    student.status = StudentStatus.REJECTED
+    student.save()
+    return redirect('/executives/unapproved_students/')
 
 
 @csrf_exempt
@@ -509,4 +517,48 @@ def show_department_management(request):
     return render(request, 'executives/department_management.html')
 
 def show_unapproved_instructors(request):
-    return render(request, 'executives/unapproved_instructors.html')
+    unapproved_instructor_data = Instructor.objects.filter(employment_status=EmploymentStatus.UNAPPROVED)
+    rejected_instructor_data = Instructor.objects.filter(employment_status=EmploymentStatus.REJECTED)
+
+    unapproved_instructors, rejected_instructors = [], []
+    unapproved_instructors.extend(
+        get_instructor_for_approval(instructor)
+        for instructor in unapproved_instructor_data
+    )
+
+    rejected_instructors.extend(
+        get_instructor_for_approval(instructor)
+        for instructor in rejected_instructor_data
+    )
+
+    data = {
+        'unapproved_instructors': unapproved_instructors,
+        'rejected_instructors': rejected_instructors,
+        'departments': list(Department.objects.all().values('id', 'name')),
+    }
+
+    # print(data)
+    return render(request, 'executives/unapproved_instructors.html', context=data)
+
+def approve_instructor(request, user_id, dept_id, role):
+    try:
+        instructor = Instructor.objects.get(user__id=int(user_id))
+        instructor.employment_status = EmploymentStatus.ACTIVE
+        instructor.department = Department.objects.get(pk=int(dept_id))
+        instructor.position_in_university = role
+        instructor.save()
+        messages.success(request, "User approved successfully")
+    except Exception as e:
+        messages.error(request, f"Error approving user: {e}")
+    return redirect('/executives/unapproved_instructors/')
+
+def reject_instructor(request, user_id):
+    try:
+        instructor = Instructor.objects.get(user__id=int(user_id))
+        instructor.employment_status = EmploymentStatus.REJECTED
+        instructor.save()
+        messages.success(request, "User rejected successfully")
+    except Exception as e:
+        messages.error(request, f"Error rejecting user: {e}")
+    return redirect('/executives/unapproved_instructors/')
+
