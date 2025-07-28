@@ -29,7 +29,8 @@
     </nav>
     <div class="container">
         <h1 class="text-center text-primary my-4">SIS submitting Form</h1>
-        <form id="multiStepForm">
+        <form id="multiStepForm" method="post" action="{%url 'sis_form' %}">
+            {% csrf_token %}
             <!-- Step 1: Personal & Student Info -->
             <div class="form-step" id="step-1">
                 <h4 class="text-primary mt-4">Student Information</h4>
