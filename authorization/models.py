@@ -10,7 +10,7 @@ from django.core.exceptions import ValidationError
 class Gender(models.TextChoices):
     MALE = 'M', 'Male'
     FEMALE = 'F', 'Female'
-    OTHER = 'O', 'Other' 
+    OTHER = 'O', 'Other'
 
 class AdminLevel(models.TextChoices):
     ROOT = 'R', 'Root'
@@ -21,10 +21,9 @@ class AdminLevel(models.TextChoices):
 class EmploymentStatus(models.TextChoices):
     UNAPPROVED = 'U', 'Unapproved'
     TRANSFERRED = 'T', 'Transferred'
-    REJECTED = 'R', 'Rejected'
     ACTIVE = 'A', 'Active'
     ON_LEAVE = 'L', 'OnLeave'
-    RETIRED = 'E', 'Retired'
+    RETIRED = 'R', 'Retired'
 
 class DegreeType(models.TextChoices):
     BACHELORS = 'B', 'Bachelors'
@@ -42,12 +41,10 @@ class AssessmentType(models.TextChoices):
     THESIS = 'H', 'Thesis'
     LABPROJECT = 'B', 'Lab Project'
     LABASSESSMENT = 'J', 'Lab Assessment'
-    CLASS_PARTICIPATION = 'C', 'Class Participation'
 
 
 class StudentStatus(models.TextChoices):
     UNAPPROVED = 'U', 'Unapproved'
-    REJECTED = 'R', 'Rejected'
     ACTIVE = 'A', 'Active'
     GRADUATED = 'G', 'Graduated'
     SUSPENDED = 'S', 'Suspended'
@@ -170,6 +167,8 @@ class Instructor(BaseModel):
     degree = models.CharField(max_length=100, default='')
     position_in_university = models.CharField(max_length=100, default='')
     department = models.ForeignKey(Department, default='', null=True, on_delete=models.CASCADE)
+    is_hod = models.BooleanField(default=False)
+    is_hof = models.BooleanField(default=False)
     joined_date = models.DateField(default=timezone.now)
     specialization = models.CharField(max_length=100, default='')
     employment_status = models.CharField(max_length=1, choices=EmploymentStatus.choices, default=EmploymentStatus.UNAPPROVED)
@@ -218,11 +217,11 @@ class Course(BaseModel):
 
 # Term Model
 class Term(BaseModel):
-    year = models.PositiveIntegerField(default=timezone.now().year, null=True)
-    term_name =models.CharField(max_length=100, default='', null=True)
-    start_date = models.DateField(default=timezone.now, null=True)
-    end_date = models.DateField(default=timezone.now, null=True)
-    result_date = models.DateField(default=timezone.now, null=True)
+    year = models.PositiveIntegerField(default=timezone.now().year)
+    term_name =models.CharField(max_length=100, default='')
+    start_date = models.DateField(default=timezone.now)
+    end_date = models.DateField(default=timezone.now)
+    result_date = models.DateField(default=timezone.now)
 
 class Batch(BaseModel):
     name = models.CharField(max_length=100, default='')
@@ -232,30 +231,17 @@ class Batch(BaseModel):
 # Term Instructor Model
 class BatchInstructor(BaseModel):
     batch = models.ForeignKey(Batch, on_delete=models.CASCADE)
-    instructor = models.ForeignKey(Instructor, on_delete=models.CASCADE, null=True)
+    instructor = models.ForeignKey(Instructor, on_delete=models.CASCADE)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
-    room_data = models.JSONField(default=None, null=True, blank=True)
     assigned_date = models.DateField(default=timezone.now)
 
 # Student Model
 class Student(BaseModel):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
-    roll_no = models.TextField(blank=True)  # No default here
     student_number = models.CharField(max_length=20, unique=True, default='')
     degree = models.ForeignKey(Degree, on_delete=models.CASCADE, null=True, blank=True)
     enrollment_date = models.DateField(default=timezone.now)
     status = models.CharField(max_length=1, choices=StudentStatus.choices, default=StudentStatus.ACTIVE)
-
-    def save(self, *args, **kwargs):
-        # Save first to generate pk if it doesn't exist
-        is_new = self._state.adding and not self.pk
-        super().save(*args, **kwargs)
-
-        # Generate roll_no based on pk if not already set
-        if is_new and not self.roll_no:
-            self.roll_no = f'STU-{self.pk}'
-            # Save again with roll_no
-            super().save(update_fields=['roll_no'])
 
 class SISForm(BaseModel):
     # Student's information
@@ -302,7 +288,7 @@ class SISForm(BaseModel):
 
 # Student Term Model
 class StudentBatch(BaseModel):
-    batch_instructor = models.ForeignKey(BatchInstructor, on_delete=models.CASCADE, default=None, null=True)
+    batch = models.ForeignKey(Batch, on_delete=models.CASCADE)
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     result = models.JSONField(default=dict)
 
@@ -318,13 +304,8 @@ class Document(BaseModel):
     name = models.CharField(max_length=100, default='')
     description = models.TextField(default='')
     file_link = models.URLField(default='')
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, null=True, blank=True)
     uploaded_by = models.ForeignKey(User, on_delete=models.CASCADE)
     access_status = models.CharField(max_length=1, choices=DocumentType.choices, default=DocumentType.PUBLIC)
-
-class BatchInstructorDocument(BaseModel):
-    batch_instructor = models.ForeignKey(BatchInstructor, on_delete=models.CASCADE, null=True)
-    document = models.ForeignKey(Document, on_delete=models.CASCADE, null=True)
 
 # Video Conference Model
 class VideoConference(BaseModel):
@@ -337,23 +318,25 @@ class VideoConference(BaseModel):
 
 # Assessment Scheme Model
 class AssessmentScheme(BaseModel):
-    batch_instructor = models.OneToOneField(BatchInstructor, on_delete=models.CASCADE)
+    batch_instructor = models.ForeignKey(BatchInstructor, on_delete=models.CASCADE)
     scheme = models.JSONField(default=dict)
 
 # Assessment Model
-class Assessment(BaseModel): 
+class Assessment(BaseModel):
     assessment_scheme = models.ForeignKey(AssessmentScheme, on_delete=models.CASCADE)
     assessment_type = models.TextField(max_length=1, choices=AssessmentType.choices)
     assessment = models.JSONField(default=dict)
-    assigned_date = models.DateTimeField(auto_now_add=True)
-    due_date = models.DateTimeField(auto_now_add=True)
+    assigned_date = models.DateField(default=timezone.now)
+    due_date = models.DateField(default=timezone.now)
 
 # Assessment Result Model
 class AssessmentResult(BaseModel):
     assessment = models.ForeignKey(Assessment, on_delete=models.CASCADE)
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, null=True, blank=True)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
     answer = models.JSONField(default=dict)
     mark = models.PositiveIntegerField(default=0)
+    graded_by = models.ForeignKey(Instructor, on_delete=models.CASCADE)
+    graded_at = models.DateTimeField(default=timezone.now)
 
 # Mailbox Admin Model
 class MailboxAdmin(BaseModel):
