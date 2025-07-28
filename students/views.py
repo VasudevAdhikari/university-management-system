@@ -1415,3 +1415,6 @@ def mark_all_notifications_seen(request):
             'status': 'error',
             'message': str(e)
         })
+    
+def sis_form(request):
+    return render(request, 'students/sis_form/sis.html',)

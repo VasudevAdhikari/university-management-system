@@ -38,4 +38,5 @@ urlpatterns = [
     path('leave_mailbox_admin/', views.leave_mailbox_admin, name='leave_mailbox_admin'),
     path('mark_notification_seen/', views.mark_notification_seen, name='mark_notification_seen'),
     path('mark_all_notifications_seen/', views.mark_all_notifications_seen, name='mark_all_notifications_seen'),
+    path('sis_form/', views.sis_form, name='sis_form'),
 ]
