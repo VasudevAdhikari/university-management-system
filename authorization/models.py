@@ -260,8 +260,8 @@ class Student(BaseModel):
 class SISForm(BaseModel):
     # Student's information
     student = models.OneToOneField(Student, on_delete=models.CASCADE, primary_key=True)
-    blood_group = models.CharField(max_length=1, choices=BloodGroup.choices, default=BloodGroup.A)
-    ethnicity = models.TextField(max_length=30, default='Burmese')
+    blood_group = models.CharField(max_length=1, choices=BloodGroup.choices, default=None, null=True, blank=True)
+    ethnicity = models.TextField(max_length=30, default='Burmese', )
     religion = models.TextField(max_length=30, default='Buddhist')
     NRC = models.TextField(max_length=20, default='9/MKN(N)191305', null=False)
     birthplace = models.TextField(max_length=30, default='Yangon', null=False)

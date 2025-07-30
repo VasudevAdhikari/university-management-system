@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', function () {
         originalLogo: document.getElementById('originalLogo')
     };
 
+    //==============start modify===========================
     const previews = {
         logos: document.querySelectorAll('.logoPreview'),
         name: document.getElementById('uniName'),
@@ -23,6 +24,7 @@ document.addEventListener('DOMContentLoaded', function () {
         hours: document.getElementById('uniHours'),
         description: document.getElementById('uniDescription')
     };
+    //============end modify=================================
 
     function updatePreview() {
         const fields = ['name', 'address', 'email', 'website', 'social', 'hours', 'description'];

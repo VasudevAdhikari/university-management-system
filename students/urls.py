@@ -6,6 +6,7 @@ app_name = 'students'
 
 urlpatterns = [
     path('academics/', include('students.academic_urls')),
+    path('personal/', include('students.personal_urls')),
     path('mailbox/', views.mailbox, name='mailbox'),
     path('mailbox/post/', views.handle_post, name='handle_post'),
     path('mailbox/load_more/', views.load_more_posts, name='load_more_posts'),
