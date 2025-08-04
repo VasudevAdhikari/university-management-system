@@ -65,10 +65,8 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // Prevent form submit for demo
-  document
-    .getElementById("multiStepForm")
-    .addEventListener("submit", function (e) {
-      // e.preventDefault(); // Uncomment to prevent actual submission
+  document.getElementById("multiStepForm").addEventListener("submit", function (e) {
+      e.preventDefault(); // Uncomment to prevent actual submission
     });
 
   // Initialize

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'faculty/css/instructor_course_management.css' %}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <script>
+    // console.log('{{batch_instructor|escapejs}}'.replaceAll("'", '"'));
+    window.csrf_token = '{{csrf_token}}';
+    window.batch_instructor = JSON.parse('{{batch_instructor|escapejs}}'.replaceAll("'", '"'));
+    console.log(window.batch_instructor);
+    window.marking_types = JSON.parse('{{assessment_types|escapejs}}'.replaceAll("'", '"'));
+    console.log(window.marking_types);
+    window.instructor = '{{instructor.user.id}}';
+    window.other_instructors = [];
+  </script>
+  <!-- Navbar -->
+  <nav class="navbar-demo">
+    <button class="nav-hamburger" id="sidebarToggle" aria-label="Toggle sidebar">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+    <span class="nav-title">Instructor Portal</span>
+    <span class="nav-user"><i class="fa-solid fa-user"></i> {{instructor.user.full_name}}</span>
+  </nav>
+
+  <!-- Sidebar -->
+  <aside class="sidebar-demo" id="sidebarMenu">
+    <div class="sidebar-header-demo">
+      <span class="sidebar-logo"><i class="fa-solid fa-graduation-cap"></i></span>
+      <span class="sidebar-title">Menu</span>
+    </div>
+    <ul class="sidebar-list-demo">
+      <li><a href="#"><i class="fa-solid fa-book"></i> My Courses</a></li>
+      <li><a href="#"><i class="fa-solid fa-user-graduate"></i> Students</a></li>
+      <li><a href="#"><i class="fa-solid fa-clipboard-list"></i> Marking</a></li>
+      <li><a href="#"><i class="fa-solid fa-gear"></i> Settings</a></li>
+      <li><a href="#"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+    </ul>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main-content-demo">
+    <!-- Course Detail Card -->
+    <div class="course-card">
+      <h2 class="course-title">{{batch_instructor.course__course_code}} ({{batch_instructor.course__course_name}})</h2>
+      <div class="course-content-row" id="courseContentRow">
+        <div class="course-image" id="courseImageBox">
+          <i class="fa-solid fa-graduation-cap course-icon"></i>
+        </div>
+        <div class="course-description" id="courseDescriptionBox">
+          <span id="courseDescriptionText">{{batch_instructor.course__description}}</span>
+        </div>
+      </div>
+      <div id="markingSchemeSection">
+        </div>
+      <!-- Place your activities section here: -->
+      <div id="activitySection">
+        <!-- Quizzes and Assignments will be dynamically injected here -->
+      </div>
+
+      <!-- Document Sections START -->
+      <!-- Referred Documents -->
+      <div class="item-section-title-row">
+        <span class="item-section-title">Referred Documents</span>
+      </div>
+      <div class="item-grid" id="referredDocsGrid">
+        <!-- Dynamically filled by JS -->
+      </div>
+  </div>
+</body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+<script src="{% static 'students/academic/javascripts/course_management.js' %}"></script>
+
+</html>

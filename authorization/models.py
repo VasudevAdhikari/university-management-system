@@ -13,10 +13,8 @@ class Gender(models.TextChoices):
     OTHER = 'O', 'Other' 
 
 class AdminLevel(models.TextChoices):
-    ROOT = 'R', 'Root'
-    SENIOR = 'S', 'Senior'
-    JUNIOR = 'J', 'Junior' 
-    VIEWER = 'V', 'Viewer'
+    READ = 'R', 'Read'
+    WRITE = 'W', 'Write'
 
 class EmploymentStatus(models.TextChoices):
     UNAPPROVED = 'U', 'Unapproved'
@@ -75,6 +73,11 @@ class DocumentType(models.TextChoices):
     PRIVATE = 'B', 'Private'
     PROTECTED = 'C', 'Protected'
 
+class EnrollmentStatus(models.TextChoices):
+    APPROVED = 'A', 'Approved'
+    PENDING = 'P', 'Pending'
+    REJECTED = 'R', 'Rejected'
+
 class BaseModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -128,19 +131,18 @@ class User(AbstractUser, BaseModel):
         help_text='Specific permissions for this user.',
         verbose_name='user permissions',
     )
-
+    
     def save(self, *args, **kwargs):
         if not self.full_name:
             self.full_name = f"{self.first_name} {self.last_name}".strip()
         super().save(*args, **kwargs)
 
 # Admin Model
-class Admin(BaseModel):
+class Admin(BaseModel): 
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     degree = models.CharField(max_length=100, default='')
     position_in_university = models.CharField(max_length=100, default='')
-    office_location = models.CharField(max_length=100, default='')
-    admin_level = models.CharField(max_length=1, choices=AdminLevel.choices, default=AdminLevel.VIEWER)
+    admin_level = models.CharField(max_length=1, choices=AdminLevel.choices, default=AdminLevel.READ)
 
 # Faculty Model
 class Faculty(BaseModel):
@@ -266,7 +268,7 @@ class SISForm(BaseModel):
     NRC = models.TextField(max_length=20, default='9/MKN(N)191305', null=False)
     birthplace = models.TextField(max_length=30, default='Yangon', null=False)
 
-    # Father's information
+    # Father's information 
     father_name = models.TextField(max_length=40, default='U Ba', null=False)
     father_NRC = models.TextField(max_length=20, default='9/MKN(N)191305', null=False)
     father_birthplace = models.TextField(max_length=30, default='Yangon', null=False)
@@ -300,19 +302,20 @@ class SISForm(BaseModel):
     spouse_name = models.TextField(max_length=50, null=False)
 
 
-# Student Term Model
-class StudentBatch(BaseModel):
-    batch_instructor = models.ForeignKey(BatchInstructor, on_delete=models.CASCADE, default=None, null=True)
-    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+class Enrollment(BaseModel): 
+    batch = models.ForeignKey(Batch, on_delete=models.CASCADE, default=None, null=True, blank=True)
+    sis_form = models.ForeignKey(SISForm, on_delete=models.SET_NULL, default=None, null=True, blank=True)
+    selected_subjects = models.JSONField(default=dict)
     result = models.JSONField(default=dict)
+    is_approved = models.BooleanField(default=False)
+    enrollment_status = models.CharField(max_length=1, choices=EnrollmentStatus.choices, default=EnrollmentStatus.PENDING)
 
-# Enrollment Model
-class Enrollment(BaseModel):
-    student_batch = models.OneToOneField(StudentBatch, on_delete=models.CASCADE, primary_key=True)
-    enrollment_form = models.JSONField(default=dict)
-    enrollment_date = models.DateField(default=timezone.now)
-    handled_by = models.ForeignKey(Admin, on_delete=models.SET_NULL, null=True, default=None)
-
+# Student Term Model
+class EnrollmentCourse(BaseModel): 
+    batch_instructor = models.ForeignKey(BatchInstructor, on_delete=models.CASCADE, default=None, null=True)
+    enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE)
+    rating = models.PositiveSmallIntegerField(default=0, null=False)
+    review = models.TextField(default=None, blank=True, null=True)
 # Document Model
 class Document(BaseModel):
     name = models.CharField(max_length=100, default='')

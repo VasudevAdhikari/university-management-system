@@ -49,3 +49,10 @@ def get_instructor_for_approval(instructor: Instructor):
             else ''
         ),
     }
+
+
+def get_course_type(course_code, course_list):
+    for course in course_list:
+        if course['course_code'] == course_code:
+            return course['type']
+    return None  # or raise an error if not found

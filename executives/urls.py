@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views, lab_api
-from executives.components import faculty_manager, department_manager, course_manager, degree_manager, term_manager, batch_manager
+from executives.components import faculty_manager, department_manager, course_manager, degree_manager, term_manager, batch_manager, enrollment_manager
 
 app_name = 'executives'
 
@@ -93,4 +93,9 @@ urlpatterns = [
     path('batches/list/', batch_manager.list_batches, name='list_batch'),
     path('batch_instructor/edit/', batch_manager.edit_batch_instructor, name='edit_batch_instructor'),
     path('batch_instructor/delete/', batch_manager.delete_batch_instructor, name='delete_batch_instructor'),
+
+    # Endpoints for Enrollment Management
+    path('enrollments/', enrollment_manager.show_enrollments, name='show_enrollments'),
+    path('enrollment/reject/<int:student_id>/', enrollment_manager.reject_enrollment, name='reject_enrollment'),
+    path('enrollment/approve/<int:student_id>/', enrollment_manager.approve_enrollment, name='appove_enrollment'),
 ]
