@@ -1,10 +1,15 @@
 from django.shortcuts import render
-from authorization.models import BatchInstructor
+from authorization.models import BatchInstructor, Instructor
+from django.http import JsonResponse
 
 # Create your views here.
 def faculty_dashboard(request):
 
-    instructor = 4 # This should be replaced with the actual instructor ID, possibly from request.user
+    instructor = Instructor.objects.filter(
+        user__email = request.COOKIES.get('my_user'),
+    ).first()
+    if not instructor:
+        return JsonResponse({'success': False, 'message': 'You are not allowed to enter this page'})
     
     batch_instructors = (
         BatchInstructor.objects 

@@ -620,24 +620,6 @@ document.getElementById('uploadPhotoForm').addEventListener('submit', function (
 });
 // ===== University Photos Section End =====
 
-// responsive design
-
-
-// Sidebar toggle for mobile
-const menuBtn = document.querySelector('.menu-icon');
-const sidebar = document.querySelector('.sidebar');
-const overlay = document.getElementById('sidebarOverlay');
-
-menuBtn.addEventListener('click', () => {
-    sidebar.classList.toggle('active');
-    overlay.classList.toggle('active');
-});
-
-overlay.addEventListener('click', () => {
-    sidebar.classList.remove('active');
-    overlay.classList.remove('active');
-});
-
 //input file upload design
 function showSelectedFile(inputId, labelId) {
     const input = document.getElementById(inputId);

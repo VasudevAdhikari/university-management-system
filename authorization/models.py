@@ -46,7 +46,7 @@ class AssessmentType(models.TextChoices):
 class StudentStatus(models.TextChoices):
     UNAPPROVED = 'U', 'Unapproved'
     REJECTED = 'R', 'Rejected'
-    ACTIVE = 'A', 'Active'
+    ACTIVE = 'A', 'Active' 
     GRADUATED = 'G', 'Graduated'
     SUSPENDED = 'S', 'Suspended'
     DROPPED = 'D', 'Dropped'
@@ -58,8 +58,9 @@ class MailboxPostStatus(models.TextChoices):
     DISQUALIFIED = 'D', 'Disqualified'
 
 class NotificationType(models.TextChoices):
-    STUDENT_QUIZ = 'S', 'Student Quiz'
-    STUDENT_ASSESSMENT = 'A', 'Student Assessment'
+    STUDENT = 'S', 'Student'
+    EXECUTIVE = 'E', 'Executive'
+    INSTRUCTOR = 'I', 'Instructor'
     STUDENT_MAILBOX = 'M', 'Student Mailbox'
 
 class BloodGroup(models.TextChoices):
@@ -189,7 +190,7 @@ class Degree(BaseModel):
     degree_type = models.CharField(max_length=1, choices=DegreeType.choices, default=DegreeType.BACHELORS)
     degree_image = models.ImageField(upload_to='degrees/', default='default.jpg')
     
- 
+  
 # Semester Model
 class Semester(BaseModel):
     semester_name = models.CharField(max_length=100, default='')
@@ -302,7 +303,7 @@ class SISForm(BaseModel):
     spouse_name = models.TextField(max_length=50, null=False)
 
 
-class Enrollment(BaseModel): 
+class Enrollment(BaseModel):
     batch = models.ForeignKey(Batch, on_delete=models.CASCADE, default=None, null=True, blank=True)
     sis_form = models.ForeignKey(SISForm, on_delete=models.SET_NULL, default=None, null=True, blank=True)
     selected_subjects = models.JSONField(default=dict)
@@ -344,12 +345,52 @@ class AssessmentScheme(BaseModel):
     scheme = models.JSONField(default=dict)
 
 # Assessment Model
-class Assessment(BaseModel): 
+class Assessment(BaseModel):
     assessment_scheme = models.ForeignKey(AssessmentScheme, on_delete=models.CASCADE)
     assessment_type = models.TextField(max_length=1, choices=AssessmentType.choices)
     assessment = models.JSONField(default=dict)
     assigned_date = models.DateTimeField(auto_now_add=True)
     due_date = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        if not self.assessment.get('students'):
+            user = self.assessment_scheme.batch_instructor.instructor.user
+            batch_instructor = self.assessment_scheme.batch_instructor
+            batch = batch_instructor.batch
+            semester = batch.semester
+            semester_name = semester.semester_name
+            degree_name = semester.degree.name
+            term_name = batch.term.term_name
+            notification = Notification(
+                user=user, 
+                notification = {
+                    "text": f"You have created a {self.get_assessment_type_display()} ({self.assessment.get('title')}) for {term_name} - {degree_name} ({semester_name})",
+                    "destination": f"/faculty/course_management/{batch_instructor.pk}/"
+                },
+                seen=False,
+                type=NotificationType.INSTRUCTOR
+            )
+            notification.save()
+        else:
+            users = User.objects.filter(pk__in=self.assessment.get('students'))
+            batch_instructor = self.assessment_scheme.batch_instructor
+            course = batch_instructor.course
+            instructor = batch_instructor.instructor.user
+            course_name, course_code = course.course_name, course.course_code
+            notifications = []
+            for user in users:
+                notifications.append( Notification(
+                    user=user,
+                    notification = {
+                        "text": f"{instructor.full_name} has created a {self.get_assessment_type_display()} named {self.assessment.get('title')} with due date {self.due_date}"
+                    },
+                    seen=False,
+                    type=NotificationType.STUDENT,
+                ))
+            Notification.objects.bulk_create(notifications)
+
 
 # Assessment Result Model
 class AssessmentResult(BaseModel):

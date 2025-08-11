@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views, lab_api
-from executives.components import faculty_manager, department_manager, course_manager, degree_manager, term_manager, batch_manager, enrollment_manager
+from executives.components import faculty_manager, department_manager, course_manager, degree_manager, student_data_manager, term_manager, batch_manager, enrollment_manager, rating_review_manager, batch_statistics_manager, dashboard
 
 app_name = 'executives'
 
@@ -98,4 +98,15 @@ urlpatterns = [
     path('enrollments/', enrollment_manager.show_enrollments, name='show_enrollments'),
     path('enrollment/reject/<int:student_id>/', enrollment_manager.reject_enrollment, name='reject_enrollment'),
     path('enrollment/approve/<int:student_id>/', enrollment_manager.approve_enrollment, name='appove_enrollment'),
+
+
+    path('rating_review/', rating_review_manager.show_rating_review, name='show_rating_review'),
+
+    path('batch_statistics/<int:batch_id>/', batch_statistics_manager.show_batch_statistics, name='show_batch_statistics'),
+
+    path('student_data/<int:student_id>', student_data_manager.show_student_data, name='show_student_statistics'),
+
+    path('student/<str:action>/<int:user_id>/', student_data_manager.update_student_status, name='update_student_status'),
+
+    path('dashboard/', dashboard.show_dashboard, name='dashboard'),
 ]

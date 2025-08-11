@@ -25,6 +25,10 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 document.getElementById('userSearch').addEventListener('input', function () {
     const search = this.value.toLowerCase();
+    // Close all user details rows when searching
+    document.querySelectorAll('.user-details-row').forEach(detailsRow => {
+        detailsRow.style.display = 'none';
+    });
     document.querySelectorAll('#userTable tbody tr').forEach(row => {
         // Only filter main rows, not details/collapse rows
         if (row.querySelector('select')) {

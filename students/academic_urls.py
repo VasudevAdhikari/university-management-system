@@ -1,5 +1,5 @@
 from django.urls import path
-from .components import quiz_manager, batch_instructor_manager, assessment_manager
+from .components import quiz_manager, batch_instructor_manager, assessment_manager, result_sheet_manager
 from . import views
 from django.conf import settings
 
@@ -18,4 +18,6 @@ urlpatterns = [
     path('home/', batch_instructor_manager.show_home_page, name='show_home_page'),
 
     path('batch_instructor/<int:batch_instructor_id>/', batch_instructor_manager.show_course_page, name='show_course_page'),
+
+    path('results/<int:student_id>/', result_sheet_manager.show_result_sheets, name='show_result_sheets'),
 ]

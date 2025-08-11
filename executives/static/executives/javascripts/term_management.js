@@ -17,16 +17,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Load terms from backend
   function loadTerms() {
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    
     fetch('/executives/terms/')
       .then(res => {
         if (!res.ok) throw new Error('Network response was not ok');
         return res.json();
       })
       .then(data => {
+        // Hide loading spinner
+        if (loadingSpinner) {
+          loadingSpinner.classList.add('hidden');
+        }
+        
         termButtonsContainer.innerHTML = '';
         data.terms.forEach(term => createTermButton(term));
       })
-      .catch(error => console.error('Error loading terms:', error));
+      .catch(error => {
+        console.error('Error loading terms:', error);
+        // Hide loading spinner on error too
+        if (loadingSpinner) {
+          loadingSpinner.classList.add('hidden');
+        }
+      });
   }
 
   // Create a term button
@@ -77,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
     deleteIcon.className = 'ml-2 cursor-pointer';
     deleteIcon.innerHTML = `
       <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="text-red-500 hover:text-red-700">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
       </svg>
     `;
     deleteIcon.title = 'Delete term';
@@ -93,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // View Details button
     const viewDetailsBtn = document.createElement('button');
     viewDetailsBtn.textContent = 'View Details';
-    viewDetailsBtn.className = 'mt-2 px-4 py-1 rounded bg-blue-500 text-white hover:bg-blue-600 text-sm';
+    viewDetailsBtn.className = 'mt-2 px-4 py-1 rounded text-sm view-details-btn';
     viewDetailsBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       window.location.href = `/executives/batches/${term.id}`;
@@ -111,14 +124,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const popup = document.createElement('div');
     popup.id = 'delete-popup';
-    popup.className = 'fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-30';
+    popup.className = 'fixed inset-0 flex items-center justify-center z-50 bg-gray-500 bg-opacity-30';
     popup.innerHTML = `
       <div class="bg-white rounded-lg shadow-lg p-6 min-w-[300px]">
-        <h2 class="text-lg font-bold mb-4 text-red-600">Delete Term</h2>
+        <h2 class="text-lg font-bold mb-4">Delete Term</h2>
         <p class="mb-4">Are you sure you want to delete <span class="font-bold">${termName}</span>?</p>
         <div class="flex justify-end gap-2">
-          <button id="deleteCancelBtn" class="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300">Cancel</button>
-          <button id="deleteConfirmBtn" class="px-4 py-2 rounded bg-red-500 text-white hover:bg-red-600">Delete</button>
+          <button id="deleteCancelBtn" class="px-4 py-2 rounded">Cancel</button>
+          <button id="deleteConfirmBtn" class="px-4 py-2 rounded">Delete</button>
         </div>
       </div>
     `;
@@ -169,37 +182,37 @@ document.addEventListener('DOMContentLoaded', () => {
         const term = data.terms.find(t => t.id == termId) || {};
         const popup = document.createElement('div');
         popup.id = 'date-popup';
-        popup.className = 'fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-30';
-        popup.innerHTML = `
-          <div class="bg-white rounded-lg shadow-lg p-6 min-w-[300px]">
-            <h2 class="text-lg font-bold mb-4">Select Dates</h2>
-            <div class="mb-3 flex items-center gap-2">
-              <label class="block mb-1 font-medium w-28">Term Name</label>
-              <input type="text" class="border border-gray-300 rounded px-2 py-1 w-full" id="termName" value="${term.name || ''}" readonly>
-            </div>
-            <div class="mb-3 flex items-center gap-2">
-              <label class="block mb-1 font-medium w-28">Academic Year</label>
-              <input type="number" min="2000" max="2100" class="border border-gray-300 rounded px-2 py-1 w-full" id="year" value="${term.year || ''}" readonly>
-            </div>
-            <div class="mb-3 flex items-center gap-2">
-              <label class="block mb-1 font-medium w-28">Start Date</label>
-              <input type="date" class="border border-gray-300 rounded px-2 py-1 w-full" id="semStartDate" value="${term.semStart || ''}" readonly>
-            </div>
-            <div class="mb-3 flex items-center gap-2">
-              <label class="block mb-1 font-medium w-28">End Date</label>
-              <input type="date" class="border border-gray-300 rounded px-2 py-1 w-full" id="endDate" value="${term.endDate || ''}" readonly>
-            </div>
-            <div class="mb-4 flex items-center gap-2">
-              <label class="block mb-1 font-medium w-28">Result Date</label>
-              <input type="date" class="border border-gray-300 rounded px-2 py-1 w-full" id="resultDate" value="${term.resultDate || ''}" readonly>
-            </div>
-            <div class="flex justify-end gap-2">
-              <button id="popupEditBtn" class="px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600">Edit</button>
-              <button id="popupCancelBtn" class="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300">Cancel</button>
-              <button id="popupSaveBtn" class="px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600">Save</button>
-            </div>
-          </div>
-        `;
+        popup.className = 'fixed inset-0 flex items-center justify-center z-50 bg-gray-500 bg-opacity-30';
+                 popup.innerHTML = `
+           <div class="bg-white rounded-lg shadow-lg p-6 min-w-[300px]">
+             <h2 class="text-lg font-bold mb-4">Select Dates</h2>
+             <div class="mb-3 flex items-center gap-2">
+               <label class="block mb-1 font-medium w-28">Term Name</label>
+               <input type="text" class="border rounded px-2 py-1 w-full" id="termName" value="${term.name || ''}" readonly>
+             </div>
+             <div class="mb-3 flex items-center gap-2">
+               <label class="block mb-1 font-medium w-28">Academic Year</label>
+               <input type="number" min="2000" max="2100" class="border rounded px-2 py-1 w-full" id="year" value="${term.year || ''}" readonly>
+             </div>
+             <div class="mb-3 flex items-center gap-2">
+               <label class="block mb-1 font-medium w-28">Start Date</label>
+               <input type="date" class="border rounded px-2 py-1 w-full" id="semStartDate" value="${term.semStart || ''}" readonly>
+             </div>
+             <div class="mb-3 flex items-center gap-2">
+               <label class="block mb-1 font-medium w-28">End Date</label>
+               <input type="date" class="border rounded px-2 py-1 w-full" id="endDate" value="${term.endDate || ''}" readonly>
+             </div>
+             <div class="mb-4 flex items-center gap-2">
+               <label class="block mb-1 font-medium w-28">Result Date</label>
+               <input type="date" class="border rounded px-2 py-1 w-full" id="resultDate" value="${term.resultDate || ''}" readonly>
+             </div>
+             <div class="flex justify-end gap-2">
+               <button id="popupEditBtn" class="px-4 py-2 rounded">Edit</button>
+               <button id="popupCancelBtn" class="px-4 py-2 rounded">Cancel</button>
+               <button id="popupSaveBtn" class="px-4 py-2 rounded">Save</button>
+             </div>
+           </div>
+         `;
         const popupBox = popup.querySelector('div.bg-white');
         animateIn(popupBox);
         
@@ -298,8 +311,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const input = document.createElement('input');
     input.type = 'text';
     input.placeholder = 'Add new term (e.g. 2022-2023)';
-    input.className = 'new-term-input flex-grow px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500';
-    input.style.border = '2px solid #2563eb';
+    input.className = 'new-term-input flex-grow px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-white ';
+    input.style.border = '2px solid #F5F5F5';
     const wrapper = document.createElement('div');
     wrapper.className = 'new-term-row';
     wrapper.appendChild(input);

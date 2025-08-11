@@ -60,6 +60,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+
 ROOT_URLCONF = 'course_management.urls'
 
 TEMPLATES = [
@@ -167,6 +168,11 @@ if not os.path.exists(POST_MEDIA_ROOT):
 if not os.path.exists(MEDIA_ROOT):
     os.makedirs(MEDIA_ROOT)
     os.makedirs(os.path.join(MEDIA_ROOT, 'profile_pictures'))
+
+# Create results directory if it doesn't exist
+results_dir = os.path.join(MEDIA_ROOT, 'results')
+if not os.path.exists(results_dir):
+    os.makedirs(results_dir)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

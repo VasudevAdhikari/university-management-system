@@ -116,9 +116,10 @@ def show_uni_info(request):
         'university_info': university_info,
         'partnerships': dict(partnerships.details).items() if partnerships else {},
         'certificates': dict(certificates.details).items() if certificates else {},
-        'photos': dict(photos.details).items() if certificates else{},
+        'photos': dict(photos.details).items() if photos else{},
         'labs': dict(labs.details).items() if labs else{}
     }
+    # print(photos.details)
     return render(request, 'executives/uni_info.html', context=data)
 
 def show_lab_details(request, lab_name):

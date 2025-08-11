@@ -58,10 +58,10 @@
                     <div class="file-list">
                         {% for file in assessment.assessment.files %}
                         <div class="file-item">
-                            <i class="fas fa-file-alt"></i>
+                            <i class="fas fa-file-alt icon-1"></i>
                             <span class="file-name">{{ file|slice:"0:-4" }}</span>
                             <a href="/media/assignment_files/{{ file }}" download class="download-btn">
-                                <i class="fas fa-download"></i>
+                                <i class="fas fa-download icon-2"></i>
                             </a>
                         </div>
                         {% endfor %}

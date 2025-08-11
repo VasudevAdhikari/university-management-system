@@ -12,7 +12,7 @@
 }
 
 :root {
-    --sidebar-color: #546bd4;
+    --sidebar-color: #546bd4; 
 
 
 }
@@ -22,138 +22,12 @@ body {
     width: 100%;
 }
 
-header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 70px;
-    background-color: #e6e65e;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 20px;
-    z-index: 1000;
-
-
-}
-
-.menu-icon {
-    background-color: #d3ddcf;
-    border-radius: 7px;
-    padding: 4px 7px;
-    margin-right: 5px;
-    font-size: 22px;
-    cursor: pointer;
-
-}
-
-.nav-left {
-    display: flex;
-    align-items: center;
-}
-
-.uni-logo {
-    width: 54px;
-    height: 50px;
-    border-radius: 7px;
-    padding: 4px;
-    margin-right: 10px;
-}
-
-.uni-name {
-
-    font-size: 18px;
-    color: rgb(16, 15, 15);
-    font-weight: 600;
-}
-
-.noti {
-    font-size: 22px;
-    cursor: pointer;
-}
-
-/* header section */
-
-/* sidebar Menu */
-.sidebar {
-    position: fixed;
-    top: 70px;
-    left: 0;
-    width: 350px;
-    height: 100vh;
-    background-color: var(--sidebar-color);
-    overflow-y: auto;
-    transform: translateX(0);
-    transition: transform 0.3s ease-in-out;
-
-}
-
-.menu-list {
-    background-color: #fff;
-    margin: 0 18px;
-    margin-top: 20px;
-    width: 300px;
-    border-radius: 3px;
-}
-
-.menu ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 5px;
-    padding-top: 5px;
-
-}
-
-.menu li .icon {
-    min-width: 60px;
-    font-size: 17px;
-
-}
-
-.menu ul li .sidebar-text {
-    color: black;
-
-}
-
-.menu ul li {
-    display: flex;
-    align-items: center;
-    border-bottom: 1px solid #ddd;
-}
-
-.menu ul li a {
-    padding: 17px 15px;
-    text-decoration: none;
-    margin: 2px;
-    width: 100%;
-    border-radius: 6px;
-}
-
-.menu ul li a i {
-    margin-right: -8px;
-}
-
-.log-out ul {
-    margin-top: 25px;
-}
-
-.menu ul li a:hover,
-.menu ul li a:active {
-    background-color: #9aa9d6;
-}
-
-
-/* sidebar Menu */
-
 /* university Information  */
 .container {
     border: 1px solid rgb(191, 155, 155);
     box-shadow: 0 2px 4px rgb(228, 188, 195), 0 4px 8px rgb(80, 80, 126);
     margin-top: 90px;
     padding-left: 20px;
-    margin-left: 390px;
     width: 1000px;
     max-width: 100%;
     background: #fff;

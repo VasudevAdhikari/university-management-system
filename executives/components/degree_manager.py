@@ -34,7 +34,6 @@ def get_all_degrees():
             "faculty": {
                 "name": degree.faculty.name if degree.faculty else '',
                 "id": degree.faculty.pk if degree.faculty else '',
-                # "photo": degree.faculty.faculty_photo if degree.faculty else '',
             },
             "faculty_id": degree.faculty.pk if degree.faculty else '',
             "duration": degree.duration,
@@ -50,7 +49,8 @@ def get_all_degrees():
             "image": degree.degree_image.url if hasattr(degree.degree_image, 'url') else './img/bachelor.png',
             "syllabus": syllabus
         })
-        return all_degrees
+    return all_degrees  # Moved here
+
 
 
 
