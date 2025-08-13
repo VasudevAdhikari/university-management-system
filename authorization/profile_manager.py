@@ -139,12 +139,16 @@ def register_admin(request):
             email = data.get('email'),
             username = data.get('email'),
         )
+        print(data)
+        print(user)
         user.set_password(
             data.get('password')
         )
         admin = Admin(
             user = user,
-            admin_level = data.get('permission')
+            admin_level = data.get('permission'),
+            position_in_university = data.get('role'),
+            degree = data.get('degree')
         )
         user.save()
         admin.save()

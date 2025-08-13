@@ -163,6 +163,37 @@ section,
     color: #64748b;
 }
 
+/* Lab Department Block */
+.lab-department-block {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 2rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+    width: 100%;
+    max-width: 600px;
+}
+
+.lab-department-title {
+    font-size: 2.2rem;
+    font-weight: 600;
+    color: var(--primary);
+    border: none;
+}
+
+.lab-department-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.lab-department-name {
+    font-size: 1.1rem;
+    color: #334155;
+    font-weight: 500;
+}
+
 .lab-description {
     max-width: 800px;
     margin: 0 auto 2.2rem;

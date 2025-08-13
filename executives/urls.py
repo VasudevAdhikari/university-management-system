@@ -1,16 +1,19 @@
 from django.urls import path
 from . import views, lab_api
-from executives.components import faculty_manager, department_manager, course_manager, degree_manager, student_data_manager, term_manager, batch_manager, enrollment_manager, rating_review_manager, batch_statistics_manager, dashboard
+from executives.components import faculty_manager, department_manager, course_manager, degree_manager, student_data_manager, term_manager, batch_manager, enrollment_manager, rating_review_manager, batch_statistics_manager, dashboard, instructor_data_manager
 
 app_name = 'executives'
 
 urlpatterns = [
     # Dashboard and Home
     path('', views.executive_home, name='executive_home'),
+    path('all_students/', views.get_all_students, name='all_students'),
     path('unapproved_students/', views.get_unapproved_students, name='unapproved_students'),
     path('approve_student/<str:user_id>/', views.approve_student, name='approve_student'),
     path('reject_student/<str:user_id>/', views.reject_student, name='reject_student'),
 
+    path('all_executives', views.show_all_executives, name='all_executives'),
+    path('all_instructors/', views.show_all_instructors, name='all_instructors'),
     path('unapproved_instructors/', views.show_unapproved_instructors, name='unapproved_instructors'),
     path('approve_instructor/<str:user_id>/<str:dept_id>/<str:role>/', views.approve_instructor, name='approve_instructor'),
     path('reject_instructor/<str:user_id>/', views.reject_instructor, name='reject_instructor'),
@@ -66,6 +69,7 @@ urlpatterns = [
     path('api/labs/edit_project/<str:lab_key>/<str:project_id>/', lab_api.lab_edit_project_api, name='lab_edit_project_api'),
     path('api/labs/add_photo/<str:lab_key>/', lab_api.lab_add_photo_api, name='lab_add_photo_api'),
     path('api/labs/add_project/<str:lab_id>/', lab_api.LabAddProjectAPI.as_view(), name='lab_add_project_api'),
+    path('api/labs/update_department/<str:lab_name>/', views.update_lab_department, name='update_lab_department'),
 
     # API Endpoints for Faculty Management
     # path('api/faculty/list/', faculty_manager.faculty_list, name='faculty_list_api'),
@@ -100,11 +104,12 @@ urlpatterns = [
     path('enrollment/approve/<int:student_id>/', enrollment_manager.approve_enrollment, name='appove_enrollment'),
 
 
-    path('rating_review/', rating_review_manager.show_rating_review, name='show_rating_review'),
+    path('rating_review/<int:batch_instructor_id>/', rating_review_manager.show_rating_review, name='show_rating_review'),
 
     path('batch_statistics/<int:batch_id>/', batch_statistics_manager.show_batch_statistics, name='show_batch_statistics'),
 
-    path('student_data/<int:student_id>', student_data_manager.show_student_data, name='show_student_statistics'),
+    path('student_data/<int:student_id>/', student_data_manager.show_student_data, name='show_student_statistics'),
+    path('instructor_data/<int:instructor_id>/', instructor_data_manager.show_instructor_data, name='show_instructor_data'),
 
     path('student/<str:action>/<int:user_id>/', student_data_manager.update_student_status, name='update_student_status'),
 

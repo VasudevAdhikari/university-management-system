@@ -365,6 +365,24 @@
                     <input type="password" class="form-control" id="password" name="password" required 
                            autocomplete="new-password" placeholder="Enter a one time password">
                 </div>
+
+                <div class="form-group">
+                    <label for="degree" class="form-label">
+                        <i class="fas fa-graduation-cap"></i>
+                        Achieved Degree
+                    </label>
+                    <input type="text" class="form-control" id="degree" name="degree" required 
+                           placeholder="Enter highest or latest achieved degree">
+                </div>
+
+                <div class="form-group">
+                    <label for="role" class="form-label">
+                        <i class="fas fa-building"></i>
+                        Role (Position in University)
+                    </label>
+                    <input type="text" class="form-control" id="role" name="role" required 
+                          placeholder="Enter position in the university">
+                </div>
                 
                 <div class="permissions-group">
                     <div class="permissions-title">
@@ -408,6 +426,8 @@
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const permission = document.querySelector('input[name="permission"]:checked')?.value;
+            const degree = document.getElementById('degree').value;
+            const role = document.getElementById('role').value;
 
             // Add loading state
             submitBtn.classList.add('loading');
@@ -423,7 +443,9 @@
                     body: JSON.stringify({
                         email: email,
                         password: password,
-                        permission: permission
+                        permission: permission,
+                        role: role,
+                        degree: degree,
                     })
                 });
 

@@ -133,6 +133,75 @@ function showEditPopup(label, value, onSave, opts = {}) {
     input.focus();
 }
 
+// Fallback parsing for JSON data
+function _fromJSON(id, fallback) {
+    try { 
+        const el = document.getElementById(id); 
+        if (!el) {
+            console.warn(`Element with id '${id}' not found`);
+            return fallback;
+        }
+        
+        console.log(`Element found for ${id}:`, el);
+        console.log(`Element tagName: ${el.tagName}`);
+        console.log(`Element className: ${el.className}`);
+        console.log(`Element id: ${el.id}`);
+        
+        // Get the text content and parse it as JSON
+        const textContent = el.textContent || el.innerText;
+        console.log(`Raw content for ${id}:`, textContent);
+        console.log(`Content length: ${textContent ? textContent.length : 0}`);
+        console.log(`Content trimmed: ${textContent ? textContent.trim() : 'N/A'}`);
+        
+        if (!textContent || textContent.trim() === '') {
+            console.warn(`Element '${id}' has no text content`);
+            return fallback;
+        }
+        
+        const parsed = JSON.parse(textContent);
+        console.log(`Successfully parsed ${id}:`, parsed);
+        return parsed;
+    } catch (e) { 
+        console.warn(`Failed to parse JSON from ${id}:`, e);
+        console.warn(`Element content was:`, el ? (el.textContent || el.innerText) : 'Element not found');
+        return fallback; 
+    }
+}
+
+// Call setupEditIcons after DOMContentLoaded and after toggling to Lab Details
+document.addEventListener('DOMContentLoaded', function () {
+    // Debug: Check what's in the script elements
+    console.log('Script elements found:', {
+        allProjectLeaders: document.getElementById('allProjectLeaders'),
+        allProjectMembers: document.getElementById('allProjectMembers'),
+        allLabHeads: document.getElementById('allLabHeads'),
+        departments: document.getElementById('departments'),
+        currentLabDept: document.getElementById('currentLabDept')
+    });
+    
+    // Initialize global variables using _fromJSON for all variables
+    window.allProjectLeaders = _fromJSON('allProjectLeaders', []);
+    window.allProjectMembers = _fromJSON('allProjectMembers', []);
+    window.allLabHeads = _fromJSON('allLabHeads', []);
+    window.departments = _fromJSON('departments', []);
+    window.currentLabDept = _fromJSON('currentLabDept', {});
+
+    // Debug logging
+    console.log('Data initialization complete:', {
+        allProjectLeaders: window.allProjectLeaders,
+        allProjectMembers: window.allProjectMembers,
+        allLabHeads: window.allLabHeads,
+        departments: window.departments,
+        currentLabDept: window.currentLabDept
+    });
+
+    // Set lab department ID for filtering
+    window.lab_department_id = window.currentLabDept.id || null;
+    
+    setupLabDescToggle();
+    setupEditIcons();
+});
+
 // Attach edit icon click handlers for each editable-group
 function setupEditIcons() {
     // Lab Name (main title)
@@ -167,6 +236,28 @@ function setupEditIcons() {
         };
     });
 
+    // Lab Department
+    document.querySelectorAll('.lab-department-info .edit-icon').forEach(icon => {
+        icon.onclick = function (e) {
+            e.stopPropagation();
+            showDepartmentSelectPopup(function (deptId, deptName) {
+                ajaxLabAPI(
+                    `/executives/api/labs/update_department/${encodeURIComponent(window.currentLabKey)}/`,
+                    'POST',
+                    { department_id: deptId, department_name: deptName },
+                    (response) => { 
+                        if (response.success) {
+                            location.reload();
+                        } else {
+                            alert('Failed to update lab department');
+                        }
+                    },
+                    (error) => { alert('Failed to update lab department'); }
+                );
+            });
+        };
+    });
+
     // Head of Lab Name
     document.querySelectorAll('.lab-head-name .edit-icon').forEach(icon => {
         icon.onclick = function (e) {
@@ -192,9 +283,9 @@ function setupEditIcons() {
                 ajaxLabAPI(
                     `/executives/api/labs/edit/${encodeURIComponent(window.currentLabKey)}/`,
                     'POST',
-                    { head_of_lab: profile.id },
+                    { head_of_lab: profile },
                     (response) => {location.reload(); },
-                    (error) => { alert('Failed to update head of labjalkfjalk'); }
+                    (error) => { alert('Failed to update head of lab'); }
                 );
             });
         };
@@ -326,7 +417,7 @@ function setupEditIcons() {
         const link = group.querySelector('a.project-link');
         const editIcon = group.querySelector('.edit-icon');
         const projectId = group.closest('.project-card') ? group.closest('.project-card').getAttribute('data-project-id') : null;
-        if (link && editIcon && link.href && link.href.includes('example.com') && projectId) {
+        if (link && editIcon && projectId) {
             editIcon.onclick = function (e) {
                 e.stopPropagation();
                 showEditPopup('Live Demo Link', link.href, function (val) {
@@ -341,7 +432,7 @@ function setupEditIcons() {
         const link = group.querySelector('a.project-link');
         const editIcon = group.querySelector('.edit-icon');
         const projectId = group.closest('.project-card') ? group.closest('.project-card').getAttribute('data-project-id') : null;
-        if (link && editIcon && link.href && link.href.includes('github.com') && projectId) {
+        if (link && editIcon && projectId) {
             editIcon.onclick = function (e) {
                 e.stopPropagation();
                 showEditPopup('GitHub Link', link.href, function (val) {
@@ -364,6 +455,24 @@ function setupEditIcons() {
                 }, { file: true, accept: ".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx" });
             };
         }
+        if (link) {
+            link.addEventListener("click", async function (e) {
+                e.preventDefault();
+                const fileUrl = link.getAttribute("href");
+        
+                const response = await fetch(fileUrl);
+                const blob = await response.blob();
+        
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = fileUrl.split("/").pop(); // file name from URL
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            });
+        }        
     });
 
     // Project Photo
@@ -388,15 +497,22 @@ function setupEditIcons() {
             const leaderSpan = editIcon.parentElement.querySelector('.project-leader-name');
             const currentName = leaderSpan ? leaderSpan.textContent.replace('(Leader)', '').trim() : '';
             const projectId = editIcon.closest('.project-card').getAttribute('data-project-id');
-            showProjectLeaderSelectPopup(currentName, function (selectedLeader) {
-                // selectedLeader is a name, but we want to send the user id
-                // Find the user id from allProjectLeaders
-                let userObj = window.allProjectLeaders.find(u => u.name === selectedLeader);
-                let userId = userObj ? userObj.id : null;
-                if (userId) {
-                    updateProject(window.currentLabKey, projectId, { project_lead: userId }, null, () => location.reload());
+            
+            // Check if current name is "Add Project Leader" and set to empty if so
+            const leaderName = currentName === 'Add Project Leader' ? '' : currentName;
+            
+            showProjectLeaderSelectPopup(leaderName, function (selectedLeader) {
+                // selectedLeader is now the full profile object
+                if (selectedLeader) {
+                    updateProject(window.currentLabKey, projectId, { 
+                        leader: {
+                            id: selectedLeader.id,
+                            name: selectedLeader.name,
+                            img: selectedLeader.img
+                        }
+                    }, null, () => location.reload());
                 } else {
-                    alert('Could not find user for leader');
+                    alert('No leader selected');
                 }
             });
         };
@@ -418,24 +534,37 @@ function setupEditIcons() {
             e.stopPropagation();
             const membersList = plusIcon.closest('.project-members-list');
             const projectId = membersList.closest('.project-card').getAttribute('data-project-id');
-            const currentMembers = Array.from(membersList.querySelectorAll('.project-member-name')).map(n => n.textContent.trim());
+            
+            // Get current members from the DOM and convert to the format expected by the popup
+            const currentMembers = [];
+            const memberElements = membersList.querySelectorAll('.project-member');
+            memberElements.forEach(memberElem => {
+                const nameElem = memberElem.querySelector('.project-member-name');
+                if (nameElem) {
+                    currentMembers.push({
+                        name: nameElem.textContent.trim()
+                    });
+                }
+            });
+            
             showProjectMembersSelectPopup(currentMembers, function (selectedMembers) {
-                // Find user ids for selected members
-                let userIds = selectedMembers.map(name => {
-                    let userObj = window.allProjectMembers.find(u => u.name === name);
-                    return userObj ? userObj.id : null;
-                }).filter(Boolean);
-                updateProject(window.currentLabKey, projectId, { add_members: userIds }, null, () => location.reload());
+                // selectedMembers is now an array of full profile objects
+                if (selectedMembers && selectedMembers.length > 0) {
+                    const membersData = selectedMembers.map(member => ({
+                        id: member.id,
+                        name: member.name,
+                        img: member.img
+                    }));
+                    updateProject(window.currentLabKey, projectId, { 
+                        members: membersData
+                    }, null, () => location.reload());
+                } else {
+                    alert('No members selected');
+                }
             });
         };
     });
 }
-
-// Call setupEditIcons after DOMContentLoaded and after toggling to Lab Details
-document.addEventListener('DOMContentLoaded', function () {
-    setupLabDescToggle();
-    setupEditIcons();
-});
 
 // Project description show more/less logic
 function setupProjectDescToggles() {
@@ -491,8 +620,7 @@ function showSection(section) {
 }
 
 // Example profiles data (replace with real data from server)
-const labProfiles = window.allLabHeads;
-
+let labProfiles = window.allLabHeads || [];
 
 // Show popup for selecting head of lab
 function showHeadSelectPopup(currentName, onSave) {
@@ -530,8 +658,37 @@ function showHeadSelectPopup(currentName, onSave) {
     // Render profiles
     function renderProfiles(filter) {
         list.innerHTML = '';
+        const currentDeptId = window.lab_department_id;
+        
+        // Ensure labProfiles is an array and has the filter method
+        labProfiles = labProfiles.textContent? JSON.parse(labProfiles.textContent): labProfiles;
+        if (!Array.isArray(labProfiles) || typeof labProfiles.filter !== 'function') {
+            console.log(labProfiles);
+            console.error('labProfiles is not a valid array:', labProfiles);
+            const nores = document.createElement('div');
+            nores.className = 'profile-select-nores';
+            nores.textContent = 'No profiles available.';
+            list.appendChild(nores);
+            return;
+        }
+        
         labProfiles
-            .filter(p => !filter || p.name.toLowerCase().includes(filter.toLowerCase()))
+            .filter(p => {
+                // First apply text filter
+                if (filter && !p.name.toLowerCase().includes(filter.toLowerCase())) {
+                    return false;
+                }
+                
+                // Then apply department filter - only show users from same department or no department
+                if (currentDeptId) {
+                    // Check if user has a department and if it matches the lab department
+                    if (p.department_id && p.department_id !== currentDeptId) {
+                        return false;
+                    }
+                }
+                
+                return true;
+            })
             .forEach(profile => {
                 const item = document.createElement('div');
                 item.className = 'profile-select-item';
@@ -584,8 +741,108 @@ function showHeadSelectPopup(currentName, onSave) {
     search.focus();
 }
 
+// Show popup for selecting lab department
+function showDepartmentSelectPopup(onSave) {
+    // Remove any existing popup
+    const existing = document.getElementById('edit-popup-backdrop');
+    if (existing) existing.remove();
+
+    // Backdrop
+    const backdrop = document.createElement('div');
+    backdrop.id = 'edit-popup-backdrop';
+    backdrop.className = 'edit-popup-backdrop';
+
+    // Popup
+    const popup = document.createElement('div');
+    popup.className = 'edit-popup';
+
+    // Title
+    const title = document.createElement('div');
+    title.className = 'edit-popup-title';
+    title.textContent = 'Select Lab Department';
+    popup.appendChild(title);
+
+    // Search box
+    const search = document.createElement('input');
+    search.type = 'text';
+    search.className = 'edit-popup-input';
+    search.placeholder = 'Search departments...';
+    popup.appendChild(search);
+
+    // Departments list
+    const list = document.createElement('div');
+    list.className = 'profile-select-list';
+    popup.appendChild(list);
+
+    // Render departments
+    function renderDepartments(filter) {
+        list.innerHTML = '';
+        const currentDeptId = window.currentLabDept.id;
+        
+        // Ensure departments is an array and has the filter method
+        if (!Array.isArray(window.departments) || typeof window.departments.filter !== 'function') {
+            console.error('departments is not a valid array:', window.departments);
+            const nores = document.createElement('div');
+            nores.className = 'profile-select-nores';
+            nores.textContent = 'No departments available.';
+            list.appendChild(nores);
+            return;
+        }
+        
+        window.departments
+            .filter(dept => !filter || dept.name.toLowerCase().includes(filter.toLowerCase()))
+            .forEach(dept => {
+                const item = document.createElement('div');
+                item.className = 'profile-select-item';
+                if (dept.id === currentDeptId) item.classList.add('selected');
+                item.innerHTML = `
+                    <span class="profile-select-name">${dept.name}</span>
+                `;
+                item.onclick = function () {
+                    if (confirm(`Set "${dept.name}" as Lab Department?`)) {
+                        onSave(dept.id, dept.name);
+                        document.body.removeChild(backdrop);
+                    }
+                };
+                list.appendChild(item);
+            });
+        if (!list.childNodes.length) {
+            const nores = document.createElement('div');
+            nores.className = 'profile-select-nores';
+            nores.textContent = 'No departments found.';
+            list.appendChild(nores);
+        }
+    }
+    renderDepartments('');
+
+    // Search handler
+    search.oninput = function () {
+        renderDepartments(search.value);
+    };
+
+    // Cancel button
+    const cancelBtn = document.createElement('button');
+    cancelBtn.className = 'edit-popup-cancel';
+    cancelBtn.textContent = 'Cancel';
+    cancelBtn.onclick = function () {
+        document.body.removeChild(backdrop);
+    };
+    popup.appendChild(cancelBtn);
+
+    // Backdrop click closes popup
+    backdrop.onclick = function (e) {
+        if (e.target === backdrop) {
+            document.body.removeChild(backdrop);
+        }
+    };
+
+    backdrop.appendChild(popup);
+    document.body.appendChild(backdrop);
+    search.focus();
+}
+
 // Example project members data (replace with real data from server)
-const allProjectMembers = window.allProjectMembers
+let allProjectMembers = JSON.parse(window.allProjectMembers.textContent) || []
 
 // Show popup for selecting project members (multi-select)
 function showProjectMembersSelectPopup(currentMembers, onSave) {
@@ -637,13 +894,24 @@ function showProjectMembersSelectPopup(currentMembers, onSave) {
     let selected = [];
     function renderProfiles(filter) {
         list.innerHTML = '';
+        
+        // Ensure allProjectMembers is an array and has the filter method
+        if (!Array.isArray(allProjectMembers) || typeof allProjectMembers.filter !== 'function') {
+            console.error('allProjectMembers is not a valid array:', allProjectMembers);
+            const nores = document.createElement('div');
+            nores.className = 'profile-select-nores';
+            nores.textContent = 'No members available.';
+            list.appendChild(nores);
+            return;
+        }
+        
         allProjectMembers
             .filter(p => !filter || p.name.toLowerCase().includes(filter.toLowerCase()))
             .forEach(profile => {
-                const alreadyMember = currentMembers.includes(profile.name);
+                const alreadyMember = currentMembers.some(member => member.name === profile.name);
                 const item = document.createElement('div');
                 item.className = 'profile-select-item';
-                if (selected.includes(profile.name)) item.classList.add('selected');
+                if (selected.some(s => s.name === profile.name)) item.classList.add('selected');
                 if (alreadyMember) item.style.opacity = '0.5';
                 item.innerHTML = `
                     <img src="${profile.img}" alt="${profile.name}" class="profile-select-img">
@@ -651,10 +919,11 @@ function showProjectMembersSelectPopup(currentMembers, onSave) {
                 `;
                 item.onclick = function () {
                     if (alreadyMember) return;
-                    if (selected.includes(profile.name)) {
-                        selected = selected.filter(n => n !== profile.name);
+                    const existingIndex = selected.findIndex(s => s.name === profile.name);
+                    if (existingIndex >= 0) {
+                        selected.splice(existingIndex, 1);
                     } else {
-                        selected.push(profile.name);
+                        selected.push(profile);
                     }
                     renderProfiles(search.value);
                     saveBtn.style.display = selected.length > 0 ? 'inline-block' : 'none';
@@ -702,7 +971,7 @@ function showProjectMembersSelectPopup(currentMembers, onSave) {
 }
 
 // Example project leaders data (replace with real data from server)
-const allProjectLeaders = window.allProjectLeaders
+let allProjectLeaders = JSON.parse(window.allProjectLeaders.textContent) || []
 
 // Show popup for selecting project leader (single-select)
 function showProjectLeaderSelectPopup(currentName, onSave) {
@@ -753,18 +1022,29 @@ function showProjectLeaderSelectPopup(currentName, onSave) {
     let selected = null;
     function renderProfiles(filter) {
         list.innerHTML = '';
+        
+        // Ensure allProjectLeaders is an array and has the filter method
+        if (!Array.isArray(allProjectLeaders) || typeof allProjectLeaders.filter !== 'function') {
+            console.error('allProjectLeaders is not a valid array:', allProjectLeaders);
+            const nores = document.createElement('div');
+            nores.className = 'profile-select-nores';
+            nores.textContent = 'No leaders available.';
+            list.appendChild(nores);
+            return;
+        }
+        
         allProjectLeaders
             .filter(p => !filter || p.name.toLowerCase().includes(filter.toLowerCase()))
             .forEach(profile => {
                 const item = document.createElement('div');
                 item.className = 'profile-select-item';
-                if (profile.name === (selected || currentName)) item.classList.add('selected');
+                if (profile.name === (selected ? selected.name : currentName)) item.classList.add('selected');
                 item.innerHTML = `
                     <img src="${profile.img}" alt="${profile.name}" class="profile-select-img">
                     <span class="profile-select-name">${profile.name}</span>
                 `;
                 item.onclick = function () {
-                    selected = profile.name;
+                    selected = profile;
                     renderProfiles(search.value);
                     saveBtn.style.display = 'inline-block';
                 };
@@ -1198,28 +1478,3 @@ function handlePhotoInputChange(e) {
         }
     }
 }
-//             alert('Failed to delete project');
-//         }
-//     });
-// }
-
-// // Example: Add Lab Photo
-// function addLabPhoto(lab_id, file, cb) {
-//     const formData = new FormData();
-//     formData.append('photo', file);
-//     fetch(`/executives/api/labs/add_photo/${lab_id}/`, {
-//         method: 'POST',
-//         headers: { 'X-CSRFToken': (document.cookie.match(/csrftoken=([^;]+)/) || [])[1] || '' },
-//         body: formData
-//     })
-//     .then(res => res.json())
-//     .then(cb)
-//     .catch(err => alert('AJAX error: ' + err));
-// }
-//     .then(cb)
-//     .catch(err => alert('AJAX error: ' + err));
-// }
-//         body: data ? JSON.stringify(data) : undefined
-//     })
-//     .then(res => res.json())
-//     .then(onSuccess)

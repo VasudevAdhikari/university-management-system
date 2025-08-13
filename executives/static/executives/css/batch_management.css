@@ -251,6 +251,15 @@ input[type="search"].form-control {
     transition: background 0.2s;
     width: 100%;
 }
+.subject-btn i.fa-pencil-alt {
+    opacity: 0;
+    transition: opacity 0.2s ease; /* smooth fade */
+    pointer-events: none; /* so it doesn't block clicks when hidden */
+}
+
+.subject-btn:hover i.fa-pencil-alt {
+    opacity: 1;
+}
 .subject-btn:hover {
     background: var(--bg-gray)  !important;
     transform: translateY(-1px);

@@ -145,7 +145,7 @@ body {
   padding: 2rem;
   box-shadow: 0 8px 30px rgba(0, 51, 102, 0.1);
   transition: all 0.3s ease;
-  border: 1px solid rgba(0, 51, 102, 0.05);
+  border-top: 4px solid #FFD700;
   position: relative;
   overflow: hidden;
 }
@@ -155,15 +155,7 @@ body {
   box-shadow: 0 15px 40px rgba(0, 51, 102, 0.15);
 }
 
-.degree-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
-}
+
 
 /* Degree Card Header */
 .degree-card-header {
@@ -346,9 +338,9 @@ body {
 
 /* Modal Header */
 .modal-header {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+  background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
   color: var(--text-light);
-  padding: 2rem;
+  padding: 2rem !important;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -411,7 +403,7 @@ body {
 /* Modal Body */
 .modal-body {
   flex: 1;
-  padding: 2rem;
+  padding: 1.5rem !important;
   overflow-y: auto;
   background: var(--bg-gray);
 }
@@ -834,7 +826,7 @@ body {
 }
 
 .add-semester-btn {
-  background: linear-gradient(135deg, var(--info) 0%, #4fc3f7 100%);
+  background: var(--primary);
   color: var(--text-light);
   border: none;
   padding: 1rem 2rem;
@@ -978,6 +970,10 @@ body {
   transform: translateY(-2px);
 }
 
+.upload-image-btn {
+  background-color: var(--primary) !important;
+}
+
 /* Responsive Design */
 @media (max-width: 1200px) {
   .degree-grid {
@@ -1021,17 +1017,12 @@ body {
     grid-template-columns: 1fr;
   }
   
-  .modal-header {
-    padding: 1.5rem;
-  }
+
   
   .modal-title {
     font-size: 1.5rem;
   }
   
-  .modal-body {
-    padding: 1.5rem;
-  }
   
   .degree-details-section,
   .syllabus-section {
@@ -1137,4 +1128,8 @@ body.sidebar-closed .degree-grid {
 
 .gap-2 {
   gap: 1rem;
+}
+
+#courseDegreeDeailsBtn {
+  background: var(--primary-light) !important;
 }

@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   const addNewTermBtn = document.getElementById('addNewTermBtn');
   const termButtonsContainer = document.getElementById('termButtonsContainer');
-  submitted = false;
+  let submitted = false;
 
   // Animation helper function
   function animateIn(element) {
@@ -45,10 +45,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // Create a term button
   function createTermButton(term) {
     const buttonWrapper = document.createElement('div');
-    buttonWrapper.className = 'flex flex-col items-center mb-2';
+    buttonWrapper.className = 'd-flex flex-column align-items-center mb-2';
 
     const button = document.createElement('button');
-    button.className = 'term-button bg-gray-200 px-6 py-3 rounded-md text-gray-700 hover:bg-gray-300 flex flex-row items-center';
+    button.className = 'term-button d-flex align-items-center gap-2 px-3 py-2 rounded';
     button.dataset.termId = term.id;
 
     // Icon
@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Date info
     if (term.semStart || term.endDate || term.resultDate) {
       const dateInfo = document.createElement('div');
-      dateInfo.className = 'text-xs text-gray-500 mt-1 w-full';
+      dateInfo.className = 'small text-muted mt-1 w-100';
       dateInfo.innerHTML = `
         ${term.semStart ? `<div>Sem Start: <span class="readonly-date">${term.semStart}</span></div>` : ''}
         ${term.endDate ? `<div>End Date: <span class="readonly-date">${term.endDate}</span></div>` : ''}
@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Delete icon
     const deleteIcon = document.createElement('span');
-    deleteIcon.className = 'ml-2 cursor-pointer';
+    deleteIcon.className = 'deleteIcon ms-2';
     deleteIcon.innerHTML = `
       <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="text-red-500 hover:text-red-700">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // View Details button
     const viewDetailsBtn = document.createElement('button');
     viewDetailsBtn.textContent = 'View Details';
-    viewDetailsBtn.className = 'mt-2 px-4 py-1 rounded text-sm view-details-btn';
+    viewDetailsBtn.className = 'view-details-btn mt-2';
     viewDetailsBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       window.location.href = `/executives/batches/${term.id}`;
@@ -124,24 +124,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const popup = document.createElement('div');
     popup.id = 'delete-popup';
-    popup.className = 'fixed inset-0 flex items-center justify-center z-50 bg-gray-500 bg-opacity-30';
+    popup.className = 'modal-overlay';
     popup.innerHTML = `
-      <div class="bg-white rounded-lg shadow-lg p-6 min-w-[300px]">
-        <h2 class="text-lg font-bold mb-4">Delete Term</h2>
-        <p class="mb-4">Are you sure you want to delete <span class="font-bold">${termName}</span>?</p>
-        <div class="flex justify-end gap-2">
-          <button id="deleteCancelBtn" class="px-4 py-2 rounded">Cancel</button>
-          <button id="deleteConfirmBtn" class="px-4 py-2 rounded">Delete</button>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="delete-modal-title">
+        <h2 id="delete-modal-title">Delete Term</h2>
+        <p>Are you sure you want to delete <span class="fw-bold">${termName}</span>?</p>
+        <div class="d-flex justify-content-end gap-2">
+          <button id="deleteCancelBtn">Cancel</button>
+          <button id="deleteConfirmBtn">Delete</button>
         </div>
       </div>
     `;
-    const popupBox = popup.querySelector('div.bg-white');
+    const popupBox = popup.querySelector('div.modal-card');
     animateIn(popupBox);
 
     popup.querySelector('#deleteCancelBtn').addEventListener('click', () => popup.remove());
     popup.addEventListener('click', (e) => {
       if (e.target === popup) popup.remove();
     });
+    const escListener = (e) => {
+      if (e.key === 'Escape') {
+        popup.remove();
+        document.removeEventListener('keydown', escListener);
+      }
+    };
+    document.addEventListener('keydown', escListener);
     popup.querySelector('#deleteConfirmBtn').addEventListener('click', () => {
       fetch(`/executives/terms/${termId}/delete/`, {
         method: 'POST',
@@ -153,6 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .then(() => {
           popup.remove();
+          alert('Selected Academic Term and its related data are deleted successfully');
           loadTerms();
         })
         .catch(error => console.error('Error deleting term:', error));
@@ -182,38 +190,38 @@ document.addEventListener('DOMContentLoaded', () => {
         const term = data.terms.find(t => t.id == termId) || {};
         const popup = document.createElement('div');
         popup.id = 'date-popup';
-        popup.className = 'fixed inset-0 flex items-center justify-center z-50 bg-gray-500 bg-opacity-30';
-                 popup.innerHTML = `
-           <div class="bg-white rounded-lg shadow-lg p-6 min-w-[300px]">
-             <h2 class="text-lg font-bold mb-4">Select Dates</h2>
-             <div class="mb-3 flex items-center gap-2">
-               <label class="block mb-1 font-medium w-28">Term Name</label>
-               <input type="text" class="border rounded px-2 py-1 w-full" id="termName" value="${term.name || ''}" readonly>
+        popup.className = 'modal-overlay';
+        popup.innerHTML = `
+           <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="tm-modal-title">
+             <h2 id="tm-modal-title">Select Dates</h2>
+             <div class="mb-3 d-flex align-items-center gap-2">
+               <label class="mb-1 fw-semibold" style="min-width: 7rem;">Term Name</label>
+               <input type="text" class="form-control" id="termName" value="${term.name || ''}" readonly>
              </div>
-             <div class="mb-3 flex items-center gap-2">
-               <label class="block mb-1 font-medium w-28">Academic Year</label>
-               <input type="number" min="2000" max="2100" class="border rounded px-2 py-1 w-full" id="year" value="${term.year || ''}" readonly>
+             <div class="mb-3 d-flex align-items-center gap-2">
+               <label class="mb-1 fw-semibold" style="min-width: 7rem;">Academic Year</label>
+               <input type="number" min="2000" max="2100" class="form-control" id="year" value="${term.year || ''}" readonly>
              </div>
-             <div class="mb-3 flex items-center gap-2">
-               <label class="block mb-1 font-medium w-28">Start Date</label>
-               <input type="date" class="border rounded px-2 py-1 w-full" id="semStartDate" value="${term.semStart || ''}" readonly>
+             <div class="mb-3 d-flex align-items-center gap-2">
+               <label class="mb-1 fw-semibold" style="min-width: 7rem;">Start Date</label>
+               <input type="date" class="form-control" id="semStartDate" value="${term.semStart || ''}" readonly>
              </div>
-             <div class="mb-3 flex items-center gap-2">
-               <label class="block mb-1 font-medium w-28">End Date</label>
-               <input type="date" class="border rounded px-2 py-1 w-full" id="endDate" value="${term.endDate || ''}" readonly>
+             <div class="mb-3 d-flex align-items-center gap-2">
+               <label class="mb-1 fw-semibold" style="min-width: 7rem;">End Date</label>
+               <input type="date" class="form-control" id="endDate" value="${term.endDate || ''}" readonly>
              </div>
-             <div class="mb-4 flex items-center gap-2">
-               <label class="block mb-1 font-medium w-28">Result Date</label>
-               <input type="date" class="border rounded px-2 py-1 w-full" id="resultDate" value="${term.resultDate || ''}" readonly>
+             <div class="mb-4 d-flex align-items-center gap-2">
+               <label class="mb-1 fw-semibold" style="min-width: 7rem;">Result Date</label>
+               <input type="date" class="form-control" id="resultDate" value="${term.resultDate || ''}" readonly>
              </div>
-             <div class="flex justify-end gap-2">
-               <button id="popupEditBtn" class="px-4 py-2 rounded">Edit</button>
-               <button id="popupCancelBtn" class="px-4 py-2 rounded">Cancel</button>
-               <button id="popupSaveBtn" class="px-4 py-2 rounded">Save</button>
+             <div class="d-flex justify-content-end gap-2">
+               <button id="popupEditBtn">Edit</button>
+               <button id="popupCancelBtn">Cancel</button>
+               <button id="popupSaveBtn">Save</button>
              </div>
            </div>
          `;
-        const popupBox = popup.querySelector('div.bg-white');
+        const popupBox = popup.querySelector('div.modal-card');
         animateIn(popupBox);
         
         popup.querySelector('#popupEditBtn').addEventListener('click', () => {
@@ -230,6 +238,13 @@ document.addEventListener('DOMContentLoaded', () => {
             popup.remove();
           }
         });
+        const escListener = (e) => {
+          if (e.key === 'Escape') {
+            popup.remove();
+            document.removeEventListener('keydown', escListener);
+          }
+        };
+        document.addEventListener('keydown', escListener);
 
         popup.querySelector('#popupSaveBtn').addEventListener('click', () => {
           const semStart = popup.querySelector('#semStartDate').value;
@@ -238,7 +253,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const name = popup.querySelector('#termName').value;
           const year = popup.querySelector('#year').value;
 
-          alert("end date is " + endDate);
+          if (!confirm('Are You sure to Update the selected Academic Term Data?')) return;
 
           fetch(`/executives/terms/${termId}/update/`, {
             method: 'POST',
@@ -254,6 +269,7 @@ document.addEventListener('DOMContentLoaded', () => {
             })
             .then(() => {
               popup.remove();
+              alert('Selected Academic Term Data Updated Successfully');
               loadTerms();
             })
             .catch(error => console.error('Error updating term dates:', error));
@@ -279,6 +295,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function finalizeEdit() {
       const value = input.value.trim();
       if (value && value !== currentValue) {
+        if (!confirm('Are You sure to Update the selected Academic Term Data?')) return;
         fetch(`/executives/terms/${term.id}/update/`, {
           method: 'POST',
           headers: {
@@ -292,6 +309,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return res.json();
           })
           .then(() => {
+            alert('Selected Academic Term Data Updated Successfully');
             loadTerms();
           })
           .catch(error => console.error('Error updating term name:', error));
@@ -311,7 +329,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const input = document.createElement('input');
     input.type = 'text';
     input.placeholder = 'Add new term (e.g. 2022-2023)';
-    input.className = 'new-term-input flex-grow px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-white ';
+    input.className = 'new-term-input flex-grow px-4 py-2 rounded';
     input.style.border = '2px solid #F5F5F5';
     const wrapper = document.createElement('div');
     wrapper.className = 'new-term-row';
@@ -326,6 +344,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const value = input.value.trim();
       if (value && !submitted) {
         submitted = true;
+        if (!confirm('Are You sure to create a new Academic Term with provided data?')) return;
         fetch('/executives/terms/create/', {
           method: 'POST',
           headers: {
@@ -339,6 +358,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return res.json();
           })
           .then(() => {
+            alert('New Term Created Successfully');
             loadTerms();
           })
           .catch(error => console.error('Error creating new term:', error));

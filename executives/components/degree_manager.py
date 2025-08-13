@@ -1,7 +1,8 @@
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 import json
-from authorization.models import Degree, Semester, Faculty
+from authorization.models import Degree, Semester, Faculty, Course
+from django.shortcuts import render, redirect
 
 def get_all_degrees():
     all_degrees = []
@@ -89,9 +90,9 @@ def add_degree_api(request):
             folder = 'degree/'
             if not os.path.exists(os.path.join('media', folder)):
                 os.makedirs(os.path.join('media', folder), exist_ok=True)
-        image_name = f"{folder}{data['code']}_{data['name']}.{ext}"
-        with open(os.path.join('media', image_name), 'wb') as f:
-            f.write(base64.b64decode(imgstr))
+            image_name = f"{folder}{data['code']}_{data['name']}.{ext}"
+            with open(os.path.join('media', image_name), 'wb') as f:
+                f.write(base64.b64decode(imgstr))
 
         degree = Degree(
             name=data['name'],
@@ -123,9 +124,6 @@ def add_degree_api(request):
     except Exception as e:
         print(e)
         return JsonResponse({'success': False, 'message': str(e)}, status=500)
-from django.shortcuts import render, redirect
-from authorization.models import Course
-
 
 def show_degree_management(request):
     course_models = Course.objects.all()
@@ -244,3 +242,4 @@ def edit_degree_api(request, degree_id):
     except Exception as e:
         print(e)
         return JsonResponse({'success': False, 'message': str(e)}, status=500)
+    

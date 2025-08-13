@@ -1,4 +1,4 @@
-const DEGREE_KEY = 'degrees_data_v1';
+const DEGREE_KEY = "degrees_data_v1";
 
 // Get degrees from localStorage or use mock data if not present
 function getDegrees() {
@@ -7,12 +7,13 @@ function getDegrees() {
 }
 
 function renderDegrees(degrees) {
-  const grid = document.getElementById('degreeGrid');
-  grid.innerHTML = '';
-  if (degrees) degrees.forEach((degree, index) => {
-    const card = document.createElement('div');
-    card.className = 'degree-card fade-in';
-    card.innerHTML = `
+  const grid = document.getElementById("degreeGrid");
+  grid.innerHTML = "";
+  if (degrees)
+    degrees.forEach((degree, index) => {
+      const card = document.createElement("div");
+      card.className = "degree-card fade-in";
+      card.innerHTML = `
       <div class="degree-card-header">
         <div class="degree-img">
           <img src="${degree.image}" alt="${degree.title}">
@@ -28,7 +29,9 @@ function renderDegrees(degrees) {
       </div>
       
       <div class="degree-card-content">
-        <p class="degree-description">${degree.description || 'No description available'}</p>
+        <p class="degree-description">${
+          degree.description || "No description available"
+        }</p>
         
         <div class="degree-stats">
           <div class="degree-stat">
@@ -57,34 +60,35 @@ function renderDegrees(degrees) {
         </button>
       </div>
     `;
-    
-    // View button functionality
-    card.querySelector('.view-btn').onclick = function () {
-      showDegreeDetailsModal(degree);
-    };
-    
-    // Delete button functionality
-    card.querySelector('.delete-btn').onclick = function () {
-      showDeleteConfirm(() => {
-        // Redirect to backend delete URL
-        if (degree.id) {
-          window.location.href = `/executives/degree/delete/${degree.id}`;
-        } else if (degree.code) {
-          window.location.href = `/executives/degree/delete/${degree.code}`;
-        } else {
-          showWarningBox('Cannot delete: degree ID or code missing.');
-        }
-      });
-    };
-    
-    grid.appendChild(card);
-  });
+
+      // View button functionality
+      card.querySelector(".view-btn").onclick = function () {
+        showDegreeDetailsModal(degree);
+        sessionStorage.setItem('degree-id', degree.id);
+      };
+
+      // Delete button functionality
+      card.querySelector(".delete-btn").onclick = function () {
+        showDeleteConfirm(() => {
+          // Redirect to backend delete URL
+          if (degree.id) {
+            window.location.href = `/executives/degree/delete/${degree.id}`;
+          } else if (degree.code) {
+            window.location.href = `/executives/degree/delete/${degree.code}`;
+          } else {
+            showWarningBox("Cannot delete: degree ID or code missing.");
+          }
+        });
+      };
+
+      grid.appendChild(card);
+    });
 }
 
 // Show degree details modal
 function showDegreeDetailsModal(degree, degreeIndex = null, isAddMode = false) {
   // Remove existing modal if any
-  const oldModal = document.getElementById('degreeDetailsModal');
+  const oldModal = document.getElementById("degreeDetailsModal");
   if (oldModal) oldModal.remove();
 
   // Clone degree object for editing
@@ -93,18 +97,29 @@ function showDegreeDetailsModal(degree, degreeIndex = null, isAddMode = false) {
   let selectedFaculty = degree.faculty || null;
   let descriptionExpanded = false;
   let selectedImageFile = null; // Store selected image file
-  
-  const modal = document.createElement('div');
-  modal.id = 'degreeDetailsModal';
-  modal.className = 'modal-overlay';
+
+  const modal = document.createElement("div");
+  modal.id = "degreeDetailsModal";
+  modal.className = "modal-overlay";
 
   function renderModalContent() {
+    // Always sync input fields before re-rendering modal content if editing
+    if (editing) {
+      const titleInput = document.getElementById("edit-title");
+      const codeInput = document.getElementById("edit-code");
+      const durationInput = document.getElementById("edit-duration");
+      if (titleInput) tempDegree.title = titleInput.value;
+      if (codeInput) tempDegree.code = codeInput.value;
+      if (durationInput) tempDegree.duration = durationInput.value;
+    }
     // Calculate totals
-    let totalCredit = 0, totalCourses = 0, totalHours = 0;
+    let totalCredit = 0,
+      totalCourses = 0,
+      totalHours = 0;
     if (tempDegree.syllabus && tempDegree.syllabus.length) {
-      tempDegree.syllabus.forEach(sem => {
+      tempDegree.syllabus.forEach((sem) => {
         let semWeeks = sem.total_weeks || 16;
-        sem.courses.forEach(course => {
+        sem.courses.forEach((course) => {
           totalCredit += Number(course.credit) || 0;
           totalHours += (Number(course.hours) || 0) * semWeeks;
         });
@@ -120,24 +135,31 @@ function showDegreeDetailsModal(degree, degreeIndex = null, isAddMode = false) {
     }
 
     // Image upload section for add/edit mode
-    let imageUploadHtml = '';
+    let imageUploadHtml = "";
     if (editing) {
       imageUploadHtml = `
-        <div class="image-upload-section">
-          <div class="image-upload-label">
-            <i class="fa-solid fa-image"></i>
-            Degree Image
-          </div>
-          <div class="image-upload-container">
-            <div class="image-preview" id="degreeImagePreview">
-              <img src="${tempDegree.image || './img/bachelor.png'}" alt="Degree Image" id="previewImg">
+        <div class="image-upload-section mb-3">
+          <label class="form-label d-block mb-2">
+            <i class="fa-solid fa-image"></i> Degree Image
+          </label>
+          <div class="image-upload-container row align-items-center g-2">
+            <div class="col-12 col-md-5 text-center mb-2 mb-md-0">
+              <div class="image-preview border rounded shadow-sm p-2 bg-light" id="degreeImagePreview" style="min-height:120px;display:flex;align-items:center;justify-content:center;">
+                <img src="${
+                  tempDegree.image || "./img/bachelor.png"
+                }" alt="Degree Image" id="previewImg" class="img-fluid rounded" style="max-height:100px;max-width:100%;object-fit:cover;">
+              </div>
             </div>
-            <div class="image-upload-controls">
+            <div class="col-12 col-md-7 d-flex flex-column flex-md-row justify-content-center align-items-center gap-2">
               <input type="file" id="degreeImageInput" accept="image/*" style="display: none;">
-              <button type="button" class="upload-image-btn" onclick="document.getElementById('degreeImageInput').click()">
+              <button type="button" class="btn btn-primary upload-image-btn mb-2 mb-md-0" onclick="document.getElementById('degreeImageInput').click()">
                 <i class="fa-solid fa-upload"></i> Choose Image
               </button>
-              <button type="button" class="remove-image-btn" onclick="removeDegreeImage()" style="display: ${tempDegree.image && tempDegree.image !== './img/bachelor.png' ? 'inline-block' : 'none'}">
+              <button type="button" class="btn btn-outline-danger remove-image-btn ms-md-2" onclick="removeDegreeImage()" style="display: ${
+                tempDegree.image && tempDegree.image !== "./img/bachelor.png"
+                  ? "inline-block"
+                  : "none"
+              };">
                 <i class="fa-solid fa-trash"></i> Remove
               </button>
             </div>
@@ -147,7 +169,7 @@ function showDegreeDetailsModal(degree, degreeIndex = null, isAddMode = false) {
     }
 
     // Faculty selection UI and Degree Description textarea
-    let facultyHtml = '';
+    let facultyHtml = "";
     if (editing) {
       facultyHtml = `
         <div class="faculty-section">
@@ -155,8 +177,18 @@ function showDegreeDetailsModal(degree, degreeIndex = null, isAddMode = false) {
             <i class="fa-solid fa-graduation-cap"></i>
             Faculty
           </div>
-          <button id="chooseFacultyBtn" class="choose-faculty-btn">
-            ${selectedFaculty ? `<img src="${window.ALL_FACULTIES.find(faculty => faculty.id === selectedFaculty.id).photo}" alt="Faculty Photo" class="faculty-avatar">${selectedFaculty.name}` : '<i class="fa-solid fa-plus"></i> Choose Faculty'}
+          <button type="button" id="chooseFacultyBtn" class="choose-faculty-btn">
+            ${
+              selectedFaculty
+                ? `<img src="${
+                    window.ALL_FACULTIES.find(
+                      (faculty) => faculty.id === selectedFaculty.id
+                    ).photo
+                  }" alt="Faculty Photo" class="faculty-avatar">${
+                    selectedFaculty.name
+                  }`
+                : '<i class="fa-solid fa-plus"></i> Choose Faculty'
+            }
           </button>
         </div>
         <div class="description-section">
@@ -164,7 +196,9 @@ function showDegreeDetailsModal(degree, degreeIndex = null, isAddMode = false) {
             <i class="fa-solid fa-align-left"></i>
             Degree Description
           </div>
-          <textarea id="edit-description" class="form-input form-textarea" placeholder="Enter degree description...">${tempDegree.description ? tempDegree.description : ''}</textarea>
+          <textarea id="edit-description" class="form-input form-textarea" placeholder="Enter degree description...">${
+            tempDegree.description ? tempDegree.description : ""
+          }</textarea>
         </div>
       `;
     } else {
@@ -174,7 +208,17 @@ function showDegreeDetailsModal(degree, degreeIndex = null, isAddMode = false) {
             <i class="fa-solid fa-graduation-cap"></i>
             Faculty
           </div>
-          ${selectedFaculty ? `<div class="d-flex align-center gap-2"><img src="${window.ALL_FACULTIES.find(faculty => faculty.id === selectedFaculty.id).photo}" alt="Faculty Photo" class="faculty-avatar">${selectedFaculty.name}</div>` : '<span style="color:#888;">Not chosen</span>'}
+          ${
+            selectedFaculty
+              ? `<div class="d-flex align-center gap-2"><img src="${
+                  window.ALL_FACULTIES.find(
+                    (faculty) => faculty.id === selectedFaculty.id
+                  ).photo
+                }" alt="Faculty Photo" class="faculty-avatar">${
+                  selectedFaculty.name
+                }</div>`
+              : '<span style="color:#888;">Not chosen</span>'
+          }
         </div>
         <div class="description-section">
           <div class="description-label">
@@ -182,26 +226,47 @@ function showDegreeDetailsModal(degree, degreeIndex = null, isAddMode = false) {
             Degree Description
           </div>
           <div class="description-content">
-            <p class="description-text ${!descriptionExpanded ? 'collapsed' : ''}">${tempDegree.description ? tempDegree.description : 'No description available'}</p>
-            ${tempDegree.description && tempDegree.description.length > 150 ? `<button class="read-more-btn" onclick="toggleDescription()">${descriptionExpanded ? '<i class="fa-solid fa-chevron-up"></i> Read Less' : '<i class="fa-solid fa-chevron-down"></i> Read More'}</button>` : ''}
+            <p class="description-text ${
+              !descriptionExpanded ? "collapsed" : ""
+            }">${
+        tempDegree.description
+          ? tempDegree.description
+          : "No description available"
+      }</p>
+            ${
+              tempDegree.description && tempDegree.description.length > 150
+                ? `<button class="read-more-btn" onclick="toggleDescription()">${
+                    descriptionExpanded
+                      ? '<i class="fa-solid fa-chevron-up"></i> Read Less'
+                      : '<i class="fa-solid fa-chevron-down"></i> Read More'
+                  }</button>`
+                : ""
+            }
           </div>
         </div>
       `;
     }
 
     // Editable courses table
-    let semestersHtml = '';
+    let semestersHtml = "";
     if (tempDegree.syllabus && tempDegree.syllabus.length) {
-      semestersHtml = tempDegree.syllabus.map((sem, sIdx) => {
-        let semCredit = 0, semHours = 0;
-        // Add total_weeks field if not present
-        if (editing && (typeof sem.total_weeks === 'undefined' || sem.total_weeks === null)) {
-          sem.total_weeks = 16;
-        }
-        const rows = sem.courses.map((course, cIdx) => {
-          semCredit += Number(course.credit) || 0;
-          semHours += Number(course.hours) || 0;
-          return editing ? `
+      semestersHtml = tempDegree.syllabus
+        .map((sem, sIdx) => {
+          let semCredit = 0,
+            semHours = 0;
+          // Add total_weeks field if not present
+          if (
+            editing &&
+            (typeof sem.total_weeks === "undefined" || sem.total_weeks === null)
+          ) {
+            sem.total_weeks = 16;
+          }
+          const rows = sem.courses
+            .map((course, cIdx) => {
+              semCredit += Number(course.credit) || 0;
+              semHours += Number(course.hours) || 0;
+              return editing
+                ? `
             <tr>
               <td><span>${course.code}</span></td>
               <td><span>${course.title}</span></td>
@@ -209,19 +274,28 @@ function showDegreeDetailsModal(degree, degreeIndex = null, isAddMode = false) {
               <td><span>${course.hours}</span></td>
               <td>
                 <select data-sem="${sIdx}" data-course="${cIdx}" class="edit-course-field course-type-select" data-field="type">
-                  <option value="Core" ${course.type === "Core" ? "selected" : ""}>Core</option>
-                  <option value="Elective" ${course.type === "Elective" ? "selected" : ""}>Elective</option>
-                  <option value="Supporting" ${course.type === "Supporting" ? "selected" : ""}>Supporting</option>
-                  <option value="Extra Curricular" ${course.type === "Extra Curricular" ? "selected" : ""}>Extra Curricular</option>
+                  <option value="Core" ${
+                    course.type === "Core" ? "selected" : ""
+                  }>Core</option>
+                  <option value="Elective" ${
+                    course.type === "Elective" ? "selected" : ""
+                  }>Elective</option>
+                  <option value="Supporting" ${
+                    course.type === "Supporting" ? "selected" : ""
+                  }>Supporting</option>
+                  <option value="Extra Curricular" ${
+                    course.type === "Extra Curricular" ? "selected" : ""
+                  }>Extra Curricular</option>
                 </select>
               </td>
               <td>
-                <button class="remove-course-btn course-remove-btn" data-sem="${sIdx}" data-course="${cIdx}" title="Remove">
+                <button type="button" class="remove-course-btn course-remove-btn" data-sem="${sIdx}" data-course="${cIdx}" title="Remove">
                   <i class="fa-solid fa-trash"></i>
                 </button>
               </td>
             </tr>
-          ` : `
+          `
+                : `
             <tr>
               <td>${course.code}</td>
               <td>${course.title}</td>
@@ -230,24 +304,33 @@ function showDegreeDetailsModal(degree, degreeIndex = null, isAddMode = false) {
               <td>${course.type}</td>
             </tr>
           `;
-        }).join('');
-        return `
+            })
+            .join("");
+          return `
           <div class="semester-item">
             <div class="semester-header">
               <div class="semester-title">
                 <i class="fa-solid fa-book"></i>
                 Semester ${sem.semester}
               </div>
-              ${editing ? `<div class="semester-actions">
-                <button class="semester-action-btn remove-semester-btn" data-sem="${sIdx}" title="Remove Semester">
+              ${
+                editing
+                  ? `<div class="semester-actions">
+                <button type="button" class="semester-action-btn remove-semester-btn" data-sem="${sIdx}" title="Remove Semester">
                   <i class="fa-solid fa-trash"></i>
                 </button>
-              </div>` : ""}
+              </div>`
+                  : ""
+              }
             </div>
             <div class="semester-content">
               <div class="semester-weeks">
                 <span class="weeks-label">Total Weeks to Study:</span>
-                ${editing ? `<input type='number' min='1' max='52' value='${sem.total_weeks}' data-sem-weeks='${sIdx}' class='edit-semester-weeks weeks-input'>` : `<span>${sem.total_weeks || 16}</span>`}
+                ${
+                  editing
+                    ? `<input type='number' min='1' max='52' value='${sem.total_weeks}' data-sem-weeks='${sIdx}' class='edit-semester-weeks weeks-input'>`
+                    : `<span>${sem.total_weeks || 16}</span>`
+                }
               </div>
               <table class="courses-table">
                 <thead>
@@ -265,20 +348,36 @@ function showDegreeDetailsModal(degree, degreeIndex = null, isAddMode = false) {
               <div class="text-center mb-1">
                 <strong>Total Credits:</strong> ${semCredit} &nbsp; | &nbsp; <strong>Total Hours:</strong> ${semHours}
               </div>
-              ${editing ? `<button type="button" class="add-course-btn" data-sem="${sIdx}">
+              ${
+                editing
+                  ? `<button type="button" class="add-course-btn" data-sem="${sIdx}">
                 <i class="fa-solid fa-plus"></i> Add Course
-              </button>` : ""}
+              </button>`
+                  : ""
+              }
             </div>
           </div>
         `;
-      }).join('');
+        })
+        .join("");
     } else {
       semestersHtml = `<div class="text-center" style="color:#888;padding:2rem;">No syllabus data available.</div>`;
     }
 
     // Modal actions
-    let actionsHtml = '';
-    if (editing) {
+    let actionsHtml = "";
+    if (editing && isAddMode) {
+      sessionStorage.setItem('mode', 'add');
+      actionsHtml = `
+        <button id="saveDegreeBtn" class="modal-action-btn">
+          <i class="fa-solid fa-save"></i> Save
+        </button>
+        <button id="closeDegreeDetailsBtn" class="modal-action-btn">
+          <i class="fa-solid fa-times"></i> Close
+        </button>
+      `;
+    } else if (editing) {
+      sessionStorage.setItem('mode', 'edit');
       actionsHtml = `
         <button id="saveDegreeBtn" class="modal-action-btn">
           <i class="fa-solid fa-save"></i> Save
@@ -297,113 +396,184 @@ function showDegreeDetailsModal(degree, degreeIndex = null, isAddMode = false) {
         </button>
       `;
     }
+    // document.getElementById('showAddModalBtn').addEventListener('click', ()=> {
+    //   sessionStorage.setItem('mode', 'add');
+    // })
+    // document.getElementById('editDegreeBtn').addEventListener('click', ()=> {
+    //   sessionStorage.setItem('mode', 'edit');
+    // })
 
-    modal.innerHTML = `
-      <div class="modal-content">
-        <div class="modal-header">
-          <h2 class="modal-title">
-            <i class="fa-solid fa-graduation-cap"></i>
-            ${isAddMode ? 'Add New Degree' : 'Degree Details'}
-          </h2>
-          <div class="modal-actions">
-            ${actionsHtml}
+    // Two-column layout for Add New Degree (editing && isAddMode)
+    if (editing) {
+      // Use two-column layout for both add and edit
+      modal.innerHTML = `
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2 class="modal-title">
+              <i class="fa-solid fa-graduation-cap"></i>
+              ${isAddMode ? "Add New Degree" : "Edit Degree"}
+            </h2>
+            <div class="modal-actions">
+              ${actionsHtml}
+            </div>
           </div>
-        </div>
-        
-        <div class="modal-body">
-          ${editing ? `
-            <div class="edit-form">
-              <div class="form-row">
-                <div class="form-group form-col">
+          <div class="modal-body">
+            <div class="add-degree-grid row g-4">
+              <div class="col-12 col-md-6">
+                <div class="form-group mb-3">
                   <label class="form-label">Degree Name</label>
                   ${field("title", tempDegree.title)}
                 </div>
-                <div class="form-group form-col">
+                <div class="form-group mb-3">
                   <label class="form-label">Degree Code</label>
                   ${field("code", tempDegree.code)}
                 </div>
-              </div>
-              <div class="form-row">
-                <div class="form-group form-col">
+                <div class="form-group mb-3">
                   <label class="form-label">Duration (Years)</label>
-                  ${field("duration", tempDegree.duration, "number", "min='1' max='10'")}
+                  ${field(
+                    "duration",
+                    tempDegree.duration,
+                    "number",
+                    "min='1' max='10'"
+                  )}
                 </div>
+                ${imageUploadHtml}
+                ${facultyHtml}
               </div>
-              ${imageUploadHtml}
-              ${facultyHtml}
-            </div>
-          ` : `
-            <div class="degree-details-section">
-              <div class="degree-details-header">
-                <div class="degree-details-image">
-                  <img src="${tempDegree.image}" alt="Degree Image">
-                </div>
-                <div class="degree-details-info">
-                  <h1 class="degree-details-title">${tempDegree.title}</h1>
-                  <span class="degree-details-code">${tempDegree.code}</span>
-                  
-                  <div class="degree-details-meta">
-                    <div class="degree-meta-item">
-                      <div class="degree-meta-icon">
-                        <i class="fa-solid fa-clock"></i>
-                      </div>
-                      <div class="degree-meta-content">
-                        <h4>Duration</h4>
-                        <p>${tempDegree.duration} Years</p>
-                      </div>
-                    </div>
-                    <div class="degree-meta-item">
-                      <div class="degree-meta-icon">
-                        <i class="fa-solid fa-star"></i>
-                      </div>
-                      <div class="degree-meta-content">
-                        <h4>Total Credits</h4>
-                        <p>${totalCredit}</p>
-                      </div>
-                    </div>
-                    <div class="degree-meta-item">
-                      <div class="degree-meta-icon">
-                        <i class="fa-solid fa-book"></i>
-                      </div>
-                      <div class="degree-meta-content">
-                        <h4>Total Courses</h4>
-                        <p>${totalCourses}</p>
-                      </div>
-                    </div>
-                    <div class="degree-meta-item">
-                      <div class="degree-meta-icon">
-                        <i class="fa-solid fa-clock"></i>
-                      </div>
-                      <div class="degree-meta-content">
-                        <h4>Total Hours</h4>
-                        <p>${totalHours}</p>
-                      </div>
-                    </div>
+              <div class="col-12 col-md-6">
+                <div class="syllabus-section">
+                  <h3 class="syllabus-title">
+                    <i class="fa-solid fa-list"></i>
+                    Syllabus Structure
+                  </h3>
+                  <div>
+                    ${semestersHtml}
+                    <button type="button" class="add-semester-btn">
+                      <i class="fa-solid fa-plus"></i> Add Semester
+                    </button>
                   </div>
                 </div>
               </div>
-              
-              ${facultyHtml}
-            </div>
-          `}
-          
-          <div class="syllabus-section">
-            <h3 class="syllabus-title">
-              <i class="fa-solid fa-list"></i>
-              Syllabus Structure
-            </h3>
-            <div>
-              ${semestersHtml}
-              ${editing ? `
-                <button class="add-semester-btn">
-                  <i class="fa-solid fa-plus"></i> Add Semester
-                </button>
-              ` : ""}
             </div>
           </div>
         </div>
-      </div>
-    `;
+      `;
+    } else {
+      // ...existing code...
+      modal.innerHTML = `
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2 class="modal-title">
+              <i class="fa-solid fa-graduation-cap"></i>
+              ${isAddMode ? "Add New Degree" : "Degree Details"}
+            </h2>
+            <div class="modal-actions">
+              ${actionsHtml}
+            </div>
+          </div>
+          <div class="modal-body">
+            ${
+              editing
+                ? `<div class="edit-form">${/* ...existing code... */ ""}
+                  <div class="form-row">
+                    <div class="form-group form-col">
+                      <label class="form-label">Degree Name</label>
+                      ${field("title", tempDegree.title)}
+                    </div>
+                    <div class="form-group form-col">
+                      <label class="form-label">Degree Code</label>
+                      ${field("code", tempDegree.code)}
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group form-col">
+                      <label class="form-label">Duration (Years)</label>
+                      ${field(
+                        "duration",
+                        tempDegree.duration,
+                        "number",
+                        "min='1' max='10'"
+                      )}
+                    </div>
+                  </div>
+                  ${imageUploadHtml}
+                  ${facultyHtml}
+                </div>`
+                : `<div class="degree-details-section">${
+                    /* ...existing code... */ ""
+                  }
+                  <div class="degree-details-header">
+                    <div class="degree-details-image">
+                      <img src="${tempDegree.image}" alt="Degree Image">
+                    </div>
+                    <div class="degree-details-info">
+                      <h1 class="degree-details-title">${tempDegree.title}</h1>
+                      <span class="degree-details-code">${
+                        tempDegree.code
+                      }</span>
+                      <div class="degree-details-meta">
+                        <div class="degree-meta-item">
+                          <div class="degree-meta-icon">
+                            <i class="fa-solid fa-clock"></i>
+                          </div>
+                          <div class="degree-meta-content">
+                            <h4>Duration</h4>
+                            <p>${tempDegree.duration} Years</p>
+                          </div>
+                        </div>
+                        <div class="degree-meta-item">
+                          <div class="degree-meta-icon">
+                            <i class="fa-solid fa-star"></i>
+                          </div>
+                          <div class="degree-meta-content">
+                            <h4>Total Credits</h4>
+                            <p>${totalCredit}</p>
+                          </div>
+                        </div>
+                        <div class="degree-meta-item">
+                          <div class="degree-meta-icon">
+                            <i class="fa-solid fa-book"></i>
+                          </div>
+                          <div class="degree-meta-content">
+                            <h4>Total Courses</h4>
+                            <p>${totalCourses}</p>
+                          </div>
+                        </div>
+                        <div class="degree-meta-item">
+                          <div class="degree-meta-icon">
+                            <i class="fa-solid fa-clock"></i>
+                          </div>
+                          <div class="degree-meta-content">
+                            <h4>Total Hours</h4>
+                            <p>${totalHours}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  ${facultyHtml}
+                </div>`
+            }
+            <div class="syllabus-section">
+              <h3 class="syllabus-title">
+                <i class="fa-solid fa-list"></i>
+                Syllabus Structure
+              </h3>
+              <div>
+                ${semestersHtml}
+                ${
+                  editing
+                    ? `<button type="button" class="add-semester-btn">
+                      <i class="fa-solid fa-plus"></i> Add Semester
+                    </button>`
+                    : ""
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
 
     // Set up image upload functionality
     if (editing) {
@@ -412,53 +582,55 @@ function showDegreeDetailsModal(degree, degreeIndex = null, isAddMode = false) {
   }
 
   // Global function for toggling description
-  window.toggleDescription = function() {
+  window.toggleDescription = function () {
     descriptionExpanded = !descriptionExpanded;
-    const descText = modal.querySelector('.description-text');
-    const readMoreBtn = modal.querySelector('.read-more-btn');
-    const icon = readMoreBtn.querySelector('i');
-    
+    const descText = modal.querySelector(".description-text");
+    const readMoreBtn = modal.querySelector(".read-more-btn");
+    const icon = readMoreBtn.querySelector("i");
+
     if (descriptionExpanded) {
-      descText.classList.remove('collapsed');
-      readMoreBtn.innerHTML = '<i class="fa-solid fa-chevron-up"></i> Read Less';
+      descText.classList.remove("collapsed");
+      readMoreBtn.innerHTML =
+        '<i class="fa-solid fa-chevron-up"></i> Read Less';
     } else {
-      descText.classList.add('collapsed');
-      readMoreBtn.innerHTML = '<i class="fa-solid fa-chevron-down"></i> Read More';
+      descText.classList.add("collapsed");
+      readMoreBtn.innerHTML =
+        '<i class="fa-solid fa-chevron-down"></i> Read More';
     }
   };
 
   // Global function for removing degree image
-  window.removeDegreeImage = function() {
-    tempDegree.image = './img/bachelor.png';
-    const previewImg = document.getElementById('previewImg');
+  window.removeDegreeImage = function () {
+    tempDegree.image = "./img/bachelor.png";
+    const previewImg = document.getElementById("previewImg");
     if (previewImg) {
-      previewImg.src = './img/bachelor.png';
+      previewImg.src = "./img/bachelor.png";
     }
-    const removeBtn = document.querySelector('.remove-image-btn');
+    const removeBtn = document.querySelector(".remove-image-btn");
     if (removeBtn) {
-      removeBtn.style.display = 'none';
+      removeBtn.style.display = "none";
     }
     selectedImageFile = null;
   };
 
   // Setup image upload functionality
   function setupImageUpload() {
-    const imageInput = modal.querySelector('#degreeImageInput');
+    const imageInput = modal.querySelector("#degreeImageInput");
     if (imageInput) {
-      imageInput.onchange = function(e) {
+      imageInput.onchange = function (e) {
         const file = e.target.files[0];
         if (file) {
           selectedImageFile = file;
           const reader = new FileReader();
-          reader.onload = function(e) {
+          reader.onload = function (e) {
             tempDegree.image = e.target.result;
-            const previewImg = document.getElementById('previewImg');
+            const previewImg = document.getElementById("previewImg");
             if (previewImg) {
               previewImg.src = e.target.result;
             }
-            const removeBtn = document.querySelector('.remove-image-btn');
+            const removeBtn = document.querySelector(".remove-image-btn");
             if (removeBtn) {
-              removeBtn.style.display = 'inline-block';
+              removeBtn.style.display = "inline-block";
             }
           };
           reader.readAsDataURL(file);
@@ -468,37 +640,37 @@ function showDegreeDetailsModal(degree, degreeIndex = null, isAddMode = false) {
   }
 
   // Global function for removing degree image
-  window.removeDegreeImage = function() {
-    tempDegree.image = './img/bachelor.png';
-    const previewImg = document.getElementById('previewImg');
+  window.removeDegreeImage = function () {
+    tempDegree.image = "./img/bachelor.png";
+    const previewImg = document.getElementById("previewImg");
     if (previewImg) {
-      previewImg.src = './img/bachelor.png';
+      previewImg.src = "./img/bachelor.png";
     }
-    const removeBtn = document.querySelector('.remove-image-btn');
+    const removeBtn = document.querySelector(".remove-image-btn");
     if (removeBtn) {
-      removeBtn.style.display = 'none';
+      removeBtn.style.display = "none";
     }
     selectedImageFile = null;
   };
 
   // Setup image upload functionality
   function setupImageUpload() {
-    const imageInput = modal.querySelector('#degreeImageInput');
+    const imageInput = modal.querySelector("#degreeImageInput");
     if (imageInput) {
-      imageInput.onchange = function(e) {
+      imageInput.onchange = function (e) {
         const file = e.target.files[0];
         if (file) {
           selectedImageFile = file;
           const reader = new FileReader();
-          reader.onload = function(e) {
+          reader.onload = function (e) {
             tempDegree.image = e.target.result;
-            const previewImg = document.getElementById('previewImg');
+            const previewImg = document.getElementById("previewImg");
             if (previewImg) {
               previewImg.src = e.target.result;
             }
-            const removeBtn = document.querySelector('.remove-image-btn');
+            const removeBtn = document.querySelector(".remove-image-btn");
             if (removeBtn) {
-              removeBtn.style.display = 'inline-block';
+              removeBtn.style.display = "inline-block";
             }
           };
           reader.readAsDataURL(file);
@@ -518,285 +690,166 @@ function showDegreeDetailsModal(degree, degreeIndex = null, isAddMode = false) {
 
   // Modal actions event delegation
   function setModalEvents() {
-    // Close
-    const closeBtn = modal.querySelector('#closeDegreeDetailsBtn');
-    if (closeBtn) closeBtn.onclick = () => modal.remove();
+    // Close (when not editing or when adding a new degree)
+    const closeBtn = modal.querySelector("#closeDegreeDetailsBtn");
+    if (closeBtn && (!editing || isAddMode))
+      closeBtn.onclick = () => modal.remove();
 
     // Edit
-    const editBtn = modal.querySelector('#editDegreeBtn');
-    if (editBtn) editBtn.onclick = () => {
-      editing = true;
-      renderModalContent();
-      setModalEvents();
-      setEditEvents();
-    };
+    const editBtn = modal.querySelector("#editDegreeBtn");
+    if (editBtn)
+      editBtn.onclick = () => {
+        editing = true;
+        renderModalContent();
+        setModalEvents();
+        setEditEvents();
+      };
 
-    // Cancel
-    const cancelBtn = modal.querySelector('#cancelEditBtn');
-    if (cancelBtn) cancelBtn.onclick = () => {
-      editing = false;
-      tempDegree = JSON.parse(JSON.stringify(degree));
-      renderModalContent();
-      setModalEvents();
-    };
+    // Cancel (only when editing)
+    const cancelBtn = modal.querySelector("#cancelEditBtn");
+    if (cancelBtn && editing)
+      cancelBtn.onclick = () => {
+        editing = false;
+        tempDegree = JSON.parse(JSON.stringify(degree));
+        renderModalContent();
+        setModalEvents();
+      };
 
     // Save
-    const saveBtn = modal.querySelector('#saveDegreeBtn');
-    if (saveBtn) saveBtn.onclick = () => {
-      // Validate all courses: code and title must not be empty
-      let invalid = false;
-      if (tempDegree.syllabus && tempDegree.syllabus.length) {
-        tempDegree.syllabus.forEach((sem, sIdx) => {
-          sem.courses.forEach((course, cIdx) => {
-            if (!course.code.trim() || !course.title.trim()) {
-              invalid = true;
-            }
+    const saveBtn = modal.querySelector("#saveDegreeBtn");
+    if (saveBtn)
+      saveBtn.onclick = () => {
+        // Validate all courses: code and title must not be empty
+        let invalid = false;
+        if (tempDegree.syllabus && tempDegree.syllabus.length) {
+          tempDegree.syllabus.forEach((sem, sIdx) => {
+            sem.courses.forEach((course, cIdx) => {
+              if (!course.code.trim() || !course.title.trim()) {
+                invalid = true;
+              }
+            });
           });
-        });
-      }
-      if (invalid) {
-        showWarningBox("Every course must have a non-empty <b>code</b> and <b>title</b>.");
-        return;
-      }
+        }
+        if (invalid) {
+          showWarningBox(
+            "Every course must have a non-empty <b>code</b> and <b>title</b>."
+          );
+          return;
+        }
 
-      // Save edited fields
-      tempDegree.title = modal.querySelector('#edit-title').value;
-      tempDegree.code = modal.querySelector('#edit-code').value;
-      tempDegree.duration = modal.querySelector('#edit-duration').value;
-      // Save degree description
-      const descInput = modal.querySelector('#edit-description');
-      if (descInput) tempDegree.description = descInput.value;
+        // Save edited fields
+        tempDegree.title = modal.querySelector("#edit-title").value;
+        tempDegree.code = modal.querySelector("#edit-code").value;
+        tempDegree.duration = modal.querySelector("#edit-duration").value;
+        // Save degree description
+        const descInput = modal.querySelector("#edit-description");
+        if (descInput) tempDegree.description = descInput.value;
 
-      // Recalculate totals
-      let totalCredit = 0, totalCourses = 0, totalHours = 0;
-      if (tempDegree.syllabus && tempDegree.syllabus.length) {
-        tempDegree.syllabus.forEach(sem => {
-          let semWeeks = sem.total_weeks || 16;
-          sem.courses.forEach(course => {
-            totalCredit += Number(course.credit) || 0;
-            totalHours += (Number(course.hours) || 0) * semWeeks;
+        // Recalculate totals
+        let totalCredit = 0,
+          totalCourses = 0,
+          totalHours = 0;
+        if (tempDegree.syllabus && tempDegree.syllabus.length) {
+          tempDegree.syllabus.forEach((sem) => {
+            let semWeeks = sem.total_weeks || 16;
+            sem.courses.forEach((course) => {
+              totalCredit += Number(course.credit) || 0;
+              totalHours += (Number(course.hours) || 0) * semWeeks;
+            });
+            totalCourses += sem.courses.length;
           });
-          totalCourses += sem.courses.length;
-        });
-      }
-      tempDegree.credit = totalCredit;
-      tempDegree.courses = totalCourses;
-      tempDegree.total_hours = totalHours;
+        }
+        tempDegree.credit = totalCredit;
+        tempDegree.courses = totalCourses;
+        tempDegree.total_hours = totalHours;
 
-      // Add mode: keep previous logic
-      if (isAddMode) {
-        // Compose degreeData for server
+        // Compose degreeData for logging
         const degreeData = {
           name: tempDegree.title,
           code: tempDegree.code,
-          faculty: tempDegree.faculty && tempDegree.faculty.id ? tempDegree.faculty.id : null,
-          description: tempDegree.description || '',
+          faculty:
+            tempDegree.faculty && tempDegree.faculty.id
+              ? tempDegree.faculty.id
+              : null,
+          description: tempDegree.description || "",
           total_credits: tempDegree.credit,
           total_courses: tempDegree.courses,
           total_hours: tempDegree.total_hours,
           degree_image: tempDegree.image,
+          duration: document.getElementById('edit-duration').value,
           semesters: (tempDegree.syllabus || []).map((sem, idx) => ({
             semester_name: `Semester ${sem.semester || idx + 1}`,
             duration_weeks: sem.total_weeks || 16,
-            syllabus_structure: (sem.courses || []).map(course => ({
+            syllabus_structure: (sem.courses || []).map((course) => ({
               course_code: course.code,
               course_name: course.title,
               course_credits: course.credit,
               course_hours: course.hours,
-              type: course.type
-            }))
-          }))
+              type: course.type,
+            })),
+          })),
         };
-        if (!degreeData.faculty) {
-          showWarningBox('Please select a faculty.');
-          return;
-        }
 
-        // Handle image upload
-        if (selectedImageFile) {
-          // Use FormData for file upload
-          const formData = new FormData();
-          formData.append('name', degreeData.name);
-          formData.append('code', degreeData.code);
-          formData.append('faculty', degreeData.faculty);
-          formData.append('description', degreeData.description);
-          formData.append('total_credits', degreeData.total_credits);
-          formData.append('total_courses', degreeData.total_courses);
-          formData.append('total_hours', degreeData.total_hours);
-          formData.append('degree_image', selectedImageFile);
-          formData.append('semesters', JSON.stringify(degreeData.semesters));
-
-          fetch('/executives/api/degree/add/', {
-            method: 'POST',
-            headers: {
-              'X-CSRFToken': (window.getCSRFToken ? window.getCSRFToken() : ''),
-            },
-            body: formData
-          })
-          .then(res => res.json())
-          .then(data => {
-            if (data.success) {
-              showWarningBox('Degree added successfully!');
-              modal.remove();
-              // Fetch updated degrees from server
-              fetch('/executives/api/degree/list/')
-                .then(res => res.json())
-                .then(listData => {
-                  if (listData.success && Array.isArray(listData.degrees)) {
-                    window.ALL_DEGREES = listData.degrees;
-                    renderDegrees(window.ALL_DEGREES);
-                  } else {
-                    renderDegrees(data.all_degrees);
-                  }
-                })
-                .catch(() => renderDegrees(getDegrees()));
-            } else {
-              showWarningBox('Error: ' + (data.message || 'Unknown error'));
-            }
-          })
-          .catch(err => {
-            showWarningBox('Error: ' + (err.message || 'Unknown error'));
-          });
-        } else {
-          // No file selected, send JSON
-          fetch('/executives/api/degree/add/', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-CSRFToken': (window.getCSRFToken ? window.getCSRFToken() : ''),
-            },
-            body: JSON.stringify(degreeData)
-          })
-          .then(res => res.json())
-          .then(data => {
-            if (data.success) {
-              showWarningBox('Degree added successfully!');
-              modal.remove();
-              // Fetch updated degrees from server
-              fetch('/executives/api/degree/list/')
-                .then(res => res.json())
-                .then(listData => {
-                  if (listData.success && Array.isArray(listData.degrees)) {
-                    window.ALL_DEGREES = listData.degrees;
-                    renderDegrees(window.ALL_DEGREES);
-                  } else {
-                    renderDegrees(data.all_degrees);
-                  }
-                })
-                .catch(() => renderDegrees(getDegrees()));
-            } else {
-              showWarningBox('Error: ' + (data.message || 'Unknown error'));
-            }
-          })
-          .catch(err => {
-            showWarningBox('Error: ' + (err.message || 'Unknown error'));
-          });
-        }
-      } else {
-        // Edit mode: confirm before saving
-        const degreeId = degree.id || degree.code;
-        if (!degreeId) {
-          showWarningBox('Cannot edit: degree ID or code missing.');
-          return;
-        }
-        // Show confirm modal
-        const confirmModal = document.createElement('div');
-        confirmModal.id = 'confirmEditModal';
-        confirmModal.className = 'modal-overlay';
+        // Show confirmation modal for both add and edit
+        const confirmModal = document.createElement("div");
+        confirmModal.id = "confirmSaveModal";
+        confirmModal.className = "modal-overlay";
         confirmModal.innerHTML = `
           <div class="faculty-selection-modal">
             <div class="faculty-modal-header">
               <h3 class="faculty-modal-title">
                 <i class="fa-solid fa-save"></i>
-                Confirm Save
+                Are you sure?
               </h3>
             </div>
             <div class="text-center mb-3">
-              <p>Are you sure you want to save the changes to this degree?</p>
+              <p>Are you sure you want to submit this degree?</p>
             </div>
             <div class="faculty-modal-actions">
-              <button id="confirmEditSaveBtn" class="faculty-modal-btn primary">Save</button>
-              <button id="cancelEditSaveBtn" class="faculty-modal-btn secondary">Cancel</button>
+              <button id="confirmSaveBtn" class="faculty-modal-btn primary">Yes, Submit</button>
+              <button id="cancelSaveBtn" class="faculty-modal-btn secondary">Cancel</button>
             </div>
           </div>
         `;
         document.body.appendChild(confirmModal);
-        
-        document.getElementById('confirmEditSaveBtn').onclick = function() {
+        document.getElementById("confirmSaveBtn").onclick = function () {
           confirmModal.remove();
-          // Compose degreeData for server
-          const degreeData = {
-            name: tempDegree.title,
-            code: tempDegree.code,
-            faculty: tempDegree.faculty && tempDegree.faculty.id ? tempDegree.faculty.id : null,
-            description: tempDegree.description || '',
-            duration: document.getElementById('edit-duration').value,
-            total_credits: tempDegree.credit,
-            total_courses: tempDegree.courses,
-            total_hours: tempDegree.total_hours,
-            degree_image: tempDegree.image,
-            semesters: (tempDegree.syllabus || []).map((sem, idx) => ({
-              semester_name: `Semester ${sem.semester || idx + 1}`,
-              duration_weeks: sem.total_weeks || 16,
-              syllabus_structure: (sem.courses || []).map(course => ({
-                course_code: course.code,
-                course_name: course.title,
-                course_credits: course.credit,
-                course_hours: course.hours,
-                type: course.type
-              }))
-            }))
-          };
-          // Add CSRF token if available
-          const headers = {
-            'Content-Type': 'application/json'
-          };
-          if (window.getCSRFToken) {
-            headers['X-CSRFToken'] = window.getCSRFToken();
-          }
-          fetch(`/executives/api/degree/edit/${degreeId}/`, {
+          console.log(
+            degreeData
+          );
+          mode = sessionStorage.getItem('mode');
+          url = mode=='edit'? `/executives/api/degree/edit/${sessionStorage.getItem('degree-id')}/`: '/executives/api/degree/add/';
+          fetch(url, {
             method: 'POST',
-            headers: headers,
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': window.CSRF_TOKEN, // include CSRF token here
+            },
             body: JSON.stringify(degreeData)
           })
-          .then(res => res.json())
-          .then(data => {
-            if (data.success) {
-              showWarningBox('Degree updated successfully!', true);
-              
-              modal.remove();
-              // Fetch updated degrees from server
-              fetch('/executives/api/degree/list/')
-                .then(res => res.json())
-                .then(listData => {
-                  if (listData.success && Array.isArray(listData.degrees)) {
-                    window.ALL_DEGREES = listData.degrees;
-                    renderDegrees(window.ALL_DEGREES);
-                  } else {
-                    renderDegrees(getDegrees());
-                  }
-                })
-                .catch(() => renderDegrees(getDegrees()));
-            } else {
-              showWarningBox('Error: ' + (data.message || 'Unknown error'));
-            }
+          .then(response => response.json())
+          .then((data) => {
+            console.log(data);
+            if (data.success) alert("Degree Data Updated Successfully");
+            modal.remove();
+            window.location.reload();
           })
-          .catch(err => {
-            showWarningBox('Error: ' + (err.message || 'Unknown error'));
+          .catch((error) => {
+            console.error('Error:', error);
+            alert(error);
           });
         };
-        document.getElementById('cancelEditSaveBtn').onclick = function() {
+        document.getElementById("cancelSaveBtn").onclick = function () {
           confirmModal.remove();
         };
-      }
-    };
+      };
   }
 
   function syncDegreeFieldsFromInputs() {
     if (!editing) return;
-    const titleInput = modal.querySelector('#edit-title');
-    const codeInput = modal.querySelector('#edit-code');
-    let durationInput = modal.querySelector('#edit-duration');
+    const titleInput = modal.querySelector("#edit-title");
+    const codeInput = modal.querySelector("#edit-code");
+    let durationInput = modal.querySelector("#edit-duration");
     if (titleInput) tempDegree.title = titleInput.value;
     if (codeInput) tempDegree.code = codeInput.value;
     if (durationInput) tempDegree.duration = durationInput.value;
@@ -805,37 +858,56 @@ function showDegreeDetailsModal(degree, degreeIndex = null, isAddMode = false) {
   // Set events for editing fields and courses
   function setEditEvents() {
     // Faculty choose button event
-    const chooseFacultyBtn = modal.querySelector('#chooseFacultyBtn');
+    const chooseFacultyBtn = modal.querySelector("#chooseFacultyBtn");
     if (chooseFacultyBtn) {
-      chooseFacultyBtn.onclick = function(e) {
+      chooseFacultyBtn.onclick = function (e) {
         e.preventDefault();
-        // Sync form data before opening faculty selection
-        syncDegreeFieldsFromInputs();
-        
-        showFacultySelectionModal(function(faculty) {
+        // Always sync input values before opening faculty selection
+        const titleInput = modal.querySelector("#edit-title");
+        const codeInput = modal.querySelector("#edit-code");
+        const durationInput = modal.querySelector("#edit-duration");
+        const descInput = modal.querySelector("#edit-description");
+        if (titleInput) tempDegree.title = titleInput.value;
+        if (codeInput) tempDegree.code = codeInput.value;
+        if (durationInput) tempDegree.duration = durationInput.value;
+        if (descInput) tempDegree.description = descInput.value;
+        showFacultySelectionModal(function (faculty) {
+          // Sync again before re-rendering
+          const titleInput2 = modal.querySelector("#edit-title");
+          const codeInput2 = modal.querySelector("#edit-code");
+          const durationInput2 = modal.querySelector("#edit-duration");
+          const descInput2 = modal.querySelector("#edit-description");
+          if (titleInput2) tempDegree.title = titleInput2.value;
+          if (codeInput2) tempDegree.code = codeInput2.value;
+          if (durationInput2) tempDegree.duration = durationInput2.value;
+          if (descInput2) tempDegree.description = descInput2.value;
           selectedFaculty = faculty;
           tempDegree.faculty = faculty;
-          // Update faculty button without re-rendering entire modal
-          const facultyBtn = modal.querySelector('#chooseFacultyBtn');
-          if (facultyBtn) {
-            facultyBtn.innerHTML = `<img src="${faculty.photo}" alt="Faculty Photo" class="faculty-avatar">${faculty.name}`;
-          }
+          renderModalContent();
+          setModalEvents();
+          setEditEvents();
         });
+        titleInput.value = tempDegree.title;
+        codeInput.value = tempDegree.code;
+        durationInput.value = tempDegree.duration;
+        descInput.value = tempDegree.description;
       };
     }
 
     // Course field edits
-    modal.querySelectorAll('.edit-course-field').forEach(input => {
-      input.addEventListener('input', function (e) {
+    modal.querySelectorAll(".edit-course-field").forEach((input) => {
+      input.addEventListener("input", function (e) {
         const semIdx = +this.dataset.sem;
         const courseIdx = +this.dataset.course;
         const field = this.dataset.field;
         tempDegree.syllabus[semIdx].courses[courseIdx][field] = this.value;
 
         // Recalculate totals
-        let totalCredit = 0, totalCourses = 0, totalHours = 0;
-        tempDegree.syllabus.forEach(sem => {
-          sem.courses.forEach(course => {
+        let totalCredit = 0,
+          totalCourses = 0,
+          totalHours = 0;
+        tempDegree.syllabus.forEach((sem) => {
+          sem.courses.forEach((course) => {
             totalCredit += Number(course.credit) || 0;
             totalHours += Number(course.hours) || 0;
           });
@@ -843,9 +915,9 @@ function showDegreeDetailsModal(degree, degreeIndex = null, isAddMode = false) {
         });
 
         // Update totals in modal (if you use IDs for totals)
-        const creditCell = modal.querySelector('#totalCreditCell');
-        const coursesCell = modal.querySelector('#totalCoursesCell');
-        const hoursCell = modal.querySelector('#totalHoursCell');
+        const creditCell = modal.querySelector("#totalCreditCell");
+        const coursesCell = modal.querySelector("#totalCoursesCell");
+        const hoursCell = modal.querySelector("#totalHoursCell");
         if (creditCell) creditCell.textContent = totalCredit;
         if (coursesCell) coursesCell.textContent = totalCourses;
         if (hoursCell) hoursCell.textContent = totalHours;
@@ -853,17 +925,24 @@ function showDegreeDetailsModal(degree, degreeIndex = null, isAddMode = false) {
     });
 
     // Remove course
-    modal.querySelectorAll('.remove-course-btn').forEach(btn => {
-      btn.addEventListener('click', function (e) {
+    modal.querySelectorAll(".remove-course-btn").forEach((btn) => {
+      btn.addEventListener("click", function (e) {
         e.preventDefault();
         const semIdx = +this.dataset.sem;
         const courseIdx = +this.dataset.course;
         // Save scroll position
-        const scrollable = modal.querySelector('.modal-body');
+        const scrollable = modal.querySelector(".modal-body");
         const scrollTop = scrollable ? scrollable.scrollTop : 0;
 
         // Sync degree fields before changing syllabus
-        syncDegreeFieldsFromInputs();
+        const titleInput = modal.querySelector("#edit-title");
+        const codeInput = modal.querySelector("#edit-code");
+        const durationInput = modal.querySelector("#edit-duration");
+        const descInput = modal.querySelector("#edit-description");
+        if (titleInput) tempDegree.title = titleInput.value;
+        if (codeInput) tempDegree.code = codeInput.value;
+        if (durationInput) tempDegree.duration = durationInput.value;
+        if (descInput) tempDegree.description = descInput.value;
 
         tempDegree.syllabus[semIdx].courses.splice(courseIdx, 1);
 
@@ -872,45 +951,52 @@ function showDegreeDetailsModal(degree, degreeIndex = null, isAddMode = false) {
         setEditEvents();
 
         // Restore scroll position
-        const newScrollable = modal.querySelector('.modal-body');
+        const newScrollable = modal.querySelector(".modal-body");
         if (newScrollable) newScrollable.scrollTop = scrollTop;
       });
     });
 
     // Add course (open course selection modal)
-    modal.querySelectorAll('.add-course-btn').forEach(btn => {
-      btn.addEventListener('click', function (e) {
+    modal.querySelectorAll(".add-course-btn").forEach((btn) => {
+      btn.addEventListener("click", function (e) {
         e.preventDefault();
         const semIdx = +this.dataset.sem;
         // Save scroll position
-        const scrollable = modal.querySelector('.modal-body');
+        const scrollable = modal.querySelector(".modal-body");
         const scrollTop = scrollable ? scrollable.scrollTop : 0;
 
         // Sync degree fields before changing syllabus
-        syncDegreeFieldsFromInputs();
+        const titleInput = modal.querySelector("#edit-title");
+        const codeInput = modal.querySelector("#edit-code");
+        const durationInput = modal.querySelector("#edit-duration");
+        const descInput = modal.querySelector("#edit-description");
+        if (titleInput) tempDegree.title = titleInput.value;
+        if (codeInput) tempDegree.code = codeInput.value;
+        if (durationInput) tempDegree.duration = durationInput.value;
+        if (descInput) tempDegree.description = descInput.value;
 
         // Show course selection modal
-        showCourseSelectionModal(selectedCourse => {
+        showCourseSelectionModal((selectedCourse) => {
           tempDegree.syllabus[semIdx].courses.push({
             code: selectedCourse.course_code,
             title: selectedCourse.course_name,
             credit: selectedCourse.course_credits,
             hours: selectedCourse.course_hours,
-            type: "Core"
+            type: "Core",
           });
           renderModalContent();
           setModalEvents();
           setEditEvents();
           // Restore scroll position
-          const newScrollable = modal.querySelector('.modal-body');
+          const newScrollable = modal.querySelector(".modal-body");
           if (newScrollable) newScrollable.scrollTop = scrollTop;
         });
       });
     });
 
     // Semester weeks input events
-    modal.querySelectorAll('.edit-semester-weeks').forEach(input => {
-      input.addEventListener('input', function (e) {
+    modal.querySelectorAll(".edit-semester-weeks").forEach((input) => {
+      input.addEventListener("input", function (e) {
         const semIdx = +this.dataset.semWeeks;
         let val = parseInt(this.value);
         if (isNaN(val) || val < 1) val = 1;
@@ -924,7 +1010,7 @@ function showDegreeDetailsModal(degree, degreeIndex = null, isAddMode = false) {
     // Add course selection modal function
     function showCourseSelectionModal(onSelect) {
       // Remove any existing modal
-      const oldModal = document.getElementById('courseSelectionModal');
+      const oldModal = document.getElementById("courseSelectionModal");
       if (oldModal) oldModal.remove();
 
       // Fetch all courses (simulate with mock data or fetch from backend if available)
@@ -933,19 +1019,23 @@ function showDegreeDetailsModal(degree, degreeIndex = null, isAddMode = false) {
 
       let filteredCourses = allCourses;
 
-      const modal = document.createElement('div');
-      modal.id = 'courseSelectionModal';
-      modal.className = 'modal-overlay';
+      const modal = document.createElement("div");
+      modal.id = "courseSelectionModal";
+      modal.className = "modal-overlay";
 
       function renderCourseList() {
-        const rows = filteredCourses.map(course => `
+        const rows = filteredCourses
+          .map(
+            (course) => `
           <tr class="course-select-row" style="cursor:pointer;" data-code="${course.course_code}" course-id="${course.course_id}">
             <td>${course.course_code}</td>
             <td>${course.course_name}</td>
             <td>${course.course_credits}</td>
             <td>${course.course_hours}</td>
           </tr>
-        `).join('');
+        `
+          )
+          .join("");
         return rows;
       }
 
@@ -982,24 +1072,25 @@ function showDegreeDetailsModal(degree, degreeIndex = null, isAddMode = false) {
       document.body.appendChild(modal);
 
       // Search functionality
-      const searchInput = modal.querySelector('#courseSearchInput');
-      searchInput.oninput = function() {
+      const searchInput = modal.querySelector("#courseSearchInput");
+      searchInput.oninput = function () {
         const q = this.value.trim().toLowerCase();
-        filteredCourses = allCourses.filter(c =>
-          c.course_code.toLowerCase().includes(q) ||
-          c.course_name.toLowerCase().includes(q)
+        filteredCourses = allCourses.filter(
+          (c) =>
+            c.course_code.toLowerCase().includes(q) ||
+            c.course_name.toLowerCase().includes(q)
         );
-        modal.querySelector('#courseListBody').innerHTML = renderCourseList();
+        modal.querySelector("#courseListBody").innerHTML = renderCourseList();
         setRowEvents();
       };
 
       // Row click event
       function setRowEvents() {
-        modal.querySelectorAll('.course-select-row').forEach(row => {
-          row.onclick = function() {
-            const code = this.getAttribute('data-code');
-            const id = this.getAttribute('course-id');
-            const course = allCourses.find(c => c.course_code === code);
+        modal.querySelectorAll(".course-select-row").forEach((row) => {
+          row.onclick = function () {
+            const code = this.getAttribute("data-code");
+            const id = this.getAttribute("course-id");
+            const course = allCourses.find((c) => c.course_code === code);
             if (course) {
               modal.remove();
               onSelect(course);
@@ -1010,29 +1101,34 @@ function showDegreeDetailsModal(degree, degreeIndex = null, isAddMode = false) {
       setRowEvents();
 
       // Cancel button
-      modal.querySelector('#closeCourseSelectBtn').onclick = () => modal.remove();
+      modal.querySelector("#closeCourseSelectBtn").onclick = () =>
+        modal.remove();
     }
 
     // Faculty selection modal
     function showFacultySelectionModal(onSelect) {
-      const oldModal = document.getElementById('facultySelectionModal');
+      const oldModal = document.getElementById("facultySelectionModal");
       if (oldModal) oldModal.remove();
       // Use window.ALL_FACULTIES if available, else mock
       const faculties = window.ALL_FACULTIES;
       let filtered = faculties;
-      const modal = document.createElement('div');
-      modal.id = 'facultySelectionModal';
-      modal.className = 'modal-overlay';
-      
+      const modal = document.createElement("div");
+      modal.id = "facultySelectionModal";
+      modal.className = "modal-overlay";
+
       function renderList() {
-        return filtered.map(f => `
+        return filtered
+          .map(
+            (f) => `
           <div class="faculty-item" data-id="${f.id}">
             <img src="${f.photo}" alt="Faculty Photo" class="faculty-avatar-large">
             <span class="faculty-name">${f.name}</span>
           </div>
-        `).join('');
+        `
+          )
+          .join("");
       }
-      
+
       modal.innerHTML = `
         <div class="faculty-selection-modal">
           <div class="faculty-modal-header">
@@ -1050,22 +1146,22 @@ function showDegreeDetailsModal(degree, degreeIndex = null, isAddMode = false) {
           </div>
         </div>
       `;
-      
+
       document.body.appendChild(modal);
-      
+
       // Search
-      modal.querySelector('#facultySearchInput').oninput = function() {
+      modal.querySelector("#facultySearchInput").oninput = function () {
         const q = this.value.trim().toLowerCase();
-        filtered = faculties.filter(f => f.name.toLowerCase().includes(q));
-        modal.querySelector('#facultyListBody').innerHTML = renderList();
+        filtered = faculties.filter((f) => f.name.toLowerCase().includes(q));
+        modal.querySelector("#facultyListBody").innerHTML = renderList();
         setRowEvents();
       };
-      
+
       function setRowEvents() {
-        modal.querySelectorAll('.faculty-item').forEach(row => {
-          row.onclick = function() {
-            const id = this.getAttribute('data-id');
-            const faculty = faculties.find(f => String(f.id) === String(id));
+        modal.querySelectorAll(".faculty-item").forEach((row) => {
+          row.onclick = function () {
+            const id = this.getAttribute("data-id");
+            const faculty = faculties.find((f) => String(f.id) === String(id));
             if (faculty) {
               modal.remove();
               onSelect(faculty);
@@ -1074,21 +1170,29 @@ function showDegreeDetailsModal(degree, degreeIndex = null, isAddMode = false) {
         });
       }
       setRowEvents();
-      modal.querySelector('#closeFacultySelectBtn').onclick = () => modal.remove();
+      modal.querySelector("#closeFacultySelectBtn").onclick = () =>
+        modal.remove();
     }
 
     // Remove semester
-    modal.querySelectorAll('.remove-semester-btn').forEach(btn => {
-      btn.addEventListener('click', function (e) {
+    modal.querySelectorAll(".remove-semester-btn").forEach((btn) => {
+      btn.addEventListener("click", function (e) {
         e.preventDefault();
         const semIdx = +this.dataset.sem;
         showDeleteSemesterConfirm(() => {
           // Save scroll position
-          const scrollable = modal.querySelector('.modal-body');
+          const scrollable = modal.querySelector(".modal-body");
           const scrollTop = scrollable ? scrollable.scrollTop : 0;
 
           // Sync degree fields before changing syllabus
-          syncDegreeFieldsFromInputs();
+          const titleInput = modal.querySelector("#edit-title");
+          const codeInput = modal.querySelector("#edit-code");
+          const durationInput = modal.querySelector("#edit-duration");
+          const descInput = modal.querySelector("#edit-description");
+          if (titleInput) tempDegree.title = titleInput.value;
+          if (codeInput) tempDegree.code = codeInput.value;
+          if (durationInput) tempDegree.duration = durationInput.value;
+          if (descInput) tempDegree.description = descInput.value;
 
           tempDegree.syllabus.splice(semIdx, 1);
 
@@ -1097,23 +1201,30 @@ function showDegreeDetailsModal(degree, degreeIndex = null, isAddMode = false) {
           setEditEvents();
 
           // Restore scroll position
-          const newScrollable = modal.querySelector('.modal-body');
+          const newScrollable = modal.querySelector(".modal-body");
           if (newScrollable) newScrollable.scrollTop = scrollTop;
         });
       });
     });
 
     // Add semester
-    const addSemesterBtn = modal.querySelector('.add-semester-btn');
+    const addSemesterBtn = modal.querySelector(".add-semester-btn");
     if (addSemesterBtn) {
-      addSemesterBtn.addEventListener('click', function (e) {
+      addSemesterBtn.addEventListener("click", function (e) {
         e.preventDefault();
         // Save scroll position
-        const scrollable = modal.querySelector('.modal-body');
+        const scrollable = modal.querySelector(".modal-body");
         const scrollTop = scrollable ? scrollable.scrollTop : 0;
 
         // --- Sync degree fields before changing syllabus ---
-        syncDegreeFieldsFromInputs();
+        const titleInput = modal.querySelector("#edit-title");
+        const codeInput = modal.querySelector("#edit-code");
+        const durationInput = modal.querySelector("#edit-duration");
+        const descInput = modal.querySelector("#edit-description");
+        if (titleInput) tempDegree.title = titleInput.value;
+        if (codeInput) tempDegree.code = codeInput.value;
+        if (durationInput) tempDegree.duration = durationInput.value;
+        if (descInput) tempDegree.description = descInput.value;
 
         // Ensure syllabus is always an array
         if (!Array.isArray(tempDegree.syllabus)) {
@@ -1122,11 +1233,11 @@ function showDegreeDetailsModal(degree, degreeIndex = null, isAddMode = false) {
 
         let nextSem = 1;
         if (tempDegree.syllabus.length > 0) {
-          nextSem = Math.max(...tempDegree.syllabus.map(s => s.semester)) + 1;
+          nextSem = Math.max(...tempDegree.syllabus.map((s) => s.semester)) + 1;
         }
         tempDegree.syllabus.push({
           semester: nextSem,
-          courses: []
+          courses: [],
         });
 
         renderModalContent();
@@ -1134,7 +1245,7 @@ function showDegreeDetailsModal(degree, degreeIndex = null, isAddMode = false) {
         setEditEvents();
 
         // Restore scroll position
-        const newScrollable = modal.querySelector('.modal-body');
+        const newScrollable = modal.querySelector(".modal-body");
         if (newScrollable) newScrollable.scrollTop = scrollTop;
       });
     }
@@ -1146,12 +1257,12 @@ function showDegreeDetailsModal(degree, degreeIndex = null, isAddMode = false) {
 
 // Custom confirm modal
 function showDeleteConfirm(onConfirm) {
-  const oldModal = document.getElementById('deleteConfirmModal');
+  const oldModal = document.getElementById("deleteConfirmModal");
   if (oldModal) oldModal.remove();
 
-  const modal = document.createElement('div');
-  modal.id = 'deleteConfirmModal';
-  modal.className = 'modal-overlay';
+  const modal = document.createElement("div");
+  modal.id = "deleteConfirmModal";
+  modal.className = "modal-overlay";
 
   modal.innerHTML = `
     <div class="faculty-selection-modal">
@@ -1175,24 +1286,24 @@ function showDeleteConfirm(onConfirm) {
 
   document.body.appendChild(modal);
 
-  document.getElementById('confirmDeleteBtn').onclick = () => {
+  document.getElementById("confirmDeleteBtn").onclick = () => {
     modal.remove();
     onConfirm();
   };
-  document.getElementById('cancelDeleteBtn').onclick = () => {
+  document.getElementById("cancelDeleteBtn").onclick = () => {
     modal.remove();
   };
 }
 
 // Warning box function
-function showWarningBox(message, reload=false) {
+function showWarningBox(message, reload = false) {
   // Remove any existing warning
-  const oldWarn = document.getElementById('customWarningBox');
+  const oldWarn = document.getElementById("customWarningBox");
   if (oldWarn) oldWarn.remove();
 
-  const warn = document.createElement('div');
-  warn.id = 'customWarningBox';
-  warn.className = 'modal-overlay';
+  const warn = document.createElement("div");
+  warn.id = "customWarningBox";
+  warn.className = "modal-overlay";
   warn.innerHTML = `
     <div class="faculty-selection-modal">
       <div class="faculty-modal-header">
@@ -1209,31 +1320,31 @@ function showWarningBox(message, reload=false) {
       </div>
     </div>
   `;
-  
+
   document.body.appendChild(warn);
-  document.getElementById('closeWarningBoxBtn').onclick = () => {
+  document.getElementById("closeWarningBoxBtn").onclick = () => {
     warn.remove();
     if (reload) window.location.reload();
-  }
+  };
 }
 
 // Render on page load
 const degrees = getDegrees();
 renderDegrees(degrees);
 
-// sidebar toggle code 
-const sidebar = document.getElementById('sidebarMenu');
-const toggleBtn = document.getElementById('sidebarToggle');
+// sidebar toggle code
+const sidebar = document.getElementById("sidebarMenu");
+const toggleBtn = document.getElementById("sidebarToggle");
 
 function handleSidebarToggle() {
   if (window.innerWidth > 900) {
-    document.body.classList.toggle('sidebar-closed');
+    document.body.classList.toggle("sidebar-closed");
   } else {
-    document.body.classList.toggle('sidebar-open');
+    document.body.classList.toggle("sidebar-open");
   }
   // Always close sidebar on mobile when resizing up
   if (window.innerWidth > 900) {
-    document.body.classList.remove('sidebar-open');
+    document.body.classList.remove("sidebar-open");
   }
 }
 
@@ -1242,24 +1353,24 @@ if (toggleBtn) {
 }
 
 // Optional: Reset sidebar state on resize
-window.addEventListener('resize', () => {
+window.addEventListener("resize", () => {
   if (window.innerWidth > 900) {
-    document.body.classList.remove('sidebar-open');
+    document.body.classList.remove("sidebar-open");
     // Show sidebar by default on desktop
-    document.body.classList.remove('sidebar-closed');
+    document.body.classList.remove("sidebar-closed");
   } else {
     // Hide sidebar by default on mobile
-    document.body.classList.remove('sidebar-closed');
+    document.body.classList.remove("sidebar-closed");
   }
 });
 
 function showDeleteSemesterConfirm(onConfirm) {
-  const oldModal = document.getElementById('deleteSemesterConfirmModal');
+  const oldModal = document.getElementById("deleteSemesterConfirmModal");
   if (oldModal) oldModal.remove();
 
-  const modal = document.createElement('div');
-  modal.id = 'deleteSemesterConfirmModal';
-  modal.className = 'modal-overlay';
+  const modal = document.createElement("div");
+  modal.id = "deleteSemesterConfirmModal";
+  modal.className = "modal-overlay";
 
   modal.innerHTML = `
     <div class="faculty-selection-modal">
@@ -1284,17 +1395,17 @@ function showDeleteSemesterConfirm(onConfirm) {
 
   document.body.appendChild(modal);
 
-  document.getElementById('confirmDeleteSemesterBtn').onclick = () => {
+  document.getElementById("confirmDeleteSemesterBtn").onclick = () => {
     modal.remove();
     onConfirm();
   };
-  document.getElementById('cancelDeleteSemesterBtn').onclick = () => {
+  document.getElementById("cancelDeleteSemesterBtn").onclick = () => {
     modal.remove();
   };
 }
 
 // Add Degree Modal
-document.getElementById('showAddModalBtn').onclick = function () {
+document.getElementById("showAddModalBtn").onclick = function () {
   // Create a blank degree object
   const newDegree = {
     title: "",
@@ -1303,7 +1414,7 @@ document.getElementById('showAddModalBtn').onclick = function () {
     credit: 0,
     courses: 0,
     image: "./img/bachelor.png",
-    syllabus: []
+    syllabus: [],
   };
   // Show the modal in editing mode
   showDegreeDetailsModal(newDegree, null, true);
@@ -1316,17 +1427,16 @@ function filterDegrees(query) {
     renderDegrees(degrees);
     return;
   }
-  const filtered = degrees.filter(d =>
-    d.title.toLowerCase().includes(q) ||
-    d.code.toLowerCase().includes(q)
+  const filtered = degrees.filter(
+    (d) => d.title.toLowerCase().includes(q) || d.code.toLowerCase().includes(q)
   );
   renderDegrees(filtered);
 }
 
-const searchInput = document.getElementById('degreeSearchInput');
-const searchBtn = document.getElementById('degreeSearchBtn');
+const searchInput = document.getElementById("degreeSearchInput");
+const searchBtn = document.getElementById("degreeSearchBtn");
 
 if (searchInput && searchBtn) {
   searchBtn.onclick = () => filterDegrees(searchInput.value);
   searchInput.oninput = () => filterDegrees(searchInput.value);
-} 
+}

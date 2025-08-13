@@ -218,6 +218,7 @@ class Course(BaseModel):
     course_hours = models.PositiveIntegerField(default=30)
     course_credits = models.PositiveSmallIntegerField(default=3)
     description = models.TextField(default='')
+    marking_scheme = models.JSONField(default=dict)
 
 # Term Model
 class Term(BaseModel):
@@ -239,6 +240,18 @@ class BatchInstructor(BaseModel):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     room_data = models.JSONField(default=None, null=True, blank=True)
     assigned_date = models.DateField(default=timezone.now)
+
+    def save(self, *args, **kwargs):
+        # Call the original save method
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+        # Create AssessmentScheme after saving BatchInstructor
+        if is_new:
+            assessment_scheme = AssessmentScheme(batch_instructor=self, scheme=self.course.marking_scheme)
+            assessment_scheme.save()
+            for i in range(1000):
+                print('*')
+                print(assessment_scheme)
 
 # Student Model
 class Student(BaseModel):

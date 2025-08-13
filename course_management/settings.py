@@ -104,7 +104,7 @@ DATABASES = {
     }
 }
 
-DATABASES['default'] = dj_database_url.parse("postgresql://vasudevadhikari:fsF43n5osuo5W1PbwomCLtJ6sDzW4n2T@dpg-d1rs1hqdbo4c738hiokg-a.oregon-postgres.render.com/course_management_iawe")
+DATABASES['default'] = dj_database_url.parse("postgresql://vasudevadhikari:c6ErQRjPCq2Cfx0bmCsbyx1YFi13JQdI@dpg-d2eakrc9c44c738ojjag-a.oregon-postgres.render.com/course_management_hhva")
 
 
 # Password validation

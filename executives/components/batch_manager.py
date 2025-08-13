@@ -88,9 +88,11 @@ def edit_batch(request):
 
     # Create batch instructors in bulk if there are any
     if batch_instructors:
-        BatchInstructor.objects.bulk_create(batch_instructors)
+        for batch_instructor in batch_instructors:
+            batch_instructor.save()
+        # BatchInstructor.objects.bulk_create(batch_instructors)
 
-    return JsonResponse({'success': True, 'created_batches': len(batches), 'created_instructors': len(batch_instructors)})
+    return JsonResponse({'success': True, 'created_batches': len(batches), 'created_instructors': len(batch_instructors), 'message': 'Batch Data Edited Successfully'})
 
 
 def list_batches(request):
@@ -151,8 +153,8 @@ def list_batches(request):
                     "course_code": course.course_code,
                     "department_id": course.department.pk,
                     "instructor": instructor_data,
-                    "batch_instructor_id": batch_instructor.pk,
                     "rooms": batch_instructor.room_data,
+                    "batch_instructor_id": batch_instructor.pk,
                 })
 
                 semester = batch.semester
@@ -161,6 +163,7 @@ def list_batches(request):
                         "semester_id": semester.pk,
                         "semester_name": semester.semester_name,
                         "courses": courses,
+                        "batch_instructor_id": batch_instructor.pk,
                     })
                 # print(courses)
 

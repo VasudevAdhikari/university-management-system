@@ -95,6 +95,7 @@ submitMajorBatch.onclick = async () => {
     // Async POST to /executives/batchs/edit/
     try {
         const CSRFToken = window.getCsrfToken();
+        if (!confirm('Are you sure to edit batch with provided data')) return;
         const resp = await fetch("/executives/batches/edit/", {
             method: "POST",
             headers: {
@@ -112,6 +113,8 @@ submitMajorBatch.onclick = async () => {
         }
         if (resp.result) {
             console.log(resp.result);
+            if(resp.messsage) alert(resp.message);
+            else alert('Batch Data Edited Successfully');
         }
         window.location.reload();
         // Remove the intro message if present
@@ -490,6 +493,8 @@ function showSubjectPopup(subjectBtn, semName, majorName) {
             }
             console.log(dataToSubmit);
 
+            if (!confirm('Are you sure to edit batch with provided data')) return;
+
             fetch("/executives/batch_instructor/edit/", {
                 method: "POST",
                 headers: {
@@ -506,6 +511,7 @@ function showSubjectPopup(subjectBtn, semName, majorName) {
                 })
                 .then(data => {
                     console.log("Success:", data);
+                    if (data.success) alert('Batch Data Updated Successfully');
                     window.location.reload();
                 })
                 .catch(error => {
@@ -653,6 +659,7 @@ async function renderAllBatches() {
                 const semItem = document.createElement("div");
                 semItem.className = "created-sem-item";
                 semItem.dataset.semId = String(sem.semester_id ?? "");
+                semItem.setAttribute('batch_instructor', sem.batch_instructor_id);
                 semItem.style.cursor = "pointer";
                 // semItem.textContent = sem.semester_name ?? "Semester";
                 semItem._semData = sem;
@@ -690,7 +697,7 @@ async function renderAllBatches() {
                 const leftItem = document.createElement('div');
                 leftItem.textContent = semItem.getAttribute('data');
                 leftItem.style.backgroundColor = '#f0f0f0'; // optional styling
-
+       
                 // Create right element
                 const rightItem = document.createElement('button');
                 rightItem.textContent = 'Details';
@@ -699,7 +706,7 @@ async function renderAllBatches() {
                 rightItem.style.backgroundColor = '#ffe44d'; // optional styling
 
                 rightItem.onclick = () => {
-                    window.location.href = `executives/rating_review/`;
+                    window.location.href = `/executives/batch_statistics/${semItem.getAttribute('batch_instructor')}/`;
                 }
 
                 leftItem.onclick = function (e) {
@@ -793,6 +800,12 @@ async function renderAllBatches() {
                         gradIcon.textContent = "🎓";
                         gradIcon.style.fontSize = "1.2rem";
                         courseNameDiv.prepend(gradIcon);
+                        
+                        // prepend graduation cap icon
+                        const editIcon = document.createElement("span");
+                        editIcon.innerHTML = '<i class="fas fa-pencil-alt me-2"></i>';
+                        editIcon.style.fontSize = "1.2rem";
+                        courseNameDiv.append(editIcon);
                         btn.appendChild(courseNameDiv);
 
                         // Instructor name with instructor icon (👨‍🏫)
@@ -818,7 +831,7 @@ async function renderAllBatches() {
 
                         // Room 1 box
                         const room1Box = document.createElement("div");
-                        room1Box.textContent = `Room 1: ${course.rooms?.room1 || "-"}`;
+                        room1Box.textContent = `Room 1: ${course.rooms?.room1 || "-"} (${course.rooms?.times1 || "-"} times)`;
                         room1Box.style.backgroundColor = "var(--bg-light)";
                         room1Box.style.border = `1px solid var(--primary-light)`;
                         room1Box.style.borderRadius = "6px";
@@ -829,7 +842,7 @@ async function renderAllBatches() {
 
                         // Room 2 box
                         const room2Box = document.createElement("div");
-                        room2Box.textContent = `Room 2: ${course.rooms?.room2 || "-"}`;
+                        room2Box.textContent = `Room 2: ${course.rooms?.room2 || "-"} (${course.rooms?.times2 || "-"} times)`;
                         room2Box.style.backgroundColor = "var(--bg-light)";
                         room2Box.style.border = `1px solid var(--primary-light)`;
                         room2Box.style.borderRadius = "6px";
@@ -838,15 +851,31 @@ async function renderAllBatches() {
                         room2Box.style.color = "var(--text-dark)";
                         roomsDiv.appendChild(room2Box);
 
+                        const ratingBox = document.createElement("button");
+                        ratingBox.textContent = `Ratings`;
+                        ratingBox.style.backgroundColor = "var(--secondary)";
+                        ratingBox.style.border = `1px solid var(--primary-light)`;
+                        ratingBox.style.borderRadius = "6px";
+                        ratingBox.style.padding = "4px 8px";
+                        ratingBox.style.fontSize = "0.85rem";
+                        ratingBox.style.color = "var(--primary-dark)";
+                        // ratingBox.onclick = window.location.href = `/executives/rating_review/${course.batchInstructorId}/`;
+                        roomsDiv.appendChild(ratingBox);
+
                         btn.appendChild(roomsDiv);
 
                         btn.dataset.batchInstructorId = String(course.batch_instructor_id ?? "");
                         btn._courseData = course;
 
-                        btn.addEventListener("click", (ev) => {
+                        editIcon.addEventListener("click", (ev) => {
                             ev.stopPropagation();
                             window.clicked_batch_instructor = course.batch_instructor_id;
                             showSubjectPopup(btn, semItem.textContent, major.degree_name);
+                        });
+
+                        ratingBox.addEventListener("click", (ev) => {
+                            ev.stopPropagation();
+                            window.location.href = `/executives/rating_review/${course.batch_instructor_id}/`;x
                         });
 
                         grid.appendChild(btn);
@@ -873,5 +902,5 @@ document.addEventListener("DOMContentLoaded", renderAllBatches);
 /*
 [
 {"type": "Core", "course_code": "CS 101", "course_name": "Basic Programming with Python", "course_hours": 4, "course_credits": 4}, 
-{"type": "Elective", "course_code": "CS 101", "course_name": "Basic Programming with Python", "course_hours": 4, "course_credits": 4}]
+{"type": "Elective", "co urse_code": "CS 101", "course_name": "Basic Programming with Python", "course_hours": 4, "course_credits": 4}]
 */

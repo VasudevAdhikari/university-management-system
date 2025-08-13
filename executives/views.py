@@ -31,6 +31,17 @@ def executive_home(request):
     }
     return render(request, 'executives/home.html', context=data)
 
+def get_all_students(request):
+    students = Student.objects.all()
+    all_student = []
+    for student in students:
+        all_student.append(get_student_for_approval(student))
+
+    data = {
+        'students': all_student
+    }
+    return render(request, 'executives/all_students.html/', context=data)
+
 def get_unapproved_students(request):
     unapproved_student_data = Student.objects.filter(status=StudentStatus.UNAPPROVED)
     rejected_student_data = Student.objects.filter(status=StudentStatus.REJECTED)
@@ -128,10 +139,17 @@ def show_lab_details(request, lab_name):
 
     # project_leader ORM query has to be fixed to all admins and instructors
     project_leaders = User.objects.all()
+    print(f"DEBUG: User.objects.all() count: {project_leaders.count()}")
+    print(f"DEBUG: First few users: {list(project_leaders[:3].values('id', 'full_name'))}")
+    
     all_project_leaders = get_formatted_lab_members(project_leaders)
 
     project_members = User.objects.all()
     all_project_members = get_formatted_lab_members(project_members)
+
+    departments = list(Department.objects.all().values('id', 'name'))
+    print(f"DEBUG: Department.objects.all() count: {len(departments)}")
+    print(f"DEBUG: First few departments: {departments[:3]}")
 
     # lab_heads ORM query has to be fixed to all admins
     lab_heads = User.objects.all()
@@ -141,6 +159,28 @@ def show_lab_details(request, lab_name):
     lab_head_dept = get_head_of_labs_department(head_of_lab)
     projects = current_lab.get('projects')
     
+    # Debug project structure
+    if projects:
+        print(f"DEBUG: Projects found: {len(projects)}")
+        for project_key, project_data in list(projects.items())[:2]:  # Show first 2 projects
+            print(f"DEBUG: Project {project_key}:")
+            print(f"  - Title: {project_data.get('title', 'N/A')}")
+            print(f"  - Leader: {project_data.get('leader', project_data.get('project_lead', 'N/A'))}")
+            print(f"  - Members: {project_data.get('members', 'N/A')}")
+            print(f"  - Members type: {type(project_data.get('members', 'N/A'))}")
+    else:
+        print("DEBUG: No projects found")
+    
+    # Get current lab department
+    current_lab_dept = current_lab.get('department', {})
+    
+    # Debug logging
+    print(f"DEBUG: all_project_leaders count: {len(all_project_leaders)}")
+    print(f"DEBUG: all_project_members count: {len(all_project_members)}")
+    print(f"DEBUG: all_lab_heads count: {len(all_lab_heads)}")
+    print(f"DEBUG: departments count: {len(departments)}")
+    print(f"DEBUG: current_lab_dept: {current_lab_dept}")
+    
     data = {
         'lab_data': current_lab,
         'lab_key': lab_name,
@@ -149,9 +189,49 @@ def show_lab_details(request, lab_name):
         'all_lab_heads': all_lab_heads,
         'head_of_lab': head_of_lab,
         'lab_head_dept': lab_head_dept,
-        'projects': projects,
+        'projects': projects or {},
+        'departments': departments,
+        'current_lab_dept': current_lab_dept,
     }
     return render(request, 'executives/lab_details.html', context=data)
+
+@csrf_exempt
+def update_lab_department(request, lab_name):
+    """Update lab department"""
+    if request.method != "POST":
+        return JsonResponse({"success": False, "error": "POST method required"})
+    
+    try:
+        data = json.loads(request.body)
+        department_id = data.get('department_id')
+        department_name = data.get('department_name')
+        
+        if not department_id or not department_name:
+            return JsonResponse({"success": False, "error": "Department ID and name required"})
+        
+        # Get labs object
+        labs_obj = UniversityDetails.objects.filter(name='labs').first()
+        if not labs_obj:
+            return JsonResponse({"success": False, "error": "Labs not found"})
+        
+        labs = labs_obj.details
+        if lab_name not in labs:
+            return JsonResponse({"success": False, "error": "Lab not found"})
+        
+        # Update department
+        labs[lab_name]['department'] = {
+            'id': int(department_id),
+            'name': department_name
+        }
+        
+        # Save to database
+        labs_obj.details = labs
+        labs_obj.save()
+        
+        return JsonResponse({"success": True})
+        
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)})
 
 @csrf_exempt
 def add_partnership_ajax(request):
@@ -516,6 +596,28 @@ def delete_photo_ajax(request):
 
 def show_department_management(request):
     return render(request, 'executives/department_management.html')
+
+def show_all_executives(request):
+    executives = Admin.objects.all().select_related('user', 'user__emergency_contact')
+    data = {
+        'executives': executives
+    }
+    return render(request, 'executives/all_executives.html', context=data)
+
+def show_all_instructors(request):
+    instructors = Instructor.objects.all().select_related('user', 'department', 'user__emergency_contact')
+    all_instructors = []
+    for instructor in instructors:
+        instructor_data = get_instructor_for_approval(instructor)
+        instructor_data['department'] = instructor.department.name
+        instructor_data['role'] = instructor.position_in_university
+        all_instructors.append(instructor_data)
+
+    data = {
+        'instructors': all_instructors
+    }
+    return render(request, 'executives/all_instructors.html', context=data)
+
 
 def show_unapproved_instructors(request):
     unapproved_instructor_data = Instructor.objects.filter(employment_status=EmploymentStatus.UNAPPROVED)
