@@ -4,14 +4,12 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 from django.http import JsonResponse
 
-
-def show_course_management(request):
+def get_course_page_data(request):
     departments = Department.objects.all()
     courses = {}
     for department in departments:
         courses[department] = []
         for course in Course.objects.filter(department=department):
-            course.marking_scheme = json.dumps(course.marking_scheme)
             courses[department].append(course)
 
     assessments = [{"id": label, "name": label} for _, label in AssessmentType.choices]
@@ -20,10 +18,11 @@ def show_course_management(request):
         'courses_by_departments': courses,
         'assessments': json.dumps(assessments),
     }
-    return render(request, 'executives/course_management.html', context=data)
+    return data
 
-import json
-from django.views.decorators.csrf import csrf_exempt
+def show_course_management(request):
+    data = get_course_page_data(request)
+    return render(request, 'executives/course_management.html', context=data)
 
 @csrf_exempt
 def add_course(request):

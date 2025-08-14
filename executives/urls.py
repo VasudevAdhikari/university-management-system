@@ -22,7 +22,7 @@ urlpatterns = [
     path('uni_info_edit/', views.uni_info_edit, name='uni_info_edit'),
 
 
-    path('show_lab_details/<str:lab_name>', views.show_lab_details, name='show_lab_details'),
+    path('show_lab_details/<str:lab_name>/', views.show_lab_details, name='show_lab_details'),
 
 
     path('show_degree_management', degree_manager.show_degree_management, name='show_degree_management'),

@@ -9,7 +9,7 @@ def faculty_dashboard(request):
         user__email = request.COOKIES.get('my_user'),
     ).first()
     if not instructor:
-        return JsonResponse({'success': False, 'message': 'You are not allowed to enter this page'})
+        return render(request, 'htmls/access_denied.html')
     
     batch_instructors = (
         BatchInstructor.objects 

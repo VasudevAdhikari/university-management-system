@@ -102,7 +102,7 @@
 
 <body>
     <script>
-        window.lagjagale = true;
+        window.lagjagale = false;
     </script>
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
         <div class="container-fluid">
@@ -206,25 +206,19 @@
             <div id="labSection">
                 <h1 class="editable-group">
                     {{lab_data.lab_name | default:"Anonymous"}}
-                    <span class="edit-icon" title="Edit">&#9998;</span>
                 </h1>
                 <div class="lab-location editable-group">
                     <span class="lab-location-icon"></span> {{lab_data.location | default:"Location: Not Known"}}
-                    <span class="edit-icon" title="Edit">&#9998;</span>
                 </div>
                 
                 <!-- Department Selection Section -->
                 <div class="lab-department-block">
                     <div class="lab-department-title">
-                        Lab Department
-                    </div>
-                    <div class="lab-department-info editable-group">
                         {% if current_lab_dept.name %}
-                            <span class="lab-department-name">{{ current_lab_dept.name }}</span>
+                            {{ current_lab_dept.name }}
                         {% else %}
-                            <span class="lab-department-name">No Department Selected</span>
+                            No Department Selected
                         {% endif %}
-                        <span class="edit-icon" title="Edit Department">&#9998;</span>
                     </div>
                 </div>
                 
@@ -237,7 +231,6 @@
                                 https://thumbs.dreamstime.com/b/anonymous-user-flat-icon-vector-illustration-long-shadow-anonymous-user-flat-icon-105446565.jpg
                             {% endif %}
                         " alt="{{head_of_lab.full_name | default:'Not Known'}}" class="lab-head-photo" loading="lazy">
-                        <span class="edit-icon edit-icon-photo" title="Edit">&#9998;</span>
                     </div>
                     <div class="lab-head-details">
                         <div class="lab-head-name">
@@ -245,7 +238,6 @@
                         </div>
                         <div class="lab-head-title editable-group">
                             {{head_of_lab.full_name | default:'Name: Not Known'}}
-                            <span class="edit-icon" title="Edit">&#9998;</span>
                         </div>
                     </div>
                 </div>
@@ -256,19 +248,16 @@
                     <span id="labDescToggle" class="lab-desc-toggle">
                         &#x25BC;
                     </span>
-                    <span class="edit-icon" title="Edit">&#9998;</span>
                 </div>
                 <div class="lab-photos-block">
                     <div class="lab-photos-title">
                         Lab Photos
-                        <span class="edit-icon" title="Edit">&#9998;</span>
                     </div>
                     <div class="lab-photos">
                         {% if lab_data.images %}
                             {% for img in lab_data.images%}
                             <div class="editable-group">
                                 <img src="/media/{{img}}" alt="Lab Photo 1" class="lab-photo" loading="lazy">
-                                <span class="edit-icon edit-icon-photo" title="Edit">&#9998;</span>
                             </div>
                             {% endfor %}
                         {% else %}
@@ -276,12 +265,6 @@
                                 <img src="https://media.istockphoto.com/id/922962354/vector/no-image-available-sign.jpg?s=612x612&w=0&k=20&c=xbGzQiL_UIMFDUZte1U0end0p3E8iwocIOGt_swlywE=" alt="Lab Photo 1" class="lab-photo" loading="lazy">
                             </div>
                         {% endif%}
-                        <div class="add-photo-btn-container">
-                            <button class="add-photo-btn" title="Add Photo" onclick="handleAddPhotoClick(event)">
-                                <i class="fa fa-plus"></i>
-                            </button>
-                            <input type="file" accept="image/*" id="addPhotoInput" style="display:none" onchange="handlePhotoInputChange(event)">
-                        </div>
                     </div>
                 </div>
             </div>
@@ -292,13 +275,11 @@
                     <div class="project-header">
                         <div class="project-title editable-group">
                             {{project.title}}
-                            <span class="edit-icon" title="Edit">&#9998;</span>
                         </div>
                         <div class="project-tags editable-group">
                             {% for tag_key, tag in project.tags.items %}
                                 <span class="project-tag">{{tag}}</span>
                             {% endfor %}
-                            <span class="edit-icon project-tags-edit" title="Edit">&#9998;</span>
                         </div>
                     </div>
                     <div class="project-photo-block">
@@ -310,7 +291,6 @@
                     </div>
                     <div class="project-desc-block">
                         <span class="project-desc-text editable-group" id="projectDescText{{ forloop.counter }}" data-full="{{project.description}}">{{project.description}}
-                            <span class="edit-icon" title="Edit">&#9998;</span>
                         </span>
                         <span class="project-desc-toggle" data-target="{{ forloop.counter }}">&#x25BC;</span>
                     </div>
@@ -318,23 +298,19 @@
                         {% if project.leader %}
                             <img src="{{project.leader.img}}" alt="{{project.leader.name}}" class="project-leader-photo">
                             <span class="project-leader-name editable-group">{{project.leader.name | default:'Add Project Leader'}}
-                                <span class="edit-icon" title="Edit">&#9998;</span>
                             </span>
                         {% elif project.project_lead %}
                             <img src="/media/{{project.project_lead.profile_picture}}" alt="{{project.project_lead.name}}" class="project-leader-photo">
                             <span class="project-leader-name editable-group">{{project.project_lead.name | default:'Add Project Leader'}}
-                                <span class="edit-icon" title="Edit">&#9998;</span>
                             </span>
                         {% else %}
                             <img src="https://thumbs.dreamstime.com/b/anonymous-user-flat-icon-vector-illustration-long-shadow-anonymous-user-flat-icon-105446565.jpg" alt="No Leader" class="project-leader-photo">
                             <span class="project-leader-name editable-group">Add Project Leader
-                                <span class="edit-icon" title="Edit">&#9998;</span>
                             </span>
                         {% endif %}
                     </div>
                     <div class="project-members-block">
                         <div class="project-members-title">Members:
-                            <span class="edit-icon" title="Edit">&#9998;</span>
                         </div>
                         <div class="project-members-list editable-group">
                             {% if project.members %}
@@ -344,7 +320,6 @@
                                             <div class="project-member">
                                                 <img src="{{member.img}}" alt="{{member.name}}" class="project-member-photo">
                                                 <span class="project-member-name">{{member.name}}</span>
-                                                <span class="fa fa-trash"></span>
                                             </div>
                                         {% endif %}
                                     {% endfor %}
@@ -354,57 +329,38 @@
                                         {% if member_data.name %}
                                             <div class="project-member">
                                                 <img src="/media/{{member_data.profile_picture}}" alt="{{member_data.name}}" class="project-member-photo">
-                                                <span class="project-member-name">{{member_data.name}}</span>
-                                                <span class="fa fa-trash"></span>
+                                                <span class="project-member-name">{{member_data.name}}
                                             </div>
                                         {% elif member_data.id %}
                                             <!-- Handle case where member_data is just an ID -->
                                             <div class="project-member">
                                                 <img src="https://thumbs.dreamstime.com/b/anonymous-user-flat-icon-vector-illustration-long-shadow-anonymous-user-flat-icon-105446565.jpg" alt="Member {{member_data.id}}" class="project-member-photo">
-                                                <span class="project-member-name">Member {{member_data.id}}</span>
-                                                <span class="fa fa-trash"></span>
+                                                <span class="project-member-name">Member {{member_data.id}}
                                             </div>
                                         {% endif %}
                                     {% endfor %}
                                 {% endif %}
                             {% endif %}
-                            <div>
-                                Add new member <span class="fa fa-plus" style="margin-top: 15px;"></span>
-                            </div>
                         </div>
                     </div>
                     <div class="project-links-block">
                         <span class="editable-group">
                             <a href="{{project.project_link}}" class="project-link" target="_blank"><i class="fa fa-github"></i> GitHub</a>
-                            <span class="edit-icon" title="Edit">&#9998;</span>
                         </span>
                         <span class="editable-group">
                             <a href="{{project.project_demo}}" class="project-link" target="_blank"><i class="fa fa-external-link"></i> Live Demo</a>
-                            <span class="edit-icon" title="Edit">&#9998;</span>
                         </span>
                         <span class="editable-group">
                             <a href="{{project.attachment | default:'project1_attachment.pdf'}}" class="project-link project-attachment-link" target="_blank"><i class="fa fa-file-pdf-o"></i> Attachment</a>
-                            <span class="edit-icon" title="Edit">&#9998;</span>
                         </span>
                     </div>
                 </div>
                 {% endfor %}
-                <!-- Add New Project Button -->
-        <div class="add-project-btn-container" style="text-align:center; margin: 40px 0;">
-            <span class="fa fa-plus add-project-btn" title="Add New Project" style="font-size: 48px; cursor: pointer; color: #888;" id="addProjectBtn"></span>
-            <span style="font-size: 48px; color: #888;">Add New Project</span>
-        </div>
             </div>
         </div>
         
     </section>
     <script src="{% static 'executives/javascripts/lab_details.js' %}"></script>
-    <script>
-        function handleAddPhotoClick(e) {
-            e.preventDefault();
-            document.getElementById('addPhotoInput').click();
-        }
-    </script>
 </body>
 
 </html>

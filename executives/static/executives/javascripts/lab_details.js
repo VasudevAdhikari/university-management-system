@@ -337,7 +337,8 @@ function setupEditIcons() {
         if (editIcon) editIcon.remove();
 
         // Add delete button if not already present
-        if (!img.parentElement.querySelector('.delete-photo-btn')) {
+        if (!img.parentElement.querySelector('.delete-photo-btn') && window.lagjagale) {
+            console.log(`lagjagale ${lagjagale}`);
             const delBtn = document.createElement('button');
             delBtn.className = 'delete-photo-btn';
             delBtn.title = 'Delete Photo';

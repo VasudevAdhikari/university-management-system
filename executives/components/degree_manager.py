@@ -125,7 +125,8 @@ def add_degree_api(request):
         print(e)
         return JsonResponse({'success': False, 'message': str(e)}, status=500)
 
-def show_degree_management(request):
+
+def get_degree_page_data(request):
     course_models = Course.objects.all()
     all_courses = []
     for course in course_models:
@@ -154,6 +155,11 @@ def show_degree_management(request):
         "all_faculties": all_faculties,
         "all_degrees": all_degrees,
     }
+    return data
+
+
+def show_degree_management(request):
+    data = get_degree_page_data(request)
     return render(request, 'executives/degree_management.html', context=data)
 
 

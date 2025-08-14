@@ -596,7 +596,7 @@
                 <h1>Welcome, Future Innovator!</h1>
                 <p>Explore your academic journey and discover endless possibilities at our esteemed university.</p>
                 <div class="d-grid gap-2 col-6 mx-auto mt-4">
-                    <a href="degree.html" class="btn btn-light btn-lg rounded-pill shadow-sm">Explore Degrees <i class="fas fa-arrow-right ms-2"></i></a>
+                    <a href="/public/degrees" class="btn btn-light btn-lg rounded-pill shadow-sm">Explore Degrees <i class="fas fa-arrow-right ms-2"></i></a>
                 </div>
             </div>
         </section>
@@ -735,12 +735,12 @@
                 <!-- Lab 1: Robotics & AI Lab -->
                  {% for id, lab in labs.items %}
                 <div class="col">
-                    <div class="card h-100 lab-card" onclick="window.location.href=''">
+                    <div class="card h-100 lab-card">
                         <img src="/media/{{lab.images.0}}" class="lab-img card-img-top lab-card-img" alt="Robotics Lab Photo">
                         <div class="card-body">
                             <h5 class="card-title">{{lab.lab_name}}</h5>
                             <p class="card-text">{{lab.description|truncatechars:100}}</p>
-                            <button class="btn btn-primary mt-auto">Learn More <i class="fas fa-arrow-right ms-2"></i></button>
+                            <button class="btn btn-primary mt-auto" onclick="window.location.href=`{% url 'lab_details' id %}`">Learn More <i class="fas fa-arrow-right ms-2"></i></button>
                         </div>
                     </div>
                 </div>

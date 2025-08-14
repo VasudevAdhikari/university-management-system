@@ -49,13 +49,9 @@ function renderMarkingScheme(rows = [], readonly = true) {
 
   if (rows.length === 0) {
     // No marking scheme yet, allow creation
-    const btn = document.createElement("button");
-    btn.textContent = "Create Marking Scheme";
+    const btn = document.createElement("div");
+    btn.textContent = "No Marking Scheme Provided Yet";
     btn.className = "create-scheme-btn";
-    btn.onclick = () => {
-      markingSchemeEditMode = true;
-      renderMarkingScheme([createEmptyRow(rows)], false);
-    };
     section.appendChild(btn);
     return;
   }
@@ -405,9 +401,10 @@ function renderDocumentsWithData(docsData, referredDocs) {
   window.other_instructors.forEach((otherInstructorId) => {
     // Create section title row
     const sectionTitleRow = document.createElement("div");
+    console.log(byInstructor[otherInstructorId]);
     sectionTitleRow.className =
       "item-section-title-row other-instructor-section";
-    sectionTitleRow.innerHTML = `<span class="item-section-title">Documents By ${byInstructor[otherInstructorId][0].uploader_name}</span>`;
+    sectionTitleRow.innerHTML = `<span class="item-section-title">Documents By ${byInstructor[otherInstructorId]? byInstructor[otherInstructorId][0].uploader_name: ""}</span>`;
     // Create item grid
     const grid = document.createElement("div");
     grid.className = "item-grid other-instructor-section";
@@ -477,16 +474,6 @@ function renderDocumentsWithData(docsData, referredDocs) {
 document.addEventListener("DOMContentLoaded", function () {
   renderAllSections();
 });
-
-const sidebar = document.getElementById("sidebarMenu");
-const toggleBtn = document.getElementById("sidebarToggle");
-toggleBtn.onclick = function () {
-  sidebar.classList.toggle("hide");
-  document.body.classList.toggle(
-    "sidebar-open",
-    !sidebar.classList.contains("hide")
-  );
-};
 
 let activities = {
   quizzes: [{ title: "Quiz 1" }, { title: "Quiz 2" }, { title: "Quiz 3" }],
@@ -566,8 +553,7 @@ function handleFileUpload(event, cardIdx) {
     }
     previewBox.innerHTML = icon;
   } else {
-    previewBox.innerHTML =
-      '<i class="fa-solid fa-file card-icon"></i>';
+    previewBox.innerHTML = '<i class="fa-solid fa-file card-icon"></i>';
   }
 }
 
@@ -865,11 +851,21 @@ async function referDocument(documentId) {
         body: JSON.stringify({ document_id: documentId }),
       }
     );
-    if (!response.ok) throw new Error("Failed to refer document");
+
+    // Parse the JSON response
+    const data = await response.json();
+
+    // Check if response was ok and backend returned success
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || "Failed to refer document");
+    }
+
     alert("Document referred successfully.");
+    window.location.reload();
     return true;
+
   } catch (err) {
-    alert("Failed to refer document.");
+    alert(err);
     return false;
   }
 }

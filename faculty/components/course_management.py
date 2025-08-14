@@ -33,28 +33,58 @@ def show_course_management(request, batch_instructor_id):
 
 @csrf_exempt
 def marking_scheme_api(request, batch_id):
-    # Only allow GET and POST
     if request.method == 'GET':
         try:
-            scheme_obj = AssessmentScheme.objects.filter(batch_instructor_id=batch_id).first()
-            scheme = scheme_obj.scheme if scheme_obj and scheme_obj.scheme else {}
+            # Get batch instructor
+            batch_instructor = BatchInstructor.objects.filter(pk=batch_id).first()
+            if not batch_instructor:
+                return JsonResponse({'scheme': {}}, status=404)
+
+            # Get or create AssessmentScheme
+            scheme_obj, created = AssessmentScheme.objects.get_or_create(
+                batch_instructor=batch_instructor,
+                defaults={'scheme': batch_instructor.course.marking_scheme or {}}
+            )
+            if not scheme_obj:
+                scheme_obj = created
+
+            # Return the scheme
+            scheme = scheme_obj.scheme if scheme_obj.scheme else {}
             return JsonResponse({'scheme': scheme})
+
         except Exception as e:
-            return JsonResponse({'scheme': {}}, status=200)
+            return JsonResponse({'scheme': {}}, status=500)
+
     elif request.method == 'POST':
         try:
             data = json.loads(request.body.decode('utf-8'))
             scheme = data.get('scheme', {})
+
             if not isinstance(scheme, dict):
                 return HttpResponseBadRequest('Scheme must be a dictionary')
-            scheme_obj, created = AssessmentScheme.objects.get_or_create(batch_instructor_id=batch_id)
+
+            # Get or create AssessmentScheme
+            batch_instructor = BatchInstructor.objects.filter(pk=batch_id).first()
+            if not batch_instructor:
+                return JsonResponse({'success': False, 'error': 'BatchInstructor not found'}, status=404)
+
+            scheme_obj, created = AssessmentScheme.objects.get_or_create(
+                batch_instructor=batch_instructor,
+                defaults={'scheme': {}}
+            )
+
+            # Update the scheme
             scheme_obj.scheme = scheme
             scheme_obj.save()
+
             return JsonResponse({'success': True, 'scheme': scheme_obj.scheme})
+
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
     else:
         return HttpResponseNotAllowed(['GET', 'POST'])
+    
 
 @csrf_exempt
 def assessments_api(request, batch_id):

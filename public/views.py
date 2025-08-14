@@ -1,7 +1,9 @@
 from django.shortcuts import render
 from django.views.generic import TemplateView
 from authorization.models import UniversityDetails, Faculty, Department, Instructor, Admin
-
+from executives.components.degree_manager import get_degree_page_data
+from executives.components.course_manager import get_course_page_data
+from executives.additional_business_logics.data_formatter import get_lab_details_data
 # Create your views here.
 
 class HomeView(TemplateView):
@@ -62,3 +64,22 @@ def show_public_page(request):
     }
 
     return render(request, 'htmls/home.html', context=data)
+
+
+def show_terms(request):
+    return render(request, 'htmls/terms.html')
+
+def show_degrees(request):
+    data = get_degree_page_data(request)
+    return render(request, 'htmls/degrees.html', context=data)
+
+def show_courses(request):
+    data = get_course_page_data(request)
+    return render(request, 'htmls/courses.html', context=data)
+
+def show_lab_details(request, lab_name):
+    data = get_lab_details_data(request, lab_name)
+    return render(request, 'htmls/lab.html', context=data)
+
+def say_access_denied(request):
+    return render(request, 'htmls/access_denied.html')

@@ -106,14 +106,25 @@ document.addEventListener('DOMContentLoaded', () => {
     // View Details button
     const viewDetailsBtn = document.createElement('button');
     viewDetailsBtn.textContent = 'View Details';
-    viewDetailsBtn.className = 'view-details-btn mt-2';
+    viewDetailsBtn.className = 'view-details-btn mt-2 me-2';
     viewDetailsBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       window.location.href = `/executives/batches/${term.id}`;
     });
 
+    // Send Result button
+    const sendResultBtn = document.createElement('button');
+    sendResultBtn.textContent = 'Send Result';
+    sendResultBtn.className = 'send-result-btn mt-2';
+    sendResultBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!confirm('Are you sure to send results of this term to all students?')) return;
+      
+    });
+
     buttonWrapper.appendChild(button);
     buttonWrapper.appendChild(viewDetailsBtn);
+    buttonWrapper.appendChild(sendResultBtn);
 
     termButtonsContainer.appendChild(buttonWrapper);
   }
@@ -160,12 +171,83 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .then(() => {
           popup.remove();
-          alert('Selected Academic Term and its related data are deleted successfully');
           loadTerms();
         })
         .catch(error => console.error('Error deleting term:', error));
     });
     document.body.appendChild(popup);
+  }
+
+  function showSendResultConfirm(termId, termName) {
+    const existingPopup = document.getElementById('send-result-popup');
+    if (existingPopup) existingPopup.remove();
+
+    const popup = document.createElement('div');
+    popup.id = 'send-result-popup';
+    popup.className = 'modal-overlay';
+    popup.innerHTML = `
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="send-result-modal-title">
+        <h2 id="send-result-modal-title">Send Results</h2>
+        <p>Are you sure you want to send results for <span class="fw-bold">${termName}</span>?</p>
+        <p class="text-muted small">This will send result notifications to all students enrolled in this term.</p>
+        <div class="d-flex justify-content-end gap-2">
+          <button id="sendResultCancelBtn">Cancel</button>
+          <button id="sendResultConfirmBtn">Send Results</button>
+        </div>
+      </div>
+    `;
+    const popupBox = popup.querySelector('div.modal-card');
+    animateIn(popupBox);
+
+    popup.querySelector('#sendResultCancelBtn').addEventListener('click', () => popup.remove());
+    popup.addEventListener('click', (e) => {
+      if (e.target === popup) popup.remove();
+    });
+    const escListener = (e) => {
+      if (e.key === 'Escape') {
+        popup.remove();
+        document.removeEventListener('keydown', escListener);
+      }
+    };
+    document.addEventListener('keydown', escListener);
+    popup.querySelector('#sendResultConfirmBtn').addEventListener('click', () => {
+      fetch(`/executives/terms/${termId}/send-results/`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': getCSRFToken() },
+      })
+        .then(res => {
+          if (!res.ok) throw new Error('Network response was not ok');
+          return res.json();
+        })
+        .then((data) => {
+          popup.remove();
+          // Show success message
+          showNotification('Results sent successfully!', 'success');
+        })
+        .catch(error => {
+          console.error('Error sending results:', error);
+          showNotification('Failed to send results. Please try again.', 'error');
+        });
+    });
+    document.body.appendChild(popup);
+  }
+
+  function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    notification.innerHTML = `
+      ${message}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    document.body.appendChild(notification);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+      if (notification.parentNode) {
+        notification.remove();
+      }
+    }, 5000);
   }
 
   function handleTermButtonClick(event) {
@@ -253,8 +335,6 @@ document.addEventListener('DOMContentLoaded', () => {
           const name = popup.querySelector('#termName').value;
           const year = popup.querySelector('#year').value;
 
-          if (!confirm('Are You sure to Update the selected Academic Term Data?')) return;
-
           fetch(`/executives/terms/${termId}/update/`, {
             method: 'POST',
             headers: {
@@ -269,7 +349,6 @@ document.addEventListener('DOMContentLoaded', () => {
             })
             .then(() => {
               popup.remove();
-              alert('Selected Academic Term Data Updated Successfully');
               loadTerms();
             })
             .catch(error => console.error('Error updating term dates:', error));
@@ -295,7 +374,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function finalizeEdit() {
       const value = input.value.trim();
       if (value && value !== currentValue) {
-        if (!confirm('Are You sure to Update the selected Academic Term Data?')) return;
         fetch(`/executives/terms/${term.id}/update/`, {
           method: 'POST',
           headers: {
@@ -309,7 +387,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return res.json();
           })
           .then(() => {
-            alert('Selected Academic Term Data Updated Successfully');
             loadTerms();
           })
           .catch(error => console.error('Error updating term name:', error));
@@ -344,7 +421,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const value = input.value.trim();
       if (value && !submitted) {
         submitted = true;
-        if (!confirm('Are You sure to create a new Academic Term with provided data?')) return;
         fetch('/executives/terms/create/', {
           method: 'POST',
           headers: {
@@ -358,7 +434,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return res.json();
           })
           .then(() => {
-            alert('New Term Created Successfully');
             loadTerms();
           })
           .catch(error => console.error('Error creating new term:', error));
