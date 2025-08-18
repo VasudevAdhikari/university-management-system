@@ -3,13 +3,23 @@ from authorization.models import Instructor, BatchInstructor, EnrollmentCourse
 from collections import defaultdict
 from django.shortcuts import get_object_or_404
 
+def get_instructor_data(instructor_id=None, request=None):
+    if instructor_id:
+        return get_object_or_404(
+            Instructor.objects.select_related('user', 'user__emergency_contact', 'department'),
+            pk=instructor_id
+        )
+    email = request.COOKIES.get('my_user')
+    return get_object_or_404(
+        Instructor.objects.select_related('user', 'user__emergency_contact', 'department'),
+        user__email=email
+    )
+        
+
 
 def show_instructor_data(request, instructor_id):
     # Fetch instructor with related user, department, emergency contact
-    instructor = get_object_or_404(
-        Instructor.objects.select_related('user', 'user__emergency_contact', 'department'),
-        pk=instructor_id
-    )
+    instructor = get_instructor_data(instructor_id)
 
     # Total courses taught
     total_courses_taught = BatchInstructor.objects.filter(instructor=instructor).count()

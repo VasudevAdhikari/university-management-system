@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from authorization.models import BatchInstructor, Instructor
 from django.http import JsonResponse
+from executives.components.instructor_data_manager import get_instructor_data
 
 # Create your views here.
 def faculty_dashboard(request):
@@ -19,3 +20,10 @@ def faculty_dashboard(request):
     )
 
     return render(request, 'faculty/faculty_home.html', {'batch_instructors': batch_instructors})
+
+def show_profile(request):
+    instructor = get_instructor_data(instructor_id=None, request=request)
+    data = {
+        'instructor': instructor,
+    }
+    return render(request, 'faculty/profile.html', context=data)

@@ -33,7 +33,8 @@ class AssessmentType(models.TextChoices):
     QUIZ = 'Q', 'Quiz'
     ASSIGNMENT = 'A', 'Assignment'
     MIDTERM = 'M', 'Midterm'
-    FINAL = 'F', 'Final'
+    FINAL = 'F', 'Final(Lab)'
+    FINAL_ONPAPER = 'D', 'Final(On Paper)'
     PROJECT = 'P', 'Project'
     LABTEST = 'L', 'Lab Test'
     PRACTICAL = 'V', 'Practical'
@@ -41,6 +42,7 @@ class AssessmentType(models.TextChoices):
     LABPROJECT = 'B', 'Lab Project'
     LABASSESSMENT = 'J', 'Lab Assessment'
     CLASS_PARTICIPATION = 'C', 'Class Participation'
+    TUTORIAL = 'Z', 'Tutorial'
 
 
 class StudentStatus(models.TextChoices):
@@ -330,6 +332,8 @@ class EnrollmentCourse(BaseModel):
     enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE)
     rating = models.PositiveSmallIntegerField(default=0, null=False)
     review = models.TextField(default=None, blank=True, null=True)
+
+    
 # Document Model
 class Document(BaseModel):
     name = models.CharField(max_length=100, default='')
@@ -359,11 +363,11 @@ class AssessmentScheme(BaseModel):
 
 # Assessment Model
 class Assessment(BaseModel):
-    assessment_scheme = models.ForeignKey(AssessmentScheme, on_delete=models.CASCADE)
-    assessment_type = models.TextField(max_length=1, choices=AssessmentType.choices)
+    assessment_scheme = models.ForeignKey(AssessmentScheme, on_delete=models.CASCADE, null=True, blank=True)
+    assessment_type = models.TextField(max_length=1, choices=AssessmentType.choices, default=AssessmentType.QUIZ)
     assessment = models.JSONField(default=dict)
-    assigned_date = models.DateTimeField(auto_now_add=True)
-    due_date = models.DateTimeField(auto_now_add=True)
+    assigned_date = models.DateTimeField(auto_now_add=False, default=None, null=True, blank=True)
+    due_date = models.DateTimeField(auto_now_add=False, default=None, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)

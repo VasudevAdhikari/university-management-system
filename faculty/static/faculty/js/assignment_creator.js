@@ -3,9 +3,8 @@ let selectedStudents = [];
 
 document.addEventListener('DOMContentLoaded', function() {
     initializeStudentModal();
-    initializeTimerControls();
     setupEventListeners();
-    updateClockDisplay();
+    // updateClockDisplay();
 
     if (window.assignment_data) {
         fillAssignmentForm(window.assignment_data);
@@ -130,38 +129,6 @@ function setupStudentSearch() {
     });
 }
 
-function initializeTimerControls() {
-    const durationInput = document.getElementById('assignmentDuration');
-    durationInput.addEventListener('input', updateClockDisplay);
-}
-
-function adjustTime(minutes) {
-    const durationInput = document.getElementById('assignmentDuration');
-    let currentValue = parseInt(durationInput.value) || 30;
-    let newValue = currentValue + minutes;
-    if (newValue < 1) newValue = 1;
-    if (newValue > 300) newValue = 300;
-    durationInput.value = newValue;
-    updateClockDisplay();
-}
-
-function updateClockDisplay() {
-    const duration = parseInt(document.getElementById('assignmentDuration').value) || 30;
-    const timeDisplay = document.getElementById('timeDisplay');
-    const hourHand = document.getElementById('hourHand');
-    const minuteHand = document.getElementById('minuteHand');
-    const hours = Math.floor(duration / 60);
-    const minutes = duration % 60;
-    timeDisplay.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-    const minuteAngle = (minutes / 60) * 360;
-    const hourAngle = ((hours % 12) / 12) * 360 + (minutes / 60) * 30;
-    if (minuteHand) {
-        minuteHand.style.transform = `translateX(-50%) rotate(${minuteAngle}deg)`;
-    }
-    if (hourHand) {
-        hourHand.style.transform = `translateX(-50%) rotate(${hourAngle}deg)`;
-    }
-}
 
 // File/Image Preview
 function previewFiles(input, containerId, isImage) {
@@ -213,8 +180,8 @@ async function fillAssignmentForm(assignment) {
     if (document.getElementById('assignmentTitle')) {
         document.getElementById('assignmentTitle').value = assignment.title || '';
     }
-    document.getElementById('assignmentDuration').value = assignment.time_limit || 30;
-    updateClockDisplay();
+    // document.getElementById('assignmentDuration').value = assignment.time_limit || 30;
+    // updateClockDisplay();
     if (assignment.start_time) document.getElementById('assignmentStart').value = assignment.start_time;
     if (assignment.end_time) document.getElementById('assignmentEnd').value = assignment.end_time;
     selectedStudents = assignment.students || [];
@@ -307,8 +274,9 @@ function handleFormSubmission(event) {
         return;
     }
     const title = document.getElementById('assignmentTitle').value;
+    const totalMark = document.getElementById('totalMarks').value;
     const question = document.getElementById('assignmentQuestion').value;
-    const timeLimit = parseInt(document.getElementById('assignmentDuration').value) || 30;
+    // const timeLimit = parseInt(document.getElementById('assignmentDuration').value) || 30;
     const startTime = document.getElementById('assignmentStart').value;
     const endTime = document.getElementById('assignmentEnd').value;
     const filesInput = document.getElementById('assignmentFiles');
@@ -322,7 +290,7 @@ function handleFormSubmission(event) {
     const assignment = {
         title: title,
         students: selectedStudents,
-        time_limit: timeLimit,
+        total_mark: totalMark,
         question: question,
         files: fileNames,
         images: imageNames

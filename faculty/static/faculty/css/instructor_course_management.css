@@ -724,6 +724,19 @@ body,
   align-self: center;
   text-align: center;
 }
+.item-card-due {
+  font-size: 14px;
+  font-weight: 400;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  width: 100%;
+  max-width: 180px; /* Adjust as needed for your card width */
+  margin: 8px 0;
+  align-self: center;
+  text-align: center;
+}
 
 .item-card-delete {
   position: absolute;

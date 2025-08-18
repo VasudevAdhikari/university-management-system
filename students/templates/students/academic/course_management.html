@@ -2,10 +2,11 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8"> 
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
+  <title>Hello</title>
   {% load static %}
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'faculty/css/instructor_course_management.css' %}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
@@ -22,29 +23,66 @@
     window.instructor = '{{instructor.user.id}}';
     window.other_instructors = [];
   </script>
-  <!-- Navbar -->
-  <nav class="navbar-demo">
-    <button class="nav-hamburger" id="sidebarToggle" aria-label="Toggle sidebar">
-      <i class="fa-solid fa-bars"></i>
-    </button>
-    <span class="nav-title">Instructor Portal</span>
-    <span class="nav-user"><i class="fa-solid fa-user"></i> {{instructor.user.full_name}}</span>
-  </nav>
 
-  <!-- Sidebar -->
-  <aside class="sidebar-demo" id="sidebarMenu">
-    <div class="sidebar-header-demo">
-      <span class="sidebar-logo"><i class="fa-solid fa-graduation-cap"></i></span>
-      <span class="sidebar-title">Menu</span>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+    <div class="container-fluid">
+      <img src="https://www.ucsy.edu.mm/img/ucsylogo-icpc2017.png" class="uni-logo ms-4" alt="University Logo">
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+
+        <ul class="navbar-nav ms-auto align-items-center custom-nav-spacing">
+
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              University Info
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="#university-info"><i class="fas fa-info-circle me-2"></i>
+                  Overview</a></li>
+              <li><a class="dropdown-item" href="#executives"><i class="fas fa-user-tie me-2"></i>
+                  Executives</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Academics
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="#faculties">Faculties</a></li>
+              <li><a class="dropdown-item" href="#departments">Departments</a></li>
+              <li><a class="dropdown-item" href="#degrees">Degrees</a></li>
+              <li><a class="dropdown-item" href="#instructors">Instructors</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Resources
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="#partnerships"><i class="fas fa-handshake me-2"></i>
+                  Partnerships</a></li>
+              <li><a class="dropdown-item" href="#certificates"><i class="fas fa-certificate me-2"></i>
+                  Certificates</a></li>
+              <li><a class="dropdown-item" href="#labs"><i class="fas fa-flask me-2"></i> Labs</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-item logout">
+            <a class="nav-link logout-icon" href="logout.html" title="Logout">
+              <i class="fas fa-sign-out-alt"></i>
+            </a>
+          </li>
+        </ul>
+      </div>
     </div>
-    <ul class="sidebar-list-demo">
-      <li><a href="#"><i class="fa-solid fa-book"></i> My Courses</a></li>
-      <li><a href="#"><i class="fa-solid fa-user-graduate"></i> Students</a></li>
-      <li><a href="#"><i class="fa-solid fa-clipboard-list"></i> Marking</a></li>
-      <li><a href="#"><i class="fa-solid fa-gear"></i> Settings</a></li>
-      <li><a href="#"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
-    </ul>
-  </aside>
+  </nav>
 
   <!-- Main Content -->
   <div class="main-content-demo">
@@ -60,7 +98,7 @@
         </div>
       </div>
       <div id="markingSchemeSection">
-        </div>
+      </div>
       <!-- Place your activities section here: -->
       <div id="activitySection">
         <!-- Quizzes and Assignments will be dynamically injected here -->
@@ -74,9 +112,73 @@
       <div class="item-grid" id="referredDocsGrid">
         <!-- Dynamically filled by JS -->
       </div>
-  </div>
+
+      <div id="instructorInfo">
+        <h3 class="instructor-header">Instructor Information</h3>
+        <div class="instructor-details">
+          <div class="instructor-image">
+            <img src="{{instructor.instructor.user.profile_picture.url|default:'https://www.transparentpng.com/download/user/gray-user-profile-icon-png-fP8Q1P.png'}}"
+              alt="{{instructor.instructor.user.profile_picture.url}}">
+          </div>
+          <div class="instructor-text">
+            <div>{{instructor.instructor.user.full_name|default:'Unknown Yet'}}</div>
+            <div>{{instructor.instructor.user.email|default:'Unknown'}}</div>
+            <div>Department: {{instructor.instructor.department.name|default:'Unknown'}}</div>
+            <div>Phone: {{instructor.instructor.user.phone|default:'Unknown'}}</div>
+            <div class="instructor-actions">
+            {% if not has_review %}
+              <button class="instructor-btn" type="button" id="reviewBtn">Review</button>
+            {% else %}
+              <button class="instructor-btn" type="button" id="reviewBtn" disabled style="display: none;"></button>
+            {% endif %}
+            {% if not has_rating %}
+              <button class="instructor-btn secondary" type="button" id="rateBtn">Rate</button>
+            {% else %}
+              <button class="instructor-btn secondary" type="button" id="rateBtn" disabled style="display: none;"></button>
+            {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Review Popup Modal -->
+      <div id="reviewPopup"
+        style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.18);z-index:9999;align-items:center;justify-content:center;">
+        <div
+          style="background:#fff;padding:2rem 1.5rem;border-radius:1rem;min-width:320px;max-width:90vw;box-shadow:0 2px 16px #0002;display:flex;flex-direction:column;align-items:center;">
+          <h3 style="color:#1a4d80;font-size:1.3rem;font-weight:700;margin-bottom:18px;">Give a Review</h3>
+          <textarea id="reviewText" rows="4"
+            style="width:100%;max-width:400px;padding:10px;border-radius:8px;border:1.5px solid #bfc6e0;font-size:1rem;margin-bottom:18px;resize:none;"></textarea>
+          <div style="display:flex;gap:16px;justify-content:center;width:100%;margin-top:8px;">
+            <button class="instructor-btn" id="submitReviewBtn" type="button">Submit</button>
+            <button class="instructor-btn secondary" id="cancelReviewBtn" type="button">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rating Popup Modal -->
+      <div id="ratingPopup"
+        style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.18);z-index:9999;align-items:center;justify-content:center;">
+        <div
+          style="background:#fff;padding:2rem 1.5rem;border-radius:1rem;min-width:320px;max-width:90vw;box-shadow:0 2px 16px #0002;display:flex;flex-direction:column;align-items:center;">
+          <h3 style="color:#1a4d80;font-size:1.3rem;font-weight:700;margin-bottom:18px;">Give a Rating</h3>
+          <div id="starContainer" style="display:flex;gap:10px;margin-bottom:18px;">
+            <span class="star" data-value="1" style="font-size:2.2rem;cursor:pointer;color:#bfc6e0;">&#9733;</span>
+            <span class="star" data-value="2" style="font-size:2.2rem;cursor:pointer;color:#bfc6e0;">&#9733;</span>
+            <span class="star" data-value="3" style="font-size:2.2rem;cursor:pointer;color:#bfc6e0;">&#9733;</span>
+            <span class="star" data-value="4" style="font-size:2.2rem;cursor:pointer;color:#bfc6e0;">&#9733;</span>
+            <span class="star" data-value="5" style="font-size:2.2rem;cursor:pointer;color:#bfc6e0;">&#9733;</span>
+          </div>
+          <div style="display:flex;gap:16px;justify-content:center;width:100%;margin-top:8px;">
+            <button class="instructor-btn" id="submitRatingBtn" type="button">Submit</button>
+            <button class="instructor-btn secondary" id="cancelRatingBtn" type="button">Cancel</button>
+          </div>
+        </div>
+      </div>
+
 </body>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 <script src="{% static 'students/academic/javascripts/course_management.js' %}"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{% static 'students/academic/javascripts/rating_review.js' %}"></script>
 </html>

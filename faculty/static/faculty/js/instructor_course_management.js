@@ -56,29 +56,6 @@ function renderMarkingScheme(rows = [], readonly = true) {
     return;
   }
 
-  // Header
-  const header = document.createElement("div");
-  header.className = "marking-header";
-  header.innerHTML = `
-    <span>Marking Scheme</span>
-    ${
-      readonly
-        ? `
-      <button class="edit-btn" id="editMarkingSchemeBtn" title="Edit">
-        <i class="fa-solid fa-pen"></i>
-      </button>
-    `
-        : `
-      <button class="edit-btn" id="addMarkingRowBtn" title="Add row" ${
-        rows.length >= MAX_ROWS ? 'style="display:none;"' : ""
-      }>
-        <i class="fa-solid fa-plus"></i>
-      </button>
-    `
-    }
-  `;
-  section.appendChild(header);
-
   // Table
   const table = document.createElement("table");
   table.className = "marking-table";
@@ -87,37 +64,32 @@ function renderMarkingScheme(rows = [], readonly = true) {
       (row, idx) => `
     <tr>
       <td>
-        ${
-          readonly
-            ? `<span>${row.type}</span>`
-            : `<select class="mark-type-select" data-idx="${idx}">
+        ${readonly
+          ? `<span>${row.type}</span>`
+          : `<select class="mark-type-select" data-idx="${idx}">
               ${MARKING_TYPES.map(
-                (type) =>
-                  `<option value="${type}" ${
-                    row.type === type ? "selected" : ""
-                  } ${
-                    rows.some((r, i) => r.type === type && i !== idx)
-                      ? "disabled"
-                      : ""
-                  }>${type}</option>`
-              ).join("")}
+            (type) =>
+              `<option value="${type}" ${row.type === type ? "selected" : ""
+              } ${rows.some((r, i) => r.type === type && i !== idx)
+                ? "disabled"
+                : ""
+              }>${type}</option>`
+          ).join("")}
             </select>`
         }
       </td>
       <td>
-        ${
-          readonly
-            ? `<span>${row.mark} %</span>`
-            : `<input type="number" min="0" max="100" value="${row.mark}" class="mark-input" style="width:70px;" data-idx="${idx}"> %`
+        ${readonly
+          ? `<span>${row.mark} %</span>`
+          : `<input type="number" min="0" max="100" value="${row.mark}" class="mark-input" style="width:70px;" data-idx="${idx}"> %`
         }
-        ${
-          !readonly
-            ? `
+        ${!readonly
+          ? `
           <button class="edit-btn remove-row-btn" data-idx="${idx}" title="Remove row">
             <i class="fa-solid fa-trash"></i>
           </button>
         `
-            : ""
+          : ""
         }
       </td>
     </tr>
@@ -126,17 +98,7 @@ function renderMarkingScheme(rows = [], readonly = true) {
     .join("");
   section.appendChild(table);
 
-  // Edit button event
-  if (readonly) {
-    const editBtn = document.getElementById("editMarkingSchemeBtn");
-    if (editBtn) {
-      editBtn.onclick = () => {
-        markingSchemeEditMode = true;
-        renderMarkingScheme(rows, false);
-      };
-    }
-    return;
-  }
+
 
   // Add row event
   const addBtn = document.getElementById("addMarkingRowBtn");
@@ -175,32 +137,6 @@ function renderMarkingScheme(rows = [], readonly = true) {
     };
   });
 
-  // Validation
-  section.querySelectorAll(".mark-input").forEach((input) => {
-    input.oninput = () => validateMarkingScheme(section, rows);
-  });
-
-  // Save button
-  const saveBtn = document.createElement("button");
-  saveBtn.className = "save-btn";
-  saveBtn.textContent = "Save";
-  saveBtn.style.marginTop = "12px";
-  section.appendChild(saveBtn);
-
-  saveBtn.onclick = async function () {
-    syncMarkingSchemeRows(section, rows);
-    // Validate total
-    const total = rows.reduce((sum, row) => sum + (Number(row.mark) || 0), 0);
-    if (total !== 100) {
-      showCustomWarning(
-        "Total marking percentage must be exactly <b>100%</b>."
-      );
-      return;
-    }
-    await saveMarkingSchemeToBackend(rows);
-    markingSchemeEditMode = false;
-    renderMarkingScheme(rows, true);
-  };
 }
 
 function createEmptyRow(rows) {
@@ -264,6 +200,7 @@ async function renderAllSections() {
   // Fetch all data in parallel
   const markingPromise = fetchMarkingScheme();
   const assessmentsPromise = fetchAssessments();
+  console.log(assessmentsPromise);
   const docsPromise = fetchDocuments();
   const referredDocsPromise = fetchReferredDocuments();
 
@@ -314,27 +251,35 @@ function renderAssessmentsWithData(markingRows, assessmentsByType) {
     grid.innerHTML = assessments
       .map(
         (a, i) => `
-      <div class="item-card">
-        <div style="display: flex; align-items: center; gap: 6px; padding: 8px;">
-          <button class="item-card-edit" data-type="${type}" data-id="${
-          a.id
-        }" title="Edit" onclick="window.location.href = '/faculty/${type
-          .toLowerCase()
-          .replace(/\s+/g, "")}_creation/${a.id}/';">
-            <i class="fa-solid fa-pen"></i>
-          </button>
-          <button class="item-card-delete" data-type="${type}" data-id="${
-          a.id
-        }" title="Delete"><i class="fa-solid fa-trash"></i></button>
-        </div>
-        <div class="item-card-image">
-          <i class="fa-solid fa-cloud card-icon"></i>
-        </div>
-        <div class="item-card-title">${a.title || type + " " + (i + 1)}</div>
-      </div>
-    `
+          <div class="item-card">
+            <div style="display: flex; align-items: center; gap: 6px; padding: 8px;">
+              <button class="item-card-edit" data-type="${type}" data-id="${a.id}" title="Edit" 
+                onclick="window.location.href = '/faculty/${type.toLowerCase().replace(/\s+/g, '')}_creation/${a.id}/';">
+                <i class="fa-solid fa-pen"></i>
+              </button>
+
+              <button class="item-card-delete" data-type="${type}" data-id="${a.id}" title="Delete">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+
+              <button class="item-card-view-results" title="View Results" 
+                onclick="window.location.href = '${type.toLowerCase().replace(/\s+/g, '') === 'quiz'
+                  ? `/faculty/quiz_results/${a.id}`
+                  : `/faculty/assessment_submissions/${a.id}`
+                }';">
+                <i class="fa-solid fa-chart-column"></i>
+              </button>
+            </div>
+
+            <div class="item-card-image">
+              <i class="fa-solid fa-cloud card-icon"></i>
+            </div>
+            <div class="item-card-title">${a.title || type + " " + (i + 1)}</div>
+          </div>
+        `
       )
       .join("");
+
     section.appendChild(grid);
     grid.querySelectorAll(".item-card-delete").forEach((deleteBtn) => {
       deleteBtn.addEventListener("click", async () => {
@@ -404,7 +349,7 @@ function renderDocumentsWithData(docsData, referredDocs) {
     console.log(byInstructor[otherInstructorId]);
     sectionTitleRow.className =
       "item-section-title-row other-instructor-section";
-    sectionTitleRow.innerHTML = `<span class="item-section-title">Documents By ${byInstructor[otherInstructorId]? byInstructor[otherInstructorId][0].uploader_name: ""}</span>`;
+    sectionTitleRow.innerHTML = `<span class="item-section-title">Documents By ${byInstructor[otherInstructorId] ? byInstructor[otherInstructorId][0].uploader_name : ""}</span>`;
     // Create item grid
     const grid = document.createElement("div");
     grid.className = "item-grid other-instructor-section";
@@ -421,23 +366,20 @@ function renderDocumentsWithData(docsData, referredDocs) {
         (doc, i) => `
       <div class="item-card">
         <div style="display:flex;align-items:center;gap:6px;padding:8px;">
-          <button class="item-card-download" title="Download" onclick="window.open('${
-            doc.file_link
+          <button class="item-card-download" title="Download" onclick="window.open('${doc.file_link
           }', '_blank')"><i class="fa-solid fa-download"></i></button>
         </div>
         <div class="item-card-image">
           <i class="fa-solid fa-file card-icon"></i>
         </div>
-        <div class="item-card-title">${doc.name}<br>${
-          doc.uploader_name ||
+        <div class="item-card-title">${doc.name}<br>${doc.uploader_name ||
           instructors[otherInstructorId] ||
           instructors[parseInt(otherInstructorId)] ||
           instructors[String(parseInt(otherInstructorId))] ||
           otherInstructorId
-        }</div>
-        <button class="refer-btn" onclick="referDocumentHandler(${
-          doc.id
-        })">Refer to Students</button>
+          }</div>
+        <button class="refer-btn" onclick="referDocumentHandler(${doc.id
+          })">Refer to Students</button>
       </div>
     `
       )
@@ -699,6 +641,7 @@ async function createAssessment(type) {
     });
     if (!response.ok) throw new Error("Failed to create assessment");
     alert("Assessment created successfully.");
+    renderAssessments();
     return true;
   } catch (err) {
     alert("Failed to create assessment.");
@@ -718,6 +661,7 @@ async function renderAssessments() {
 
   // Get assessments grouped by type
   const assessmentsByType = await fetchAssessments();
+  console.log(assessmentsByType);
 
   assessmentTypes.forEach((type) => {
     // Section title and add button
@@ -741,19 +685,25 @@ async function renderAssessments() {
         (a, i) => `
       <div class="item-card">
         <div style="display: flex; align-items: center; gap: 6px; padding: 8px;">
-          <button class="item-card-edit" data-type="${type}" data-id="${
-          a.id
-        }" title="Edit" onclick="window.location.href='/faculty/${type
-          .toLowerCase()
-          .replace(/\s+/g, "")}_creation/${a.id}/';">
+          <button class="item-card-edit" data-type="${type}" data-id="${a.id}" title="Edit" 
+            onclick="window.location.href = '/faculty/${type.toLowerCase().replace(/\s+/g, '')}_creation/${a.id}/';">
             <i class="fa-solid fa-pen"></i>
           </button>
-          <button class="item-card-delete" data-type="${type}" data-id="${
-          a.id
-        }" title="Delete"><i class="fa-solid fa-trash"></i></button>
+
+          <button class="item-card-delete" data-type="${type}" data-id="${a.id}" title="Delete">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+
+          <button class="item-card-view-results" title="View Results" 
+            onclick="window.location.href = (type.toLowerCase().replace(/\s+/g, '') == 'quiz') 
+              ? '/faculty/quiz_results/${a.id}' 
+              : '/faculty/assessment_submissions/${a.id}';">
+            <i class="fa-solid fa-chart-column"></i>
+          </button>
         </div>
+
         <div class="item-card-image">
-          <i class="fa-solid fa-cloud"></i>
+          <i class="fa-solid fa-cloud card-icon"></i>
         </div>
         <div class="item-card-title">${a.title || type + " " + (i + 1)}</div>
       </div>
@@ -830,6 +780,7 @@ async function addDocument(formData) {
     });
     if (!response.ok) throw new Error("Failed to add document");
     alert("Document added successfully.");
+    renderDocuments();
     return true;
   } catch (err) {
     alert("Failed to add document.");
@@ -1033,9 +984,9 @@ window.deleteDocument = async function (documentId) {
     .then((r) =>
       r.ok
         ? r.text().then(() => {
-            alert("Document Deleted successfully");
-            renderDocuments();
-          })
+          alert("Document Deleted successfully");
+          renderDocuments();
+        })
         : console.log("Error:", r.error)
     )
     .catch((e) => console.log("Error:", e));
@@ -1047,9 +998,9 @@ window.deleteReferredDocument = async function (documentId) {
     .then((r) =>
       r.ok
         ? r.text().then(() => {
-            alert("Document Unreffered successfully");
-            renderDocuments();
-          })
+          alert("Document Unreffered successfully");
+          renderDocuments();
+        })
         : console.log("Error:", r.error)
     )
     .catch((e) => console.log("Error:", e));

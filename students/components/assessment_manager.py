@@ -1,19 +1,51 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
-from authorization.models import Assessment, AssessmentResult, Student
+from authorization.models import Assessment, AssessmentResult, Student, AssessmentType, User
 import json
 import os
 from datetime import datetime
+from django.utils.timezone import now
 
 def show_assessment_submission(request, assessment_id):
-    assessment = Assessment.objects.get(id=assessment_id)
+    type = request.GET.get('type')
+    if type in (
+        AssessmentType.CLASS_PARTICIPATION, 
+        AssessmentType.FINAL_ONPAPER, 
+        AssessmentType.MIDTERM, 
+        AssessmentType.TUTORIAL
+    ):
+        return render(request, 'htmls/access_denied.html', {'message': 'You cannot view or submit this assessment'})
 
+    assessment = Assessment.objects.get(id=assessment_id)
+    # Assigned date check
+    if not assessment.assigned_date or assessment.assigned_date > now():
+        return render(request, 'htmls/access_denied.html', {
+            'message': 'You cannot view or submit this assessment. The assessment time has not started yet.'
+        })
+    
+    email = request.COOKIES.get('my_user')
+    student = User.objects.filter(
+        email=email
+    ).first()
+    if student.pk not in assessment.assessment.get('students'):
+        return render(request, 'htmls/access_denied.html', {'message': 'You cannot view or submit this assessment. This assessment is not assigned for you.'})
+    
+    if AssessmentResult.objects.filter(student__user=student,assessment=assessment).exists():
+        return redirect(f'/students/academics/submitted_assessment/{assessment.id}')
+    
+        # Due date check
+    if assessment.due_date < now():
+        return render(request, 'htmls/access_denied.html', {
+            'message': f'You cannot view or submit this assessment. The assignment was due by {assessment.due_date.strftime("%d.%m.%Y (%H:%M)")}'
+        })
+    
+    if type==AssessmentType.QUIZ:
+        return redirect(f'/students/academics/quiz/{assessment.id}')
     data = {
         'assessment': assessment,
     }
-
     return render(request, 'students/academic/assessment.html', context=data)
 
 # @login_required

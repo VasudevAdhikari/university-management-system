@@ -5,8 +5,8 @@ from public.components import notification_manager
 urlpatterns = [
     path('', views.show_public_page, name='home'),
 
-    path('notifications/<int:user_id>', notification_manager.show_notifications, name='show_notifications'),
-
+    path('notifications/<int:user_id>/', notification_manager.show_notifications, name='show_notifications'),
+    path('notifications/', notification_manager.show_notifications, name='show_notifications'),
     path('terms/', views.show_terms, name='terms'),
     path('degrees/', views.show_degrees, name='degrees'),
     path('courses/', views.show_courses, name='courses'),

@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.contrib.auth import login, authenticate
-from .models import User, Student, EmergencyContact, OTP, LoginAttempt
+from .models import User, Student, EmergencyContact, OTP, LoginAttempt, Admin
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST, require_http_methods
 from django.views.decorators.csrf import csrf_exempt
@@ -16,6 +16,8 @@ from django.db.models import Count
 from django.db.models.functions import TruncDay
 from django.contrib.auth.hashers import check_password
 from .models import StudentStatus, Student, Instructor, EmploymentStatus
+from django.core.exceptions import PermissionDenied
+from django.core.cache import cache
 
 # Create your views here.
 
@@ -422,8 +424,22 @@ def login(request):
             user_agent=request.META.get('HTTP_USER_AGENT', ''),
             success=True
         )
+
+        role = ""
+        if Student.objects.filter(user=user).exists():
+            role="student"
+        elif Instructor.objects.filter(user=user).exists():
+            role="instructor"
+        elif Admin.objects.filter(user=user).exists():
+            role="admin"
+        else:
+            raise PermissionDenied('You are not allowed to access this page')
         
-        response = JsonResponse({'success': True, 'is_instructor': user.is_staff})
+        role_cache = cache.get(f"user_role:{user.email}")
+        if not role_cache:
+            cache.set(f"user_role:{user.email}", role, timeout=60*60*24*30*2)
+        
+        response = JsonResponse({'success': True, 'is_instructor': user.is_staff, 'role': role})
         response.set_cookie('my_user', user, max_age=60*24*60*60)
         return response
             

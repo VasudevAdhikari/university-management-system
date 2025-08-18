@@ -48,7 +48,9 @@
         }
 
         .enroll-btn:hover {
-            background-color: var(--primary-light);
+            background-color: var(--primary);
+            color: var(--text-light);
+            transform: translateY(-1px);  
         }
 
         .course-card {
@@ -76,42 +78,54 @@
         .Elective { background-color: var(--warning); }
         .Extracurricular { background-color: var(--success); }
 
+        .accordion-button {
+            border: 1px solid var(--primary);
+            border-radius: 6px;
+
+        }
+
         .accordion-button:not(.collapsed) {
             background-color: var(--primary-light);
             color: white;
         }
-
+        /* .accordion-header {
+            border-top: 7px solid var(--secondary);
+        } */
+        
     </style>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'faculty/css/navbar.css' %}">
 </head>
 <body>
+    {% include "students/academic/navbar.html" %}
     <script>
         console.log('{{pending_enrollments|escapejs}}');
     </script>
 
-    <div class="container">
+    <div class="container"  style="margin-top: 80px !important;">
 
-        <button class="btn enroll-btn mb-4" onclick="window.location.href='YOUR_LINK_HERE'">
+        <button class="btn enroll-btn mb-4" onclick="window.location.href='/students/personal/enrollment/'">
             <i class="fas fa-plus-circle me-2"></i>Enroll for a New Term
         </button>
 
         <!-- Enrolled Terms Section -->
         <h2><i class="fas fa-graduation-cap me-2"></i>Enrolled Terms</h2>
-        <div class="accordion" id="enrolledTermsAccordion">
+        <div class="accordion " id="enrolledTermsAccordion">
             <!-- Term 1 -->
              {% for term in approved_enrollments %}
             <div class="accordion-item mb-2">
                 <h2 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#term1">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#term{{forloop.counter}}">
                         {{term.name}}
                     </button>
                 </h2>
-                <div id="term1" class="accordion-collapse collapse" data-bs-parent="#enrolledTermsAccordion">
+                <div id="term{{forloop.counter}}" class="accordion-collapse collapse" data-bs-parent="#enrolledTermsAccordion">
                     <div class="accordion-body">
                         <p><strong>Enrollment Date:</strong> {{term.enrolled_date}}</p>
                         <div class="row g-3 mt-2">
                             {% for details in term.details %}
                             <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-                                <div class="course-card" onclick="window.location.href='/students/academics/batch_instructor/{{details.batch_instructor.id}}';">
+                                <div class="course-card shadow-sm p-4 " onclick="window.location.href='/students/academics/batch_instructor/{{details.batch_instructor.id}}';">
                                     <i class="fas fa-graduation-cap me-2 text-primary"></i>
                                     <strong>{{details.batch_instructor.course.course_code}} - {{details.batch_instructor.course.course_name}}</strong><br>
                                     Instructor: {{details.batch_instructor.instructor.user.full_name|default:"Not decided yet"}}<br>
@@ -144,7 +158,9 @@
                 <div id="pending{{enrollment.id}}" class="accordion-collapse collapse" data-bs-parent="#pendingEnrollmentsAccordion">
                     <div class="accordion-body">
                         <p><strong>Enrollment Date:</strong> {{enrollment.enrollment_date}}</p>
-                        <p><strong>Student Information Form:</strong> Completed</p>
+                        <p><strong>Student Information Form:</strong> Completed &nbsp;&nbsp;&nbsp; 
+                        <button class="btn btn-primary" onclick="window.location.href='/students/personal/sis_form/'">Check Again</button>
+                        </p>
                         <h5>Selected Subjects</h5>
                         <div class="row g-3 mt-2">
                             {% for course in enrollment.courses%}

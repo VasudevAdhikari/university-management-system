@@ -4,6 +4,7 @@ from authorization.models import UniversityDetails, Faculty, Department, Instruc
 from executives.components.degree_manager import get_degree_page_data
 from executives.components.course_manager import get_course_page_data
 from executives.additional_business_logics.data_formatter import get_lab_details_data
+from executives.components.instructor_data_manager import get_instructor_data
 # Create your views here.
 
 class HomeView(TemplateView):
@@ -83,3 +84,4 @@ def show_lab_details(request, lab_name):
 
 def say_access_denied(request):
     return render(request, 'htmls/access_denied.html')
+

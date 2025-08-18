@@ -149,6 +149,14 @@ def show_course_page(request, batch_instructor_id):
         "course__description",
     ).first() 
 
+    instructor = BatchInstructor.objects.filter(
+        pk=int(batch_instructor_id)
+    ).select_related(
+        'instructor', 
+        'instructor__user', 
+        'instructor__department'
+    ).first()
+
     marking_types = [label for _, label in AssessmentType.choices]
     other_instructor_ids = list(
         Document.objects
@@ -157,9 +165,20 @@ def show_course_page(request, batch_instructor_id):
         .distinct()
     )
 
+    enrollment_course = EnrollmentCourse.objects.filter(
+        batch_instructor_id=batch_instructor_id,
+        enrollment__sis_form__student__user__email=request.COOKIES.get('my_user'),
+    ).first()
+    print(enrollment_course)
+    has_review = bool(enrollment_course and enrollment_course.review)
+    has_rating = bool(enrollment_course and enrollment_course.rating)
+            
     data = {
         'batch_instructor': batch_instructor,
         'assessment_types': marking_types,
+        'instructor': instructor,
+        'has_review': has_review,
+        'has_rating': has_rating,
     }
     print(data)
     return render(request, 'students/academic/course_management.html', context=data)

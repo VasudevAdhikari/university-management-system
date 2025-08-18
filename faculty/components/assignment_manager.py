@@ -33,6 +33,9 @@ def show_assignment_creation(request, assessment_id):
 
         # to fix later => Students related to the related batch
         students = Student.objects.all().select_related('user')
+        students = Student.objects.filter(
+            sisform__enrollment__enrollmentcourse__batch_instructor = batch_instructor
+        ).select_related('user')
         student_data = []
         for student in students:
             avatar = "".join(word[0] for word in student.user.full_name.split()).upper()[:2]

@@ -53,7 +53,7 @@ function createStudentCard(student) {
             <div class="student-name">${student.name}</div>
             <div class="student-details">
                 ${student.email}<br>
-                Semester: ${student.semester}
+                Roll No.: ${student.roll_no}
             </div>
         </div>
     `;
@@ -687,6 +687,7 @@ function handleFormSubmission(event) {
         title: quizTitle,
         students: selectedStudents,
         time_limit: timeLimit,
+        total_mark: parseInt(document.getElementById('totalMarks').value),
         questions_per_student: questionsPerStudent,
         questions: quizQuestions
     };
@@ -967,6 +968,7 @@ function handleFormSubmission(event) {
 
     // Build quiz JSON
     const quizTitle = document.getElementById('quizTitle') ? document.getElementById('quizTitle').value : '';
+    const totalMark = document.getElementById('totalMarks').value;
     const timeLimit = parseInt(document.getElementById('quizDuration').value) || 30;
     const questionsPerStudent = parseInt(document.getElementById('questionsPerStudent').value) || questions.length;
 
@@ -1026,6 +1028,7 @@ function handleFormSubmission(event) {
 
     const quiz = {
         title: quizTitle,
+        total_mark: parseInt(totalMark),
         students: selectedStudents,
         time_limit: timeLimit,
         questions_per_student: questionsPerStudent,

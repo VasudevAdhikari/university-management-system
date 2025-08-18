@@ -446,11 +446,11 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initially disable all inputs except email
     toggleInputs(false);
-    if (sessionStorage.getItem('role') == 'student') {
+    if (localStorage.getItem('role') == 'student') {
         document.getElementById('instructor-role').style.display = 'none';
         document.getElementById('degree-input').innerHTML = '';
         document.getElementById('specialization-input').innerHTML = '';
-    } else if (sessionStorage.getItem('role') == 'instructor') {
+    } else if (localStorage.getItem('role') == 'instructor') {
         document.getElementById('student-role').style.display = 'none';
         document.getElementById('role').value = 'instructor';
     }

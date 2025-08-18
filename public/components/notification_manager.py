@@ -1,11 +1,16 @@
 from django.shortcuts import render
 from authorization.models import User, Notification
+from django.db.models import Q
 import json
 
-def show_notifications(request, user_id):
-    user = User.objects.filter(pk=user_id).first()
+def show_notifications(request, user_id=None):
+    user=None
+    if user_id:
+        user = User.objects.filter(pk=user_id).first()
+    else:
+        user = User.objects.filter(email=request.COOKIES.get('my_user')).first()
     notifications = Notification.objects.filter(
-        user=user,
+        Q(user=user) & ~Q(type='M')
     )
     notification_data = []
     for notification in notifications:

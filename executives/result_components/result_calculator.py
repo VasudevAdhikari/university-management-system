@@ -28,7 +28,7 @@ def get_result_for_a_course(enrollment_course: EnrollmentCourse):
         assessment = assessment_result.assessment
         assessment_type = assessment.get_assessment_type_display()
         if assessment_type in scheme:
-            types[assessment_type]["given_total"] += assessment.assessment.get('given', 1)
+            types[assessment_type]["given_total"] += assessment.assessment.get('total_mark', 1)
             types[assessment_type]["got_marks"] += assessment_result.mark
 
     total = 0

@@ -11,9 +11,11 @@
   <link rel="stylesheet" href="{% static 'faculty/css/instructor_course_management.css' %}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'faculty/css/navbar.css' %}">
 </head>
 
 <body>
+  {% include "faculty/navbar.html" %}
   <script>
     // console.log('{{batch_instructor|escapejs}}'.replaceAll("'", '"'));
     window.csrf_token = '{{csrf_token}}';
@@ -24,65 +26,6 @@
     window.instructor = '{{instructor.user.id}}';
     window.other_instructors = [];
   </script>
-  <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
-    <div class="container-fluid">
-      <img src="https://www.ucsy.edu.mm/img/ucsylogo-icpc2017.png" class="uni-logo ms-4" alt="University Logo">
-
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-
-        <ul class="navbar-nav ms-auto align-items-center custom-nav-spacing">
-
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              University Info
-            </a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="#university-info"><i class="fas fa-info-circle me-2"></i>
-                  Overview</a></li>
-              <li><a class="dropdown-item" href="#executives"><i class="fas fa-user-tie me-2"></i>
-                  Executives</a></li>
-            </ul>
-          </li>
-
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              Academics
-            </a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="#faculties">Faculties</a></li>
-              <li><a class="dropdown-item" href="#departments">Departments</a></li>
-              <li><a class="dropdown-item" href="#degrees">Degrees</a></li>
-              <li><a class="dropdown-item" href="#instructors">Instructors</a></li>
-            </ul>
-          </li>
-
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              Resources
-            </a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="#partnerships"><i class="fas fa-handshake me-2"></i>
-                  Partnerships</a></li>
-              <li><a class="dropdown-item" href="#certificates"><i class="fas fa-certificate me-2"></i>
-                  Certificates</a></li>
-              <li><a class="dropdown-item" href="#labs"><i class="fas fa-flask me-2"></i> Labs</a></li>
-            </ul>
-          </li>
-
-          <li class="nav-item logout">
-            <a class="nav-link logout-icon" href="logout.html" title="Logout">
-              <i class="fas fa-sign-out-alt"></i>
-            </a>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </nav>
 
   <!-- Main Content -->
   <div class="main-content-demo">
@@ -97,6 +40,7 @@
           <span id="courseDescriptionText">{{batch_instructor.course__description}}</span>
         </div>
       </div>
+      <div><button class="btn btn-primary" onclick="window.location.href='/faculty/all_results/{{batch_instructor.id}}'">View All Results</button></div>
       <div id="markingSchemeSection"></div>
       <!-- Place your activities section here: -->
       <div id="activitySection">
@@ -177,6 +121,7 @@
     </div>
 </body>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="{% static 'faculty/js/instructor_course_management.js' %}"></script>
 
 </html>

@@ -190,6 +190,7 @@ document.addEventListener('DOMContentLoaded', function() {
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
             e.stopPropagation();
+            if (!confirm('Are you sure to submit this quiz')) return;
             // Gather quiz answer data
             const quiz = window.QUIZ_DATA;
             const attemptTime = quizAttemptStart.toISOString();

@@ -58,6 +58,10 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    # my custom middlewares to cache user roles and add them to the context everytime rendering a template
+    'authorization.middleware.UserRoleMiddleware',
+    # 'executives.middleware.ExecutiveAccessMiddleware',
 ]
 
 
