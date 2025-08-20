@@ -163,7 +163,7 @@ def list_batches(request):
                         "semester_id": semester.pk,
                         "semester_name": semester.semester_name,
                         "courses": courses,
-                        "batch_instructor_id": batch_instructor.pk,
+                        "batch_instructor_id": batch.pk,
                     })
                 # print(courses)
 

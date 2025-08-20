@@ -11,4 +11,5 @@ urlpatterns = [
     path('enrollment/get_batches/', enrollment_manager.get_batches_for_term, name='get_batches_for_term'),
     path('enrollment/get_courses/', enrollment_manager.get_courses_for_batch, name='get_courses_for_batch'),
     path('enrollment/submit/', enrollment_manager.save_enrollment, name='submit_enrollment'),
+    path('profile/', sis_manager.show_profile, name='show_profile'),
 ]

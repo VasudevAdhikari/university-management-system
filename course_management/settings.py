@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'executives',
     'students',
     'faculty',
+    'noticeboard',
 ]
 
 MIDDLEWARE = [
@@ -61,7 +62,7 @@ MIDDLEWARE = [
 
     # my custom middlewares to cache user roles and add them to the context everytime rendering a template
     'authorization.middleware.UserRoleMiddleware',
-    # 'executives.middleware.ExecutiveAccessMiddleware',
+    'authorization.middleware.ImgFallbackMiddleware'
 ]
 
 

@@ -1,7 +1,8 @@
-from django.shortcuts import render
-from authorization.models import Instructor, BatchInstructor, EnrollmentCourse
+from django.shortcuts import render, redirect
+from authorization.models import Instructor, BatchInstructor, EnrollmentCourse, EmploymentStatus
 from collections import defaultdict
 from django.shortcuts import get_object_or_404
+from django.contrib import messages
 
 def get_instructor_data(instructor_id=None, request=None):
     if instructor_id:
@@ -77,3 +78,39 @@ def show_instructor_data(request, instructor_id):
     }
 
     return render(request, 'executives/instructor_data.html', context=data)
+
+def transfer_instructor(request, instructor_id):
+    return change_instructor_status(request, instructor_id, EmploymentStatus.TRANSFERRED)
+
+
+def retire_instructor(request, instructor_id):
+    return change_instructor_status(request, instructor_id, EmploymentStatus.RETIRED)
+
+
+def leave_instructor(request, instructor_id):
+    return change_instructor_status(request, instructor_id, EmploymentStatus.ON_LEAVE)
+
+
+def change_instructor_status(request, instructor_id, status):
+    try:
+        instructor = Instructor.objects.filter(
+            user__id=instructor_id
+        ).first()
+
+        if not instructor:
+            messages.error(request, "Instructor not found.")
+            return redirect(f"/executives/instructor_data/{instructor_id}/")
+
+        instructor.employment_status = status
+        instructor.save()
+
+        # dynamic message
+        messages.success(
+            request,
+            f"Selected instructor's status has been successfully changed to **{status.label if hasattr(status, 'label') else status}**."
+        )
+    except Exception as e:
+        messages.error(request, "An error occurred while changing the instructor's status.")
+        print("Error:", e)
+
+    return redirect(f"/executives/instructor_data/{instructor_id}/")

@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
-from authorization.models import Assessment, AssessmentResult, Student, AssessmentType, User
+from authorization.models import Assessment, AssessmentResult, Student, AssessmentType, User, BatchInstructor
 import json
 import os
 from datetime import datetime
@@ -170,3 +170,29 @@ def show_submitted_assessment(request, assessment_id):
         return render(request, 'students/academic/submitted_assessment.html', {'result': None, 'error': 'Assessment result not found.'})
     except Exception as e:
         return render(request, 'students/academic/submitted_assessment.html', {'result': None, 'error': str(e)})
+    
+
+def show_all_assessment_results(request, batch_instructor_id):
+    batch_instructor = BatchInstructor.objects.filter(
+        pk=int(batch_instructor_id),
+    ).select_related(
+        'instructor_user',
+        'course',
+        'instructor_department',
+        'batch_term',
+        'batch_semester',
+        'batch_semester_degree'
+    ).first()
+
+    assessment_results = AssessmentResult.objects.filter(
+        assessment__assessment_scheme__batch_instructor_id=batch_instructor_id,
+        student__user__email=request.COOKIES.get('my_user'),
+    ).select_related(
+        'assessment'
+    )
+
+    data = {
+        'batch_instructor': batch_instructor,
+        'assessment_results': assessment_results
+    }
+    return render(request, 'students/academic/all_results.html', context=data)

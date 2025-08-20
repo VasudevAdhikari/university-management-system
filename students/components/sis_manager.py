@@ -158,3 +158,23 @@ def update_sis_form(request):
         return redirect('/students/mailbox/')
     else:
         return JsonResponse({'success': False, 'error': 'Only Post Requests are allowed'})
+    
+
+def show_profile(request):
+    email = request.COOKIES.get('my_user')
+    sis_form=None
+    try:
+        sis_form = SISForm.objects.filter(
+            student__user__email=email,
+        ).select_related(
+            'student',
+            'student__user', 
+            'student__user__emergency_contact'
+        ).first()
+        student = sis_form.student
+    except Exception as e:
+        student = Student.objects.filter(
+            user__email=email,
+        ).first()
+        sis_form = SISForm(student=student)
+    return render(request, 'students/personal/profile.html', {'sis_form': sis_form})

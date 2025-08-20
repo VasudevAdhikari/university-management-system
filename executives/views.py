@@ -547,11 +547,11 @@ def show_all_executives(request):
     return render(request, 'executives/all_executives.html', context=data)
 
 def show_all_instructors(request):
-    instructors = Instructor.objects.all().select_related('user', 'department', 'user__emergency_contact')
+    instructors = Instructor.objects.exclude(employment_status=EmploymentStatus.UNAPPROVED).select_related('user', 'department', 'user__emergency_contact')
     all_instructors = []
     for instructor in instructors:
         instructor_data = get_instructor_for_approval(instructor)
-        instructor_data['department'] = instructor.department.name
+        instructor_data['department'] = instructor.department.name if instructor.department else "Unknown"
         instructor_data['role'] = instructor.position_in_university
         all_instructors.append(instructor_data)
 

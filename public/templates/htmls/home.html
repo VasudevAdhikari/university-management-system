@@ -14,7 +14,15 @@
 <body data-bs-spy="scroll" data-bs-target=".navbar" data-bs-offset="180" tabindex="0">
 
     <!-- Navbar -->
-    {% include "htmls/navbar.html" %}
+{% if request.user_role == 'instructor' %}
+    {% include "faculty/navbar.html" %}
+{% elif request.user_role == 'student' %}
+    {% include "students/academic/navbar.html" %}
+{% elif request.user_role == 'executive' %}
+    {% include "executives/navbar.html" %}
+{% else %}
+    {% include "public/navbar.html" %}
+{% endif %}
 
     <!-- Main Content -->
     <main class="container-fluid py-5" style="margin-top: 56px;">
@@ -53,7 +61,7 @@
                     
                     {% for id, photo in photos.items %}
                     <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                        <img src="/media/{{photo.image}}" class="d-block w-100" alt="{{photo.caption}}">
+                        <img src="/media/{{photo.image}}" class="d-block w-100" alt="{{photo.caption}}" loading="lazy">
                         <div class="carousel-caption d-none d-md-block">
                             <h4>{{photo.caption}}</h4>
                         </div>
@@ -79,7 +87,7 @@
                 {% for faculty in faculties %}
                 <div class="col">
                     <div class="card h-100">
-                        <img src="/media/{{faculty.faculty_photo}}" class="card-img-top" alt="{{faculty.name}}">
+                        <img src="/media/{{faculty.faculty_photo}}" class="card-img-top" alt="{{faculty.name}}" loading="lazy">
                         <div class="card-body">
                             <h5 class="card-title">{{faculty.name}}</h5>
                             <p class="card-text"><i class="fas fa-user-tie me-2"></i><strong>Head:</strong> {{faculty.head_of_faculty.full_name}}</p>
@@ -122,7 +130,7 @@
                                         <img src="/media/{{ department.department_photo }}"
                                             alt="{{ department.name }} Dept Logo"
                                             class="img-fluid rounded-circle mb-3"
-                                            style="width: 70px; height: 70px; object-fit: cover;">
+                                            style="width: 70px; height: 70px; object-fit: cover;" loading="lazy">
                                         <h5 class="card-title department-title">{{ department.name }}</h5>
                                         <p class="card-text"><small><i class="fas fa-user-tie me-1"></i><strong>Head:</strong> {{ department.head_of_department.full_name }}</small></p>
                                         <p class="card-text"><small><i class="fas fa-phone-alt me-1"></i><strong>Phone:</strong> {{ department.contact_phone }}</small></p>
@@ -180,7 +188,7 @@
                                 <div class="card-body">
                                   <img src="{{ instructor.user.profile_picture.url }}"
                                        alt="Instructor Profile"
-                                       class="profile-img mb-3">
+                                       class="profile-img mb-3" loading="lazy">
                                   <h6 class="card-title">{{ instructor.user.full_name }}</h6>
                                   <div class="text-group">
                                     <p class="card-text mb-1 info-line">
@@ -219,7 +227,7 @@
                     <div class="executive-card">
                         <div class="d-flex align-items-center mb-3">
                             <div class="me-3" >
-                                <img class="executive-img" src="{{executive.user.profile_picture.url}}" alt="image">
+                                <img class="executive-img" src="{{executive.user.profile_picture.url}}" alt="image" loading="lazy">
                             </div>
                             <div>
                                 <div class="executive-name">{{executive.user.full_name}}</div>
@@ -247,7 +255,7 @@
                  {% for partnership, details in partnerships.items %}
                 <div class="col">
                     <div class="card h-100">
-                        <img src="/media/{{details.image}}" class="card-img-top" alt="TechCorp Logo">
+                        <img src="/media/{{details.image}}" class="card-img-top" alt="TechCorp Logo" loading="lazy">
                         <div class="card-body">
                             <h5 class="card-title">{{partnership}}</h5>
                             <p class="card-text">{{details.description}}</p>
@@ -286,7 +294,7 @@
                  {% for id, lab in labs.items %}
                 <div class="col">
                     <div class="card h-100 lab-card">
-                        <img src="/media/{{lab.images.0}}" class="lab-img card-img-top lab-card-img" alt="Robotics Lab Photo">
+                        <img src="/media/{{lab.images.0}}" class="lab-img card-img-top lab-card-img" alt="Robotics Lab Photo" loading="lazy">
                         <div class="card-body">
                             <h5 class="card-title">{{lab.lab_name}}</h5>
                             <p class="card-text">{{lab.description|truncatechars:100}}</p>

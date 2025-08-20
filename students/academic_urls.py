@@ -22,4 +22,6 @@ urlpatterns = [
 
     path('enrollment_course_review/<int:batch_instructor_id>/', rating_review_manager.review_enrollment_course, name='review_enrollment_course'),
     path('enrollment_course_rating/<int:batch_instructor_id>/', rating_review_manager.rate_enrollment_course, name='rate_enrollment_course'),
+
+    path('all_results/', assessment_manager.show_all_assessment_results, name='show_all_assessment_results')
 ]

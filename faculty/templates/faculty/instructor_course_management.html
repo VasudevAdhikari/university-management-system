@@ -15,7 +15,15 @@
 </head>
 
 <body>
-  {% include "faculty/navbar.html" %}
+{% if request.user_role == 'instructor' %}
+    {% include "faculty/navbar.html" %}
+{% elif request.user_role == 'student' %}
+    {% include "students/academic/navbar.html" %}
+{% elif request.user_role == 'executive' %}
+    {% include "executives/navbar.html" %}
+{% else %}
+    {% include "public/navbar.html" %}
+{% endif %}
   <script>
     // console.log('{{batch_instructor|escapejs}}'.replaceAll("'", '"'));
     window.csrf_token = '{{csrf_token}}';

@@ -431,7 +431,7 @@ def login(request):
         elif Instructor.objects.filter(user=user).exists():
             role="instructor"
         elif Admin.objects.filter(user=user).exists():
-            role="admin"
+            role="executive"
         else:
             raise PermissionDenied('You are not allowed to access this page')
         

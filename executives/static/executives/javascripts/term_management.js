@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Load terms from backend
   function loadTerms() {
     const loadingSpinner = document.getElementById('loadingSpinner');
-    
+
     fetch('/executives/terms/')
       .then(res => {
         if (!res.ok) throw new Error('Network response was not ok');
@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (loadingSpinner) {
           loadingSpinner.classList.add('hidden');
         }
-        
+
         termButtonsContainer.innerHTML = '';
         data.terms.forEach(term => createTermButton(term));
       })
@@ -119,7 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
     sendResultBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       if (!confirm('Are you sure to send results of this term to all students?')) return;
-      
+      window.location.href = `/executives/send_results/${term.id}`
     });
 
     buttonWrapper.appendChild(button);
@@ -241,7 +241,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     `;
     document.body.appendChild(notification);
-    
+
     // Auto remove after 5 seconds
     setTimeout(() => {
       if (notification.parentNode) {
@@ -305,7 +305,7 @@ document.addEventListener('DOMContentLoaded', () => {
          `;
         const popupBox = popup.querySelector('div.modal-card');
         animateIn(popupBox);
-        
+
         popup.querySelector('#popupEditBtn').addEventListener('click', () => {
           const inputs = popup.querySelectorAll('input');
           inputs.forEach(input => {

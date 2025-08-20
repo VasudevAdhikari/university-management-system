@@ -77,6 +77,34 @@
             </div>
         </div>
 
+        <div class="actions-bar">
+            <div class="btn-group gap-2 flex-wrap">
+                <!-- Transfer -->
+                <form method="post" action="/executives/instructor/{{instructor.user.id}}/transfer/" onsubmit="return confirm('Transfer this instructor?');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-transfer">
+                    <i class="fa-solid fa-people-arrows-left-right me-1"></i> Transfer
+                </button>
+                </form>
+
+                <!-- Retire -->
+                <form method="post" action="/executives/instructor/{{instructor.user.id}}/retire/" onsubmit="return confirm('Mark this instructor as retired?');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-retire">
+                    <i class="fa-solid fa-person-cane me-1"></i> Retire
+                </button>
+                </form>
+
+                <!-- Put on Leave -->
+                <form method="post" action="/executives/instructor/{{instructor.user.id}}/leave/" onsubmit="return confirm('Put this instructor on leave?');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-leave">
+                    <i class="fa-solid fa-plane-departure me-1"></i> Put on Leave
+                </button>
+                </form>
+            </div>
+        </div>
+
         <!-- Courses by Term -->
         <h2 class="mb-3"><i class="fas fa-book"></i> Courses Taught</h2>
         {% if terms %}

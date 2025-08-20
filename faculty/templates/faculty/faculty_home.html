@@ -22,7 +22,15 @@
 </head>
 
 <body>
-  {% include "faculty/navbar.html" %}
+{% if request.user_role == 'instructor' %}
+    {% include "faculty/navbar.html" %}
+{% elif request.user_role == 'student' %}
+    {% include "students/academic/navbar.html" %}
+{% elif request.user_role == 'executive' %}
+    {% include "executives/navbar.html" %}
+{% else %}
+    {% include "public/navbar.html" %}
+{% endif %}
 
   <section class="container" id="main-content">
     <div class="home-title">Assigned Courses</div>

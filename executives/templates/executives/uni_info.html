@@ -130,80 +130,18 @@
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
-        <div class="container-fluid">
-            <img src="https://www.ucsy.edu.mm/img/ucsylogo-icpc2017.png" class="uni-logo ms-4" alt="University Logo">
-
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-
-                <ul class="navbar-nav ms-auto align-items-center custom-nav-spacing">
-
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                            aria-expanded="false">
-                            University Info
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#university-info"><i class="fas fa-info-circle me-2"></i>
-                                    Overview</a></li>
-                            <li><a class="dropdown-item" href="#executives"><i class="fas fa-user-tie me-2"></i>
-                                    Executives</a></li>
-                        </ul>
-                    </li>
-
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                            aria-expanded="false">
-                            Academics
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#faculties">Faculties</a></li>
-                            <li><a class="dropdown-item" href="#departments">Departments</a></li>
-                            <li><a class="dropdown-item" href="#degrees">Degrees</a></li>
-                            <li><a class="dropdown-item" href="#instructors">Instructors</a></li>
-                        </ul>
-                    </li>
-
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                            aria-expanded="false">
-                            Resources
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#partnerships"><i class="fas fa-handshake me-2"></i>
-                                    Partnerships</a></li>
-                            <li><a class="dropdown-item" href="#certificates"><i class="fas fa-certificate me-2"></i>
-                                    Certificates</a></li>
-                            <li><a class="dropdown-item" href="#labs"><i class="fas fa-flask me-2"></i> Labs</a></li>
-                        </ul>
-                    </li>
-
-                    <li class="nav-item logout">
-                        <a class="nav-link logout-icon" href="logout.html" title="Logout">
-                            <i class="fas fa-sign-out-alt"></i>
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-
+    {% include "executives/navbar.html" %}
     <!-- University Information Details Section-->
     <section class="container">
         <div class="info-card ">
             <div class="info-title">
-                <h3 class="university-information">Uni Information</h3>
+                <h3 class="university-information">University Information</h3>
                 <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal"
                     data-bs-target="#editModal"><i class="fa-solid fa-pen "></i>Edit</button>
             </div>
 
             <div class="d-flex mb-3">
-                <img class="logoPreview uni-logo1 pb-1 rounded" id="logoPreview"
+                <img class="logoPreview uni-logo1 pb-1 rounded img-fluid" id="logoPreview"
                     src="/media/{{ university_info.profile }}" alt="" loading="lazy">
             </div>
 
@@ -249,8 +187,8 @@
                     action="{% url 'executives:uni_info_edit' %}">
                     {% csrf_token %}
                     <div class="modal-header ">
-                        <h5 class="modal-title">Edit University Information</h5>
-                        <button type="button" class="btn-close" style="background-color: #198754 ;"
+                        <h5 class="modal-title text-center">Edit University Information</h5>
+                        <button type="button" class="btn-close" style="background-color: #003366 ;"
                             data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body row">
@@ -308,8 +246,6 @@
                                 <div class="uni-info-logo-preview-wrapper">
                                     <img src="/media/{{ university_info.profile }}" alt="Current Logo"
                                         class="uni-info-logo-preview-img">
-                                    <span class="uni-info-logo-filename">{{ university_info.profile|default_if_none:""
-                                        }}</span>
                                 </div>
                                 {% endif %}
                             </div>
@@ -347,15 +283,15 @@
             </script>
             {% for photo in photos %}
 
-            <div class="col-8 col-sm-6 col-md-4 mb-4">
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
                 <div class="card position-relative shadow-sm" id="photoCard{{photo.0}}" data-photo-id="{{photo.0}}">
                     <img src="/media/{{photo.1.image}}" class="card-img-top img-fluid" alt="Photo" loading="lazy">
                     <div class="card-body">
                         <p class="card-text uni-caption text-center" id="caption{{photo.0}}">{{photo.1.caption}}</p>
                     </div>
                     <div class="position-absolute top-0 end-0 m-2 d-flex gap-1">
-                        <button class="btn btn-sm btn-light edit-btn" style="border: 1px solid rgb(219, 193, 193);"><i
-                                class="fas fa-pen"></i></button>
+                        <!-- Button to hold -->
+                        <button class="btn btn-sm btn-light edit-btn" "><i class="fas fa-pen"></i></button>
                         <button class="btn btn-sm btn-danger delete-btn"><i class="fas fa-trash"></i></button>
                     </div>
                 </div>
@@ -458,7 +394,7 @@
         <div id="partnershipList" class="row gy-4">
 
             {% for partnership in partnerships %}
-            <div class="col-md-4">
+            <div class="col-12 col-sm-6 col-lg-4">
                 <div class="card partnership-card shadow-sm ">
                     <img src="/media/{{partnership.1.image}}" class="card-img-top" alt="Image" loading="lazy">
                     <div class="card-body">
@@ -466,8 +402,8 @@
                         <p class="card-text"><strong>Description:</strong> {{ partnership.1.description }}
                         </p>
                         <p class="card-text"><strong>Type:</strong> {{ partnership.1.type }}</p>
-                        <button class="btn btn-sm btn-warning me-2" onclick="editPartnership(this)">Edit</button>
-                        <button class="btn btn-sm btn-danger" onclick="deletePartnership(this)">Delete</button>
+                        <button class="btn btn-sm btn-warning me-2 edit-btn" onclick="editPartnership(this)">Edit</button>
+                        <button class="btn btn-sm btn-danger delete-btn" onclick="deletePartnership(this)">Delete</button>
                     </div>
                 </div>
             </div>
@@ -533,13 +469,9 @@
 
                 {% for certificate in certificates %}
                 <!-- {{certificate}} -->
-                <div class="col-md-4 mb-4 certificate-card">
-                    <div class="card h-100">
+                <div class="col-12 col-sm-6 col-lg-4 mb-4 certificate-card">
+                    <div class="card h-50">
                         <div class="card-body certificate-card">
-                            <div class="text-center mb-2">
-                                <!-- {{certificate.1.file}} -->
-                                <iframe src="/media/{{certificate.1.file}}" class="certificate-preview"></iframe>
-                            </div>
                             <h5 class="certificate-title">{{certificate.1.title}}</h5>
                             <p class="certificate-desc">{{certificate.1.description}}</p>
                             <div class="certificate-buttons">
@@ -614,7 +546,7 @@
                 <!-- Example Lab Card -->
 
                 {% for lab in labs %}
-                <div class="col-md-4 mb-4 lab-card">
+                <div class="col-12 col-sm-6 col-lg-4 mb-4 lab-card">
                     <div class="card h-100 shadow-sm position-relative">
                         <img src="/media/{{lab.1.images.0}}" class="card-img-top" alt="Lab Image" loading="lazy">
                         <div class="card-body p-1">

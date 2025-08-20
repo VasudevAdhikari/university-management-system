@@ -82,6 +82,20 @@
                 flex: 1;
             }
         }
+
+        .main-card, .review-card {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1),
+                        0 8px 16px rgba(0, 0, 0, 0.08);
+            border-radius: 12px;
+            padding: 1rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .main-card, .review-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15),
+                        0 12px 24px rgba(0, 0, 0, 0.12);
+        }
     </style>
 </head>
 
@@ -94,27 +108,27 @@
         <div class="row g-4 equal-height-row">
 
             <!-- Instructor Info -->
-            <div class="col-lg-5">
+            <div class="col-lg-5 main-card">
                 <div class="p-3 equal-height-card"
                     style="background-color: var(--bg-gray); border-radius: 10px; border-left: 5px solid var(--primary);">
                     <div class="d-flex flex-column align-items-center text-center">
-                        <img src="https://via.placeholder.com/120" alt="Instructor Photo"
+                        <img src="{{bi.instructor.user.profile_picture.url|default:'https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_hybrid&w=740&q=80'}}" alt="Instructor Photo"
                             class="rounded-circle shadow-sm mb-3"
                             style="width: 120px; height: 120px; object-fit: cover;">
                         <h4 class="mb-1" style="color: var(--primary-dark); font-weight: 600;">
-                            Advanced Software Architecture <small class="text-muted">(CSE402)</small>
+                            {{bi.course.course_name}} <small class="text-muted">({{bi.course.course_code}})</small>
                         </h4>
-                        <p class="mb-1"><strong>Instructor:</strong> Dr. Jane Smith</p>
-                        <p class="mb-1"><strong>Department:</strong> Computer Science</p>
-                        <p class="mb-1"><strong>Term:</strong> 2022–2023 June Term</p>
-                        <p class="mb-1"><strong>Degree:</strong> B.Sc. in Software Engineering</p>
-                        <p class="mb-0"><strong>Semester:</strong> Semester III</p>
+                        <p class="mb-1"><strong>Instructor:</strong> {{bi.instructor.user.full_name}}</p>
+                        <p class="mb-1"><strong>Department:</strong> {{bi.instructor.department.name}}</p>
+                        <p class="mb-1"><strong>Term:</strong> {{bi.batch.term.term_name}}</p>
+                        <p class="mb-1"><strong>Degree:</strong> {{bi.batch.semester.degree.name}}</p>
+                        <p class="mb-0"><strong>Semester:</strong> {{bi.batch.semester.semester_name}}</p>
                     </div>
                 </div>
             </div>
 
             <!-- Chart -->
-            <div class="col-lg-7">
+            <div class="col-lg-7 main-card" style="background-color: var(--bg-gray); border-radius: 10px; border-left: 5px solid var(--primary);">
                 <div class="p-3 equal-height-card" style="background-color: var(--bg-gray); border-radius: 10px;">
                     <h3 class="section-title text-center mb-4">
                         <i class="fa-solid fa-chart-pie me-2"></i> Ratings Overview
@@ -135,17 +149,7 @@
 
     <script>
         // Sample data
-        const reviewData = [
-            { rating: 5, review: "Great instructor! Very clear explanations." },
-            { rating: 4, review: "Good teaching style, but could provide more examples." },
-            { rating: 5 },
-            { rating: 3, review: "Average, some topics were rushed." },
-            { review: "Helpful and supportive!" },
-            { rating: 2 },
-            { rating: 4, review: "Enjoyed the class overall." },
-            { rating: 1, review: "Hard to follow lectures." },
-            { rating: 5, review: "Best teacher I've had!" }
-        ];
+        const reviewData = JSON.parse('{{ratings|safe|escapejs}}');
 
         // Chart data
         const starCounts = [0, 0, 0, 0, 0, 0];
@@ -165,12 +169,13 @@
                 datasets: [{
                     data: starCounts,
                     backgroundColor: [
-                        '#00264d',
-                        '#FFD700',
-                        '#1a4d80',
-                        '#c2d94c',
-                        '#2CA6A4',
-                        'red',
+                        'var(--primary-dark)',   // #00264d
+                        '#1a4d80',               // primary-light (already in your scheme)
+                        '#336699',               // medium blue
+                        '#4d80b3',               // softer blue
+                        '#80a6cc',               // pastel blue
+                        '#b3cce6',               // very light blue
+                        '#e6f0ff'  
                     ]
                 }]
             },

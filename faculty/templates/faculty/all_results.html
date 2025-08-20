@@ -120,7 +120,15 @@
   <link rel="stylesheet" href="{% static 'faculty/css/navbar.css' %}">
 </head>
 <body>
-{% include "faculty/navbar.html" %}  
+{% if request.user_role == 'instructor' %}
+    {% include "faculty/navbar.html" %}
+{% elif request.user_role == 'student' %}
+    {% include "students/academic/navbar.html" %}
+{% elif request.user_role == 'executive' %}
+    {% include "executives/navbar.html" %}
+{% else %}
+    {% include "public/navbar.html" %}
+{% endif %}
 
 <header style="margin-top: 80px;">
   <h1><i class="fa-solid fa-clipboard-list"></i> Assessment Results for {{ course_title }}</h1>

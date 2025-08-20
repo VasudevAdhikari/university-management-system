@@ -21,11 +21,11 @@ const pieBgColors = [
 new Chart(document.getElementById("enrollmentChart"), {
   type: "bar",
   data: {
-    labels: ["2020", "2021", "2022", "2023", "2024"],
+    labels: window.enrollmentPerYear.years,
     datasets: [
       {
         label: "Total Enrollment",
-        data: [120, 135, 150, 145, 160],
+        data: window.enrollmentPerYear.enrollments,
         backgroundColor: "#003366",
         borderColor: "#00264d",
         hoverBackgroundColor: "#1a4d80",
@@ -55,14 +55,14 @@ new Chart(document.getElementById("enrollmentChart"), {
 });
 
 // 2. Degree Percentage (Pie)
-const degreePieLabels = ["BSc", "MSc", "PhD"];
+const degreePieLabels = window.enrollmentPercentByDegree.degrees;
 new Chart(document.getElementById("degreePieChart"), {
   type: "pie",
   data: {
     labels: degreePieLabels,
     datasets: [
       {
-        data: [60, 30, 10],
+        data: window.enrollmentPercentByDegree.percentages,
         backgroundColor: pieBgColors.slice(0, degreePieLabels.length),
         borderColor: pieBgColors.slice(0, degreePieLabels.length),
         borderWidth: 2,
@@ -114,29 +114,21 @@ new Chart(document.getElementById("courseRateChart"), {
 new Chart(document.getElementById("genderRatioChart"), {
   type: "bar",
   data: {
-    labels: ["2020", "2021", "2022", "2023", "2024"],
+    labels: window.enrollmentGenderRatio.years,
     datasets: [
       {
         label: "Male",
-        data: [70, 75, 80, 78, 85],
+        data: window.enrollmentGenderRatio.males,
         backgroundColor: "#003366",
         borderColor: "#00264d",
         yAxisID: "y",
       },
       {
         label: "Female",
-        data: [50, 60, 70, 67, 75],
+        data: window.enrollmentGenderRatio.females,
         backgroundColor: "#FFD700",
         borderColor: "#FFD700",
         yAxisID: "y",
-      },
-      {
-        label: "Female %",
-        data: [41, 44, 47, 46, 47],
-        type: "line",
-        borderColor: "#1a4d80",
-        backgroundColor: "rgba(26, 77, 128, 0.2)",
-        yAxisID: "y1",
       },
     ],
   },
@@ -174,11 +166,11 @@ new Chart(document.getElementById("genderRatioChart"), {
 new Chart(document.getElementById("gpaChart"), {
   type: "line",
   data: {
-    labels: ["2020", "2021", "2022", "2023", "2024"],
+    labels: window.averageGPAPerYear.years,
     datasets: [
       {
         label: "Average GPA",
-        data: [3.1, 3.2, 3.3, 3.25, 3.4],
+        data: window.averageGPAPerYear.gpas,
         borderColor: "#003366",
         backgroundColor: "rgba(0, 51, 102, 0.15)",
         pointBackgroundColor: "#FFD700",

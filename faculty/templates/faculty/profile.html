@@ -17,6 +17,17 @@
 </head>
 
 <body>
+    <div class="container text-center my-4" style="padding: 0 !important; margin-bottom: 0 !important; ">
+        <!-- Circle Profile Picture -->
+        <img src="{% if instructor.user.profile_picture %}
+                {{ instructor.user.profile_picture.url }}
+            {% else %}
+                https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_hybrid&w=740&q=80
+            {% endif %}"
+        alt="Profile Picture" loading="lazy"
+        class="rounded-circle border border-3 shadow"
+        width="150" height="150">
+    </div>
     <div class="container">
         <div class="title"><i class="fas fa-chalkboard-teacher"></i> Profile</div>
 

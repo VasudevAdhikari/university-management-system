@@ -335,9 +335,12 @@
             100% { transform: rotate(360deg); }
         }
     </style>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'faculty/css/navbar.css' %}">
 </head>
 <body>
-    <div class="registration-container">
+    {% include "executives/navbar.html" %}
+    <div class="registration-container" style="margin-top: 80px;">
         <div class="header-section">
             <div class="header-icon">
                 <i class="fas fa-user-shield"></i>

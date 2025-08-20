@@ -114,4 +114,10 @@ urlpatterns = [
     path('student/<str:action>/<int:user_id>/', student_data_manager.update_student_status, name='update_student_status'),
 
     path('dashboard/', dashboard.show_dashboard, name='dashboard'),
+
+    path('send_results/<int:term_id>/', term_manager.send_results, name='send_results_to_a_term'),
+
+    path("instructor/<int:instructor_id>/transfer/", instructor_data_manager.transfer_instructor, name="transfer_instructor"),
+    path("instructor/<int:instructor_id>/retire/", instructor_data_manager.retire_instructor, name="retire_instructor"),
+    path("instructor/<int:instructor_id>/leave/", instructor_data_manager.leave_instructor, name="leave_instructor"),
 ]

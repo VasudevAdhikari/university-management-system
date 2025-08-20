@@ -25,64 +25,15 @@
   </script>
 
   <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
-    <div class="container-fluid">
-      <img src="https://www.ucsy.edu.mm/img/ucsylogo-icpc2017.png" class="uni-logo ms-4" alt="University Logo">
-
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-
-        <ul class="navbar-nav ms-auto align-items-center custom-nav-spacing">
-
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              University Info
-            </a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="#university-info"><i class="fas fa-info-circle me-2"></i>
-                  Overview</a></li>
-              <li><a class="dropdown-item" href="#executives"><i class="fas fa-user-tie me-2"></i>
-                  Executives</a></li>
-            </ul>
-          </li>
-
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              Academics
-            </a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="#faculties">Faculties</a></li>
-              <li><a class="dropdown-item" href="#departments">Departments</a></li>
-              <li><a class="dropdown-item" href="#degrees">Degrees</a></li>
-              <li><a class="dropdown-item" href="#instructors">Instructors</a></li>
-            </ul>
-          </li>
-
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              Resources
-            </a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="#partnerships"><i class="fas fa-handshake me-2"></i>
-                  Partnerships</a></li>
-              <li><a class="dropdown-item" href="#certificates"><i class="fas fa-certificate me-2"></i>
-                  Certificates</a></li>
-              <li><a class="dropdown-item" href="#labs"><i class="fas fa-flask me-2"></i> Labs</a></li>
-            </ul>
-          </li>
-
-          <li class="nav-item logout">
-            <a class="nav-link logout-icon" href="logout.html" title="Logout">
-              <i class="fas fa-sign-out-alt"></i>
-            </a>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </nav>
+{% if request.user_role == 'instructor' %}
+    {% include "faculty/navbar.html" %}
+{% elif request.user_role == 'student' %}
+    {% include "students/academic/navbar.html" %}
+{% elif request.user_role == 'executive' %}
+    {% include "executives/navbar.html" %}
+{% else %}
+    {% include "public/navbar.html" %}
+{% endif %}
 
   <!-- Main Content -->
   <div class="main-content-demo">

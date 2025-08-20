@@ -358,81 +358,7 @@
 
 <body>
     <!-- Navbar from public home.html -->
-    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
-        <div class="container-fluid">
-            <img src="https://www.ucsy.edu.mm/img/ucsylogo-icpc2017.png" class="uni-logo ms-4" alt="University Logo">
-
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav" >
-                
-                <ul class="navbar-nav ms-auto align-items-center custom-nav-spacing">
-
-                    <li class="nav-item dropdown">
-                        <a class="nav-link" href="/public/" role="button"aria-expanded="false">
-                            Home
-                        </a>
-                    </li>
-
-                    <li class="nav-item dropdown">
-                        <a class="nav-link" href="/executives/dashboard/" role="button"aria-expanded="false">
-                            Dashboard
-                        </a>
-                    </li>
-
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Academics
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="/executives/show_faculty_management">
-                                <i class="fas fa-university"></i> Faculties
-                            </a></li>
-                            <li><a class="dropdown-item" href="/executives/show_department_management"><i class="fas fa-building"></i> Departments</a></li>
-                            <li><a class="dropdown-item" href="/executives/show_course_management"><i class="fas fa-book"></i> Courses</a></li>
-                            <li><a class="dropdown-item" href="/executives/show_degree_management"><i class="fas fa-graduation-cap"></i> Degrees</a></li>
-                            <li><a class="dropdown-item" href="/executives/show_term_management"><i class="fas fa-calendar-alt"></i> Terms</a></li>
-                            <li><a class="dropdown-item" href="/executives/enrollments"><i class="fas fa-user-plus"></i> Enrollments</a></li>
-                            <li><a class="dropdown-item" href="/noticeboard"><i class="fas fa-bullhorn"></i> Noticeboard</a></li>
-                        </ul>
-                    </li>
-
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            User Management
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="/executives/unapproved_students"><i class="fas fa-user-graduate"></i> Unapproved Students</a></li>
-                            <li><a class="dropdown-item" href="/executives/unapproved_instructors"><i class="fas fa-chalkboard-teacher"></i> Unapproved Instructors</a></li>
-                            <li><a class="dropdown-item" href="/executives/all_students"><i class="fas fa-user-graduate"></i> All Students</a></li>
-                            <li><a class="dropdown-item" href="/executives/all_instructors"><i class="fas fa-chalkboard-teacher"></i> All Instructors</a></li>
-                            <li><a class="dropdown-item" href="/executives/all_executives"><i class="fas fa-user-tie"></i> All Executives</a></li>
-                        </ul>
-                    </li>
-
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Profile
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="/auth/profile/{{user_id}}"><i class="fas fa-id-badge"></i> Manage Profile</a></li>
-                            <li><a class="dropdown-item" href="/auth/logout/"><i class="fas fa-sign-out-alt"></i>
-                                Logout</a></li>
-                            <li><a class="dropdown-item" href="/auth/logout/"><i class="fas fa-sign-in-alt"></i>
-                                Login</a></li>
-                        </ul>
-                    </li>
-
-                    <li class="nav-item dropdown">
-                        <a class="nav-link" href="/public/notifications/" role="button"aria-expanded="false">
-                            <i class="fas fa-bell"></i> Notifications
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+    {% include "executives/navbar.html" %}
 
     <div class="container">
         <h1 style="text-align: center;">Batch Details</h1>
@@ -519,15 +445,7 @@
 
     <script>
         // Sample data for 7 courses
-        const courses = [
-            { name: 'Mathematics', scores: [55, 65, 70, 72, 78, 80, 83, 85, 88, 90, 92, 95, 100, 45, 60] },
-            { name: 'Physics', scores: [50, 60, 62, 64, 67, 70, 72, 74, 76, 78, 80, 85, 88, 40, 55] },
-            { name: 'Chemistry', scores: [58, 62, 65, 68, 70, 72, 75, 77, 80, 82, 85, 88, 92, 50, 61] },
-            { name: 'Biology', scores: [52, 57, 60, 63, 66, 68, 71, 73, 76, 78, 81, 83, 86, 45, 59] },
-            { name: 'Computer Science', scores: [65, 68, 70, 73, 75, 78, 80, 83, 86, 88, 90, 93, 95, 55, 60] },
-            { name: 'Economics', scores: [50, 55, 60, 63, 65, 67, 70, 72, 75, 77, 80, 82, 85, 45, 58] },
-            { name: 'Statistics', scores: [54, 58, 62, 65, 67, 70, 72, 75, 78, 80, 82, 85, 88, 49, 61] }
-        ];
+        const courses = JSON.parse('{{box_plot|safe|escapejs}}');
 
         // Colors for each course (different for visualization)
         const colors = ['#003366', '#FFD700', '#4CAF50', '#F44336', '#17A2B8', '#9C27B0', '#FF9800'];
