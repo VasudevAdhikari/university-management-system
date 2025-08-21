@@ -78,7 +78,7 @@
   <script src="{% static 'executives/javascripts/term_management.js' %}"></script>
   <script>
     {% for message in messages %}
-      alert('{{message}}');
+      await alert('{{message}}');
     {% endfor %}
   </script>
 </body>

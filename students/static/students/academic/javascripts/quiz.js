@@ -267,7 +267,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Timer functionality
-let timeLeft = 10*60; // 30 minutes in seconds
+let timeLeft = QUIZ_DATA.time_limit; // 30 minutes in seconds
 let timerInterval;
 
 function startTimer() {

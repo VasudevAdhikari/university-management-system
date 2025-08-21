@@ -14,8 +14,6 @@
         window.userId = '{{user.id}}';
         window.CSRFToken = '{{csrf_token}}';
         window.profilePictureUrl = '{{user.profile_picture.url}}';
-
-        window.editable = {{ editable|yesno:"true,false" }};
     </script>
 
     <div class="profile-container">
@@ -23,12 +21,12 @@
             
             <div class="profile-picture-container">
                 <img src="{{user.profile_picture.url}}" alt="Profile Picture" class="profile-picture" id="profilePicture">
-
+                {% if editable %}
                 <button class="profile-picture-upload" onclick="requestPasswordForAction('upload')">
                     <i class="fas fa-camera"></i>
                 </button>
                 <input type="file" id="profilePictureInput" class="file-upload" accept="image/*">
-
+                {% endif %}
             </div>
             
             <h1 class="profile-name" id="profileName">{{user.full_name}}</h1>
@@ -151,10 +149,12 @@
                     <i class="fas fa-key"></i>
                     Change Password
                 </button>
+                {% if editable %}
                 <button class="btn btn-primary" onclick="requestPasswordForAction('edit')">
                     <i class="fas fa-edit"></i>
                     Edit Profile
                 </button>
+                {% endif %}
                 <button class="btn btn-danger" id="logoutBtn">
                     <i class="fas fa-sign-out-alt"></i>
                     Logout

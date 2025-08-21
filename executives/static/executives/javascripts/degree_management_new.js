@@ -828,15 +828,15 @@ function showDegreeDetailsModal(degree, degreeIndex = null, isAddMode = false) {
             body: JSON.stringify(degreeData)
           })
           .then(response => response.json())
-          .then((data) => {
+          .then(async (data) => {
             console.log(data);
-            if (data.success) alert("Degree Data Updated Successfully");
+            if (data.success) await alert("Degree Data Updated Successfully");
             modal.remove();
             window.location.reload();
           })
-          .catch((error) => {
+          .catch(async (error) => {
             console.error('Error:', error);
-            alert(error);
+            await alert(error);
           });
         };
         document.getElementById("cancelSaveBtn").onclick = function () {

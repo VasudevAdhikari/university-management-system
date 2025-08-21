@@ -10,7 +10,7 @@ from django.core.files.storage import FileSystemStorage
 from django.conf import settings
 
 def show_profile_management(request, user_id):
-    user = User.objects.get(pk=user_id)
+    user = User.objects.get(pk=user_id, email=request.COOKIES.get('my_user'))
     role = 'Student'
     editable = False
     if Instructor.objects.filter(user=user).exists():
@@ -31,7 +31,9 @@ def check_password(request, user_id, password):
     # print(user.is_active)
     # authenticated_user = authenticate(request, username=user.username, password=password)
     # print(authenticated_user)
+    print('got')
     if user.check_password(password):
+        print('true')
         return JsonResponse({'success': True})
     else:
         return JsonResponse({'success': False})
@@ -63,7 +65,7 @@ def change_password(request, user_id):
         current_password = data.get('current_password')
         new_password = data.get('new_password')
         
-        user = User.objects.get(pk=int(user_id))
+        user = User.objects.get(email=request.COOKIES.get('my_user'), id=int(user_id))
         
         # Check if current password is correct
         if not user.check_password(current_password):

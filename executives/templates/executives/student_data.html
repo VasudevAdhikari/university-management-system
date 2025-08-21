@@ -191,9 +191,9 @@
             window.location.href = `/students/academics/results/${user_id}`; // replace with actual URL
         }
 
-        {% for message in messages %}
-        alert('{{message}}');
-        {% endfor %}
+    {% for message in messages %}
+    await alert('{{message}}');
+    {% endfor %}
     </script>
 
 </body>

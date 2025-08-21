@@ -455,13 +455,13 @@
                 const result = await response.json();
 
                 if (response.ok && result.success) {
-                    alert('Admin registered successfully!');
+                    await alert('Admin registered successfully!');
                 } else {
-                    alert('Failed to register: ' + (result.error || 'Unknown error'));
+                    await alert('Failed to register: ' + (result.error || 'Unknown error'));
                 }
             } catch (error) {
                 console.error('Request failed:', error);
-                alert('Something went wrong: ' + error.message);
+                await alert('Something went wrong: ' + error.message);
             } finally {
                 // Reset button state
                 submitBtn.classList.remove('loading');

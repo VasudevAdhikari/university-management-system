@@ -213,7 +213,7 @@ async function verifyEmail() {
         
         if (data.success) {
             // Show success message
-            alert(data.message);
+            await alert(data.message);
             // Disable email field and show OTP section
             document.getElementById('email').disabled = true;
             document.getElementById('otp').disabled = false;  // Enable OTP input
@@ -229,7 +229,7 @@ async function verifyEmail() {
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('An error occurred while verifying email');
+        await alert('An error occurred while verifying email');
         emailError.textContent = 'An error occurred while verifying email';
         emailError.style.display = 'block';
     }
@@ -250,13 +250,13 @@ function verifyOTP() {
         body: JSON.stringify({ otp: otp, email: email})
     })
     .then(response => response.json())
-    .then(data => {
+    .then(async data => {
         if (data.verified) {
             toggleInputs(true);
-            alert('OTP verification successful. You can fill the other information now');
+            await alert('OTP verification successful. You can fill the other information now');
             document.getElementById('otp-group').style.display = 'none';
         } else {
-            alert('OTP verification failed. Please try again.');
+            await alert('OTP verification failed. Please try again.');
         }
     })
     .catch(error => {
@@ -331,7 +331,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 compressedFile = await compressImage(file);
             } catch (error) {
                 console.error('Image compression failed:', error);
-                alert('Failed to compress image. Please try again.');
+                await alert('Failed to compress image. Please try again.');
                 return;
             }
         }
@@ -392,7 +392,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         } catch (error) {
             console.error('Registration failed:', error);
-            alert('Registration failed: ' + error.message);
+            await alert('Registration failed: ' + error.message);
         }
     });
 

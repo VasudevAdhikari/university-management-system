@@ -116,9 +116,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const sendResultBtn = document.createElement('button');
     sendResultBtn.textContent = 'Send Result';
     sendResultBtn.className = 'send-result-btn mt-2';
-    sendResultBtn.addEventListener('click', (e) => {
+    sendResultBtn.addEventListener('click', async (e) => {
       e.stopPropagation();
-      if (!confirm('Are you sure to send results of this term to all students?')) return;
+      if (!await confirm('Are you sure to send results of this term to all students?')) return;
       window.location.href = `/executives/send_results/${term.id}`
     });
 

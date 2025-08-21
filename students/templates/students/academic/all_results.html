@@ -92,6 +92,7 @@
       margin: 20px 0 10px;
     }
     .card {
+      border-top: 4px solid var(--primary-light);
       background: var(--bg-light);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
@@ -245,81 +246,45 @@
     <section class="info-grid" aria-label="Course details">
       <div class="card col-6">
         <h3>Course Code</h3>
-        <p>CS101</p>
+        <p>{{batch_instructor.course.course_code}}</p>
       </div>
       <div class="card col-6">
         <h3>Course Name</h3>
-        <p>Introduction to Computer Science</p>
+        <p>{{batch_instructor.course.course_name}}</p>
       </div>
 
       <div class="card col-6">
         <h3>Instructor</h3>
-        <p>Dr. Jane Doe</p>
+        <p>{{batch_instructor.instructor.user.full_name}}</p>
       </div>
       <div class="card col-6">
         <h3>Department</h3>
-        <p>Department of Computer Science</p>
+        <p>{{batch_instructor.instructor.department.name}}</p>
       </div>
     </section>
 
     <!-- Chips: term / degree / semester -->
     <div class="chips" role="list" aria-label="Academic context">
-      <span class="chip" role="listitem">Term: Spring 2025</span>
-      <span class="chip" role="listitem">Degree: B.Sc. in Computer Science</span>
-      <span class="chip" role="listitem">Semester: 5</span>
+      <span class="chip" role="listitem">Term: {{batch_instructor.batch.term.term_name}}</span>
+      <span class="chip" role="listitem">Degree: {{batch_instructor.batch.semester.degree.name}}</span>
+      <span class="chip" role="listitem">{{batch_instructor.batch.semester.semester_name}}</span>
     </div>
 
     <!-- Assessments -->
     <h2 class="section-title">Assessments</h2>
     <section class="assessments" aria-label="Assessment marks">
       <!-- quiz 1 10 out of 10 -->
-      <div class="assessment">
-        <div class="a-title">Quiz 1</div>
-        <div class="a-score" aria-label="Score">10 / 10</div>
-        <div class="bar" aria-hidden="true"><span style="--w: 100%"></span></div>
-      </div>
-
-      <!-- quiz 2 2 out of 10 -->
-      <div class="assessment">
-        <div class="a-title">Quiz 2</div>
-        <div class="a-score">2 / 10</div>
-        <div class="bar"><span style="--w: 20%"></span></div>
-      </div>
-
-      <!-- assignment 1 9 out of 10 -->
-      <div class="assessment">
-        <div class="a-title">Assignment 1</div>
-        <div class="a-score">9 / 10</div>
-        <div class="bar"><span style="--w: 90%"></span></div>
-      </div>
-
-      <!-- assignment 2 10 out of 10 -->
-      <div class="assessment">
-        <div class="a-title">Assignment 2</div>
-        <div class="a-score">10 / 10</div>
-        <div class="bar"><span style="--w: 100%"></span></div>
-      </div>
-
-      <!-- quiz 3 10 out of 10 -->
-      <div class="assessment">
-        <div class="a-title">Quiz 3</div>
-        <div class="a-score">10 / 10</div>
-        <div class="bar"><span style="--w: 100%"></span></div>
-      </div>
-
-      <!-- tutorial 10 out of 10 -->
-      <div class="assessment">
-        <div class="a-title">Tutorial</div>
-        <div class="a-score">10 / 10</div>
-        <div class="bar"><span style="--w: 100%"></span></div>
-      </div>
-
-      <!-- class participation 10 out of 10 -->
-      <div class="assessment">
-        <div class="a-title">Class Participation</div>
-        <div class="a-score">10 / 10</div>
-        <div class="bar"><span style="--w: 100%"></span></div>
-      </div>
+        {% for assessment_result in assessment_results %}
+        <div class="assessment">
+            <div class="a-title">{{ assessment_result.assessment.assessment.title }}</div>
+            <div class="a-score" aria-label="Score">
+            {{ assessment_result.mark }} / {{ assessment_result.assessment.assessment.total_mark }}
+            </div>
+            <div class="bar" aria-hidden="true">
+            <span style="--w:{% widthratio assessment_result.mark assessment_result.assessment.assessment.total_mark 100 %}%"></span>
+            </div>
+        </div>
+        {% endfor %}
     </section>
 
     <!-- Summary -->
@@ -327,16 +292,16 @@
       <div class="card summary-card highlight">
         <h3>Overall</h3>
         <div class="stat">
-          61<span class="muted">/ 70</span>
+          {{got_total}}<span class="muted">/ {{given_total}}</span>
         </div>
-        <p class="muted">Simple sum of all obtained marks (no weighting applied).</p>
+        <p class="muted">Comulative Assessment Results (For the whole semester period).</p>
       </div>
       <div class="card summary-card">
         <h3>Overall Performance Percentage</h3>
         <div class="stat" style="color: var(--primary-dark)">
-          87.14<span class="muted-dark">%</span>
+          {{percentage}}<span class="muted-dark">%</span>
         </div>
-        <div class="bar" aria-hidden="true"><span style="--w: 87.14%"></span></div>
+        <div class="bar" aria-hidden="true"><span style="--w: {{percentage}}%"></span></div>
       </div>
     </section>
   </main>

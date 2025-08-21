@@ -23,8 +23,8 @@ def save_specific_image(images, target_filename):
 
 def get_quiz_data(assessment: Assessment):
     quiz_data = assessment.assessment
-    quiz_data['start_time'] = assessment.assigned_date.strftime('%Y-%m-%dT%H:%M:%S')
-    quiz_data['end_time'] = assessment.due_date.strftime('%Y-%m-%dT%H:%M:%S')
+    quiz_data['start_time'] = assessment.assigned_date.strftime('%Y-%m-%dT%H:%M:%S') if assessment.assigned_date else None
+    quiz_data['end_time'] = assessment.due_date.strftime('%Y-%m-%dT%H:%M:%S') if assessment.due_date else None
     print(quiz_data)
     return quiz_data
 

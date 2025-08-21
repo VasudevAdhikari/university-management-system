@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', function () {
 // Utility to create and show the popup for editing
 function showEditPopup(label, value, onSave, opts = {}) {
     // Remove any existing popup
-    // alert(`${label} ${value}`);
+    // await alert(`${label} ${value}`);
     const existing = document.getElementById('edit-popup-backdrop');
     if (existing) existing.remove();
 
@@ -99,16 +99,16 @@ function showEditPopup(label, value, onSave, opts = {}) {
     }
 
     // Save handler
-    saveBtn.onclick = function () {
+    saveBtn.onclick = async function () {
         if (opts.file) {
             if (!input.files || !input.files[0]) return;
-            if (confirm('Are you sure you want to upload this file?')) {
+            if (await confirm('Are you sure you want to upload this file?')) {
                 onSave(input.files[0]);
                 document.body.removeChild(backdrop);
                 location.reload();
             }
         } else {
-            if (confirm('Are you sure you want to save changes?')) {
+            if (await confirm('Are you sure you want to save changes?')) {
                 onSave(input.value);
                 document.body.removeChild(backdrop);
                 location.reload();
@@ -214,7 +214,7 @@ function setupEditIcons() {
                     'POST',
                     { lab_name: val },
                     (response) => { location.reload(); },
-                    (error) => { alert('Failed to update lab name'); }
+                    async (error) => { await alert('Failed to update lab name'); }
                 );
             });
         };
@@ -230,7 +230,7 @@ function setupEditIcons() {
                     'POST',
                     { location: val },
                     (response) => { location.reload(); },
-                    (error) => { alert('Failed to update lab location'); }
+                    async (error) => { await alert('Failed to update lab location'); }
                 );
             });
         };
@@ -245,14 +245,14 @@ function setupEditIcons() {
                     `/executives/api/labs/update_department/${encodeURIComponent(window.currentLabKey)}/`,
                     'POST',
                     { department_id: deptId, department_name: deptName },
-                    (response) => { 
+                    async (response) => { 
                         if (response.success) {
                             location.reload();
                         } else {
-                            alert('Failed to update lab department');
+                            await alert('Failed to update lab department');
                         }
                     },
-                    (error) => { alert('Failed to update lab department'); }
+                    async (error) => { await alert('Failed to update lab department'); }
                 );
             });
         };
@@ -268,7 +268,7 @@ function setupEditIcons() {
                     'POST',
                     { head_of_lab: val },
                     (response) => { location.reload(); },
-                    (error) => { alert('Failed to update head of lab'); }
+                    async (error) => { await alert('Failed to update head of lab'); }
                 );
             });
         };
@@ -285,7 +285,7 @@ function setupEditIcons() {
                     'POST',
                     { head_of_lab: profile },
                     (response) => {location.reload(); },
-                    (error) => { alert('Failed to update head of lab'); }
+                    async (error) => { await alert('Failed to update head of lab'); }
                 );
             });
         };
@@ -301,7 +301,7 @@ function setupEditIcons() {
                     'POST',
                     { department: val },
                     (response) => { location.reload(); },
-                    (error) => { alert('Failed to update department'); }
+                    async (error) => { await alert('Failed to update department'); }
                 );
             });
         };
@@ -320,7 +320,7 @@ function setupEditIcons() {
                         'POST',
                         { description: val },
                         (response) => { location.reload(); },
-                        (error) => { alert('Failed to update lab description'); }
+                        async (error) => { await alert('Failed to update lab description'); }
                     );
                 },
                 { textarea: true, rows: 20 }
@@ -343,15 +343,15 @@ function setupEditIcons() {
             delBtn.className = 'delete-photo-btn';
             delBtn.title = 'Delete Photo';
             delBtn.innerHTML = '<i class="fa fa-trash"></i>';
-            delBtn.onclick = function (e) {
+            delBtn.onclick = async function (e) {
                 e.stopPropagation();
-                if (confirm('Are you sure you want to delete this photo?')) {
+                if (await confirm('Are you sure you want to delete this photo?')) {
                     ajaxLabAPI(
                         `/executives/api/labs/delete_photo/${encodeURIComponent(window.currentLabKey)}/`,
                         'POST',
                         { photo_key: img.src },
                         (response) => { location.reload(); },
-                        (error) => { alert('Failed to delete photo'); }
+                        async (error) => { await alert('Failed to delete photo'); }
                     );
                 }
             };
@@ -379,8 +379,8 @@ function setupEditIcons() {
             const tagSpans = Array.from(tagsDiv.querySelectorAll('.project-tag'));
             const tagsValue = tagSpans.map(t => t.textContent.trim()).join(', ');
             const projectId = tagsDiv.closest('.project-card').getAttribute('data-project-id');
-            showEditPopup('Project Tags', tagsValue, function (val) {
-                if (confirm('Are you sure you want to save these tags?')) {
+            showEditPopup('Project Tags', tagsValue, async function (val) {
+                if (await confirm('Are you sure you want to save these tags?')) {
                     const tagsObj = {};
                     val.split(',').forEach((tag, idx) => { tagsObj[`tag${idx+1}`] = tag.trim(); });
                     updateProject(window.currentLabKey, projectId, { tags: tagsObj }, null, () => location.reload());
@@ -502,7 +502,7 @@ function setupEditIcons() {
             // Check if current name is "Add Project Leader" and set to empty if so
             const leaderName = currentName === 'Add Project Leader' ? '' : currentName;
             
-            showProjectLeaderSelectPopup(leaderName, function (selectedLeader) {
+            showProjectLeaderSelectPopup(leaderName, async function (selectedLeader) {
                 // selectedLeader is now the full profile object
                 if (selectedLeader) {
                     updateProject(window.currentLabKey, projectId, { 
@@ -513,7 +513,7 @@ function setupEditIcons() {
                         }
                     }, null, () => location.reload());
                 } else {
-                    alert('No leader selected');
+                    await alert('No leader selected');
                 }
             });
         };
@@ -548,7 +548,7 @@ function setupEditIcons() {
                 }
             });
             
-            showProjectMembersSelectPopup(currentMembers, function (selectedMembers) {
+            showProjectMembersSelectPopup(currentMembers, async function (selectedMembers) {
                 // selectedMembers is now an array of full profile objects
                 if (selectedMembers && selectedMembers.length > 0) {
                     const membersData = selectedMembers.map(member => ({
@@ -560,7 +560,7 @@ function setupEditIcons() {
                         members: membersData
                     }, null, () => location.reload());
                 } else {
-                    alert('No members selected');
+                    await alert('No members selected');
                 }
             });
         };
@@ -698,8 +698,8 @@ function showHeadSelectPopup(currentName, onSave) {
                     <img src="${profile.img}" alt="${profile.name}" class="profile-select-img">
                     <span class="profile-select-name">${profile.name}</span>
                 `;
-                item.onclick = function () {
-                    if (confirm(`Set "${profile.name}" as Head of Lab?`)) {
+                item.onclick = async function () {
+                    if (await confirm(`Set "${profile.name}" as Head of Lab?`)) {
                         onSave(profile);
                         document.body.removeChild(backdrop);
                         location.reload();
@@ -799,8 +799,8 @@ function showDepartmentSelectPopup(onSave) {
                 item.innerHTML = `
                     <span class="profile-select-name">${dept.name}</span>
                 `;
-                item.onclick = function () {
-                    if (confirm(`Set "${dept.name}" as Lab Department?`)) {
+                item.onclick = async function () {
+                    if (await confirm(`Set "${dept.name}" as Lab Department?`)) {
                         onSave(dept.id, dept.name);
                         document.body.removeChild(backdrop);
                     }
@@ -946,8 +946,8 @@ function showProjectMembersSelectPopup(currentMembers, onSave) {
     };
 
     // Save handler
-    saveBtn.onclick = function () {
-        if (selected.length > 0 && confirm('Add selected member(s) to project?')) {
+    saveBtn.onclick = async function () {
+        if (selected.length > 0 && await confirm('Add selected member(s) to project?')) {
             onSave(selected);
             document.body.removeChild(backdrop);
             location.reload();
@@ -1064,8 +1064,8 @@ function showProjectLeaderSelectPopup(currentName, onSave) {
         renderProfiles(search.value);
     };
 
-    saveBtn.onclick = function () {
-        if (selected && confirm('Set selected leader for this project?')) {
+    saveBtn.onclick = async function () {
+        if (selected && await confirm('Set selected leader for this project?')) {
             onSave(selected);
             document.body.removeChild(backdrop);
             location.reload();
@@ -1151,9 +1151,9 @@ function showProjectPhotoEditPopup(currentImgUrl, onSave) {
     };
 
     // Save handler
-    saveBtn.onclick = function () {
+    saveBtn.onclick = async function () {
         if (input.files && input.files[0]) {
-            if (confirm('Are you sure you want to update the project photo?')) {
+            if (await confirm('Are you sure you want to update the project photo?')) {
                 onSave(input.files[0]);
                 document.body.removeChild(backdrop);
                 location.reload();
@@ -1312,13 +1312,13 @@ function showAddProjectPopup(onSave) {
     };
 
     // Form submit handler
-    form.onsubmit = function (e) {
+    form.onsubmit = async function (e) {
         e.preventDefault();
         if (!nameInput.value.trim() || !descInput.value.trim()) {
-            alert('Please fill in required fields.');
+            await alert('Please fill in required fields.');
             return;
         }
-        if (confirm('Add this project?')) {
+        if (await confirm('Add this project?')) {
             onSave({
                 name: nameInput.value.trim(),
                 photo: photoInput.files[0] || null,
@@ -1377,27 +1377,27 @@ if (addBtn) {
                     body: formData
                 })
                 .then(res => res.json())
-                .then(function(resp) {
+                .then(async function(resp) {
                     if (resp.success) {
                         location.reload();
                     } else {
-                        alert('Failed to add project');
+                        await alert('Failed to add project');
                     }
                 })
-                .catch(() => alert('AJAX error'));
+                .catch(async () => await alert('AJAX error'));
             } else {
                 ajaxLabAPI(
                     url,
                     'POST',
                     data,
-                    function(resp) {
+                    async function(resp) {
                         if (resp.success) {
                             location.reload();
                         } else {
-                            alert('Failed to add project');
+                            await alert('Failed to add project');
                         }
                     },
-                    function() { alert('AJAX error'); }
+                    async function() { await alert('AJAX error'); }
                 );
             }
         });
@@ -1416,7 +1416,7 @@ function ajaxLabAPI(url, method, data, onSuccess, onError) {
     })
     .then(res => res.json())
     .then(onSuccess)
-    .catch(onError || (err => alert('AJAX error: ' + err)));
+    .catch(onError || (async err => await alert('AJAX error: ' + err)));
 }
 
 // Utility to update project via AJAX (handles file and non-file fields)
@@ -1433,23 +1433,23 @@ function updateProject(labKey, projectId, data, files, cb) {
         })
         .then(res => res.json())
         .then(cb)
-        .catch(() => alert('AJAX error'));
+        .catch(async () => await alert('AJAX error'));
     } else {
         ajaxLabAPI(
             `/executives/api/labs/edit_project/${encodeURIComponent(labKey)}/${encodeURIComponent(projectId)}/`,
             'POST',
             data,
             cb,
-            () => alert('AJAX error')
+            async () => await alert('AJAX error')
         );
     }
 }
 
 // Add this function to handle photo upload via AJAX
-function addLabPhoto(labKey, file, cb) {
+async function addLabPhoto(labKey, file, cb) {
     const formData = new FormData();
     formData.append('photo', file);
-    alert('gonna go to submit photo');
+    await alert('gonna go to submit photo');
     fetch(`/executives/api/labs/add_photo/${encodeURIComponent(labKey)}/`, {
         method: 'POST',
         headers: { 'X-CSRFToken': (document.cookie.match(/csrftoken=([^;]+)/) || [])[1] || '' },
@@ -1457,21 +1457,21 @@ function addLabPhoto(labKey, file, cb) {
     })
     .then(res => res.json())
     .then(cb)
-    .catch(err => alert('AJAX error: ' + err));
+    .catch(async err => await alert('AJAX error: ' + err));
 }
 
 // Update handlePhotoInputChange to use the above function
-function handlePhotoInputChange(e) {
+async function handlePhotoInputChange(e) {
     const fileInput = e.target;
     if (fileInput.files && fileInput.files[0]) {
-        if (confirm('Are you sure you want to add this image?')) {
-            alert('something');
-            addLabPhoto(window.currentLabKey, fileInput.files[0], function(resp) {
+        if (await confirm('Are you sure you want to add this image?')) {
+            await alert('something');
+            addLabPhoto(window.currentLabKey, fileInput.files[0], async function(resp) {
                 if (resp.success) {
-                    alert("successful");
+                    await alert("successful");
                     // location.reload();
                 } else {
-                    alert('Failed to add photo');
+                    await alert('Failed to add photo');
                 }
             });
         } else {

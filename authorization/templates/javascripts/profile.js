@@ -51,13 +51,17 @@ function enableEdit() {
     document.getElementById('profileFieldsEdit').classList.remove('hidden');
     document.getElementById('viewActions').classList.add('hidden');
     document.getElementById('editActions').classList.remove('hidden');
-    
     // Enable all input fields
     const inputs = document.querySelectorAll('#profileFieldsEdit input');
     inputs.forEach(input => {
         input.disabled = false;
         console.log('Enabled input:', input.id); // Debug log
     });
+    if (!window.editable) {
+        document.getElementById('fullNameInput').disabled = true;
+        document.getElementById('emailInput').disabled = true;
+        document.getElementById('outlookInput').disabled = true;
+    }
 }
 
 // Cancel Edit
@@ -124,7 +128,7 @@ async function saveProfile() {
             
             // Switch back to view mode
             cancelEdit();
-            alert("Profile Updated Successfully");
+            await alert("Profile Updated Successfully");
             window.location.reload();
         } else {
             showMessage(data.error, 'error');
@@ -186,7 +190,7 @@ async function changePassword() {
         
         if (data.success) {
             closeChangePasswordModal();
-            alert('Password changed successfully');
+            await alert('Password changed successfully');
         } else {
             errorElement.textContent = data.error;
         }
@@ -298,8 +302,8 @@ document.addEventListener('DOMContentLoaded', function() {
     `;
     document.head.appendChild(style);
 
-    document.getElementById('logoutBtn').addEventListener('click', () => {
-        if (!confirm('Are you sure to log out')) return;
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+        if (! await confirm('Are you sure to log out')) return;
         window.location.href = `/auth/logout/`;
     })
 });
@@ -319,7 +323,7 @@ async function uploadProfilePicture(file) {
         
         if (data.success) {
             document.getElementById('profilePicture').src = data.profile_picture_url;
-            alert('Profile Picture Updated Successfully');
+            await alert('Profile Picture Updated Successfully');
             window.location.reload();
         } else {
             showMessage(data.error, 'error');

@@ -79,23 +79,23 @@ submitMajorBatch.onclick = async () => {
     const checkedSems = Array.from(semCheckboxList.querySelectorAll("input:checked")).map(cb => cb.value);
 
     if (!major) {
-        alert("Please select a major.");
+        await alert("Please select a major.");
         return;
     }
     if (checkedSems.length === 0) {
-        alert("Please select at least one semester.");
+        await alert("Please select at least one semester.");
         return;
     }
 
     // Confirm creation
-    if (!confirm(`Create batch for major "${major}" with semesters: ${checkedSems.join(", ")}?`)) {
+    if (!await confirm(`Create batch for major "${major}" with semesters: ${checkedSems.join(", ")}?`)) {
         return;
     }
 
     // Async POST to /executives/batchs/edit/
     try {
         const CSRFToken = window.getCsrfToken();
-        if (!confirm('Are you sure to edit batch with provided data')) return;
+        if (!await confirm('Are you sure to edit batch with provided data')) return;
         const resp = await fetch("/executives/batches/edit/", {
             method: "POST",
             headers: {
@@ -113,8 +113,8 @@ submitMajorBatch.onclick = async () => {
         }
         if (resp.result) {
             console.log(resp.result);
-            if(resp.messsage) alert(resp.message);
-            else alert('Batch Data Edited Successfully');
+            if(resp.messsage) await alert(resp.message);
+            else await alert('Batch Data Edited Successfully');
         }
         window.location.reload();
         // Remove the intro message if present
@@ -201,7 +201,7 @@ submitMajorBatch.onclick = async () => {
         if (modalOverlay) modalOverlay.style.display = "none";
     } catch (err) {
         console.error(err);
-        alert("Error: " + err.message);
+        await alert("Error: " + err.message);
     }
 };
 
@@ -367,9 +367,9 @@ function showSubjectPopup(subjectBtn, semName, majorName) {
         teacherSelect.id = "subjectTeacherToSubmit"
         teacherSelect.style.marginBottom = "14px";
         let departmentId = courseData.department_id;
-        // alert(departmentId);
+        // await alert(departmentId);
         (window.ALL_INSTRUCTORS || []).forEach(instr => {
-            // alert(instr.department);
+            // await alert(instr.department);
             if (instr.department == departmentId) {
                 let o = document.createElement('option');
                 o.value = instr.id;
@@ -476,7 +476,7 @@ function showSubjectPopup(subjectBtn, semName, majorName) {
         let submitBtn = document.createElement('button');
         submitBtn.textContent = "Submit";
         submitBtn.className = "subject-submit-btn";
-        submitBtn.onclick = function () {
+        submitBtn.onclick = async function () {
             teacherToSubmit = document.getElementById('subjectTeacherToSubmit').value;
             classroom1ToSubmit = document.getElementById('classroom1ToSubmit').value;
             class1TimesToSubmit = document.getElementById('classTime1ToSubmit').value;
@@ -493,7 +493,7 @@ function showSubjectPopup(subjectBtn, semName, majorName) {
             }
             console.log(dataToSubmit);
 
-            if (!confirm('Are you sure to edit batch with provided data')) return;
+            if (!await confirm('Are you sure to edit batch with provided data')) return;
 
             fetch("/executives/batch_instructor/edit/", {
                 method: "POST",
@@ -509,9 +509,9 @@ function showSubjectPopup(subjectBtn, semName, majorName) {
                     }
                     return response.json(); // or response.text() if the response is not JSON
                 })
-                .then(data => {
+                .then(async data => {
                     console.log("Success:", data);
-                    if (data.success) alert('Batch Data Updated Successfully');
+                    if (data.success) await alert('Batch Data Updated Successfully');
                     window.location.reload();
                 })
                 .catch(error => {
@@ -549,8 +549,8 @@ editTabsBtn.onclick = function () {
                 btn.innerHTML = '&minus;';
                 btn.title = "Delete Tab";
                 btn.onclick = async function (e) {
-                    if (confirm('Are you sure you want to remove all the courses related to this semester for this term?')) {
-                        // alert(tab.getAttribute('degree-id'))
+                    if (await confirm('Are you sure you want to remove all the courses related to this semester for this term?')) {
+                        // await alert(tab.getAttribute('degree-id'))
                         const resp = await fetch("/executives/batch_instructor/delete/", {
                             method: "POST",
                             headers: {
@@ -565,7 +565,7 @@ editTabsBtn.onclick = function () {
                         });
                         if (!resp.ok) throw new Error("Failed to delete batch instructors.");
                         else {
-                            alert('deletion successful');
+                            await alert('deletion successful');
                             window.location.reload();
                         }
                     }

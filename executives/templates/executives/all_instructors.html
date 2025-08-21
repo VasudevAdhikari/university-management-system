@@ -120,7 +120,7 @@
     <div class="main-content container-fluid px-2 px-md-4" style="margin-top: 80px;">
         <script>
             {% for message in messages %}
-            alert('{{message|escapejs}}');
+            await alert('{{message|escapejs}}');
             {% endfor %}
         </script>
 

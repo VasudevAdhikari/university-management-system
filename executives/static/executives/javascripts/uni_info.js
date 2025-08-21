@@ -285,20 +285,20 @@ function editPartnership(button) {
     new bootstrap.Modal(document.getElementById('partnershipModal')).show();
 }
 
-function deletePartnership(button) {
+async function deletePartnership(button) {
     const card = button.closest('.col-md-4');
     const partnerId = card.getAttribute('data-partner-id');
     const partnerName = card.querySelector('.card-title').textContent;
 
-    if (confirm("Are you sure you want to delete this partnership?")) {
+    if (await confirm("Are you sure you want to delete this partnership?")) {
         const formData = new FormData();
         formData.append('name', partnerId || partnerName);
 
-        sendAjaxRequest('/executives/partnerships/delete/', formData, function (data) {
+        sendAjaxRequest('/executives/partnerships/delete/', formData, async function (data) {
             if (data.success) {
                 card.remove();
             } else {
-                alert(data.error || "Failed to delete partnership.");
+                await alert(data.error || "Failed to delete partnership.");
             }
         });
     }
@@ -335,12 +335,12 @@ document.getElementById('partnershipForm').addEventListener('submit', function (
         : '/executives/partnerships/add/';
 
 
-    sendAjaxRequest(url, formData, function (data) {
+    sendAjaxRequest(url, formData, async function (data) {
         if (data.success) {
-            alert(mode === 'edit'? 'Partnership editing successful': 'New Partnership Addition Successful');
+            await alert(mode === 'edit'? 'Partnership editing successful': 'New Partnership Addition Successful');
             window.location.reload();
         } else {
-            alert(`${url} Failed`);
+            await alert(`${url} Failed`);
             console.error(data.error);
         }
     });
@@ -418,17 +418,17 @@ function editCertificate(button) {
     new bootstrap.Modal(document.getElementById('certificateModal')).show();
 }
 
-function deleteCertificate(button) {
+async function deleteCertificate(button) {
     const card = button.closest('.certificate-card');
     const certId = card.getAttribute('data-cert-id');
-    if (confirm("Are you sure you want to delete this certificate?")) {
+    if (await confirm("Are you sure you want to delete this certificate?")) {
         const formData = new FormData();
         formData.append('id', certId);
-        sendAjaxRequest('/executives/certificates/delete/', formData, function (data) {
+        sendAjaxRequest('/executives/certificates/delete/', formData, async function (data) {
             if (data.success) {
                 card.remove();
             } else {
-                alert(data.error || "Failed to delete certificate.");
+                await alert(data.error || "Failed to delete certificate.");
             }
         });
     }
@@ -461,11 +461,11 @@ document.getElementById('editForm').addEventListener('submit', function (e) {
         ? '/executives/certificates/edit/'
         : '/executives/certificates/add/';
 
-    sendAjaxRequest(url, formData, function (data) {
+    sendAjaxRequest(url, formData, async function (data) {
         if (data.success) {
-            alert(mode === 'edit'? "Certificate editing successful": "New Certificate Addition Successful");
+            await alert(mode === 'edit'? "Certificate editing successful": "New Certificate Addition Successful");
         } else {
-            alert(`${url} Failed`);
+            await alert(`${url} Failed`);
             console.error(data.error);
         }
     });
@@ -533,14 +533,14 @@ function openAddPhotoModal() {
     new bootstrap.Modal(document.getElementById('uploadPhotoModal')).show();
 }
 
-function editPhoto(button) {
+async function editPhoto(button) {
     editingPhotoCard = button.closest('.card');
     // Fix: getAttribute('data-photo-id') may be missing if not set on card
     // Always set data-photo-id on the card when rendering from backend!
     editingPhotoId = editingPhotoCard.getAttribute('data-photo-id');
     if (!editingPhotoId) {
         // Try to fallback: look for a unique identifier, or alert
-        alert("Photo ID not found. Please ensure data-photo-id is set on each card.");
+        await alert("Photo ID not found. Please ensure data-photo-id is set on each card.");
         return;
     }
     sessionStorage.setItem('photoMode', 'edit');
@@ -564,22 +564,22 @@ function editPhoto(button) {
     new bootstrap.Modal(document.getElementById('uploadPhotoModal')).show();
 }
 
-function deletePhoto(button) {
+async function deletePhoto(button) {
     const card = button.closest('.card');
     const photoId = card.getAttribute('data-photo-id');
     if (!photoId) {
-        alert("Photo ID not found.");
+        await alert("Photo ID not found.");
         return;
     }
-    if (confirm("Are you sure you want to delete this photo?")) {
+    if (await confirm("Are you sure you want to delete this photo?")) {
         const formData = new FormData();
         formData.append('id', photoId);
-        sendAjaxRequest('/executives/photos/delete/', formData, function (data) {
+        sendAjaxRequest('/executives/photos/delete/', formData, async function (data) {
             if (data.success) {
-                alert('photo deletion successful');
+                await alert('photo deletion successful');
                 window.location.reload();
             } else {
-                alert(data.error || "Failed to delete photo.");
+                await alert(data.error || "Failed to delete photo.");
             }
         });
     }
@@ -609,12 +609,12 @@ document.getElementById('uploadPhotoForm').addEventListener('submit', function (
         ? '/executives/photos/edit/'
         : '/executives/photos/add/';
 
-    sendAjaxRequest(url, formData, function (data) {
+    sendAjaxRequest(url, formData, async function (data) {
         if (data.success) {
-            alert('Photo Editing Successful');
+            await alert('Photo Editing Successful');
             window.location.reload();
         } else {
-            alert(data.error || "Failed to save photo.");
+            await alert(data.error || "Failed to save photo.");
         }
     });
 });
@@ -647,10 +647,10 @@ if (uniInfoEditForm) {
     const clone = uniInfoEditForm.cloneNode(true);
     uniInfoEditForm.parentNode.replaceChild(clone, uniInfoEditForm);
 
-    clone.addEventListener('submit', function(event) {
+    clone.addEventListener('submit', async function(event) {
         event.preventDefault();
         // Confirm before saving changes
-        if (!confirm("Are you sure you want to save changes to university information?")) {
+        if (!await confirm("Are you sure you want to save changes to university information?")) {
             return;
         }
         console.log("going to submit the edited details");

@@ -10,6 +10,15 @@
   <link rel="stylesheet" href="{% static 'faculty/css/instructor_course_management.css' %}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    .all-result-btn-div {
+      margin-bottom: 20px;
+    }
+
+    .all-result-btn-div button{
+      background-color: var(--primary-light);
+    }
+  </style>
 </head>
 
 <body>
@@ -62,6 +71,10 @@
       </div>
       <div class="item-grid" id="referredDocsGrid">
         <!-- Dynamically filled by JS -->
+      </div>
+
+      <div class="all-result-btn-div">
+        <button class="btn btn-primary" onclick="window.location.href=`/students/academics/all_results/${window.batch_instructor.id}`">All Assessment Results</button>
       </div>
 
       <div id="instructorInfo">

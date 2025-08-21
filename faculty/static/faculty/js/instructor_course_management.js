@@ -37,7 +37,7 @@ async function saveMarkingSchemeToBackend(rows) {
       },
       body: JSON.stringify({ scheme }),
     });
-    alert("Marking scheme has been successfully changed.");
+    await alert("Marking scheme has been successfully changed.");
   } catch (err) {
     console.error("Failed to save marking scheme", err);
   }
@@ -284,12 +284,12 @@ function renderAssessmentsWithData(markingRows, assessmentsByType) {
     grid.querySelectorAll(".item-card-delete").forEach((deleteBtn) => {
       deleteBtn.addEventListener("click", async () => {
         const assessmentId = deleteBtn.getAttribute("data-id");
-        if (!confirm("Are you sure to remove this assessment?")) {
+        if (!await confirm("Are you sure to remove this assessment?")) {
           return;
         }
         const ok = await deleteAssessment(assessmentId);
         if (ok) {
-          alert("Assessment deleted successfully");
+          await alert("Assessment deleted successfully");
           renderAllSections();
         }
       });
@@ -299,7 +299,7 @@ function renderAssessmentsWithData(markingRows, assessmentsByType) {
   section.querySelectorAll(".add-card-btn").forEach((btn) => {
     btn.onclick = async function () {
       const type = btn.getAttribute("data-type");
-      if (!confirm(`Create a new assessment for "${type}"?`)) return;
+      if (!await confirm(`Create a new assessment for "${type}"?`)) return;
       const ok = await createAssessment(type);
       if (ok) renderAllSections();
     };
@@ -427,7 +427,7 @@ let activities = {
 };
 
 if (typeof pdfjsLib === "undefined") {
-  alert("PDF.js is not loaded! Please check your script order.");
+  await alert("PDF.js is not loaded! Please check your script order.");
 }
 
 if (window.pdfjsLib) {
@@ -541,9 +541,9 @@ function setupEditDocButtons() {
 }
 
 const docAddForm = document.getElementById("editDocForm");
-docAddForm.onsubmit = function (e) {
+docAddForm.onsubmit = async function (e) {
   e.preventDefault();
-  if (!confirm("Are you sure to add this document")) return;
+  if (!await confirm("Are you sure to add this document")) return;
   docAddForm.submit();
 };
 
@@ -579,10 +579,10 @@ function encodeSVG(svg) {
   return "data:image/svg+xml," + encodeURIComponent(svg);
 }
 
-function downloadDrDoc(idx) {
+async function downloadDrDoc(idx) {
   const doc = drDocs[idx];
   if (!doc.fileBlob) {
-    alert("No file available for download.");
+    await alert("No file available for download.");
     return;
   }
   const url = URL.createObjectURL(doc.fileBlob);
@@ -596,7 +596,7 @@ function downloadDrDoc(idx) {
 }
 
 async function fetchAssessments() {
-  // alert('fetchAssessment()');
+  // await alert('fetchAssessment()');
   const batchId = window.batch_instructor.id;
   try {
     const response = await fetch(`/faculty/api/assessments/${batchId}/`);
@@ -611,7 +611,7 @@ async function fetchAssessments() {
 }
 
 async function deleteAssessment(assessmentId) {
-  // alert('fetchAssessment()');
+  // await alert('fetchAssessment()');
   const batchId = window.batch_instructor.id;
   try {
     const response = await fetch(
@@ -628,7 +628,7 @@ async function deleteAssessment(assessmentId) {
 }
 
 async function createAssessment(type) {
-  // alert(type);
+  // await alert(type);
   const batchId = window.batch_instructor.id;
   try {
     const response = await fetch(`/faculty/api/assessments/${batchId}/`, {
@@ -640,11 +640,11 @@ async function createAssessment(type) {
       body: JSON.stringify({ type }),
     });
     if (!response.ok) throw new Error("Failed to create assessment");
-    alert("Assessment created successfully.");
+    await alert("Assessment created successfully.");
     renderAssessments();
     return true;
   } catch (err) {
-    alert("Failed to create assessment.");
+    await alert("Failed to create assessment.");
     return false;
   }
 }
@@ -714,13 +714,13 @@ async function renderAssessments() {
     grid.querySelectorAll(".item-card-delete").forEach((deleteBtn) => {
       deleteBtn.addEventListener("click", async () => {
         const assessmentId = deleteBtn.getAttribute("data-id");
-        // alert(assessmentId);
-        if (!confirm("Are you sure to remove this assessment?")) {
+        // await alert(assessmentId);
+        if (!await confirm("Are you sure to remove this assessment?")) {
           return;
         }
         const ok = await deleteAssessment(assessmentId);
         if (ok) {
-          alert("Assessment deleted successfully");
+          await alert("Assessment deleted successfully");
           renderAssessments();
         }
       });
@@ -730,7 +730,7 @@ async function renderAssessments() {
     section.querySelectorAll(".add-card-btn").forEach((btn) => {
       btn.onclick = async function () {
         const type = btn.getAttribute("data-type");
-        if (!confirm(`Create a new assessment for "${type}"?`)) return;
+        if (!await confirm(`Create a new assessment for "${type}"?`)) return;
         const ok = await createAssessment(type);
         if (ok) renderAssessments();
       };
@@ -779,11 +779,11 @@ async function addDocument(formData) {
       body: formData,
     });
     if (!response.ok) throw new Error("Failed to add document");
-    alert("Document added successfully.");
+    await alert("Document added successfully.");
     renderDocuments();
     return true;
   } catch (err) {
-    alert("Failed to add document.");
+    await alert("Failed to add document.");
     return false;
   }
 }
@@ -811,12 +811,12 @@ async function referDocument(documentId) {
       throw new Error(data.error || "Failed to refer document");
     }
 
-    alert("Document referred successfully.");
+    await alert("Document referred successfully.");
     window.location.reload();
     return true;
 
   } catch (err) {
-    alert(err);
+    await alert(err);
     return false;
   }
 }
@@ -955,10 +955,10 @@ function showAddDocumentPopup() {
     const access = document.getElementById("addDocAccess").value;
     const file = fileInput.files[0];
     if (!name || !file) {
-      alert("Please provide both document name and file.");
+      await alert("Please provide both document name and file.");
       return;
     }
-    if (!confirm("Are you sure you want to add this document?")) return;
+    if (!await confirm("Are you sure you want to add this document?")) return;
     const formData = new FormData();
     formData.append("name", name);
     formData.append("access_status", access);
@@ -973,18 +973,18 @@ function showAddDocumentPopup() {
 }
 
 window.referDocumentHandler = async function (documentId) {
-  if (!confirm("Refer this document to students?")) return;
+  if (!await confirm("Refer this document to students?")) return;
   const ok = await referDocument(documentId);
   if (ok) renderDocuments();
 };
 
 window.deleteDocument = async function (documentId) {
-  if (!confirm("Are you sure to delete this document permanently?")) return;
+  if (!await confirm("Are you sure to delete this document permanently?")) return;
   fetch(`/faculty/document/delete/${documentId}/`)
     .then((r) =>
       r.ok
-        ? r.text().then(() => {
-          alert("Document Deleted successfully");
+        ? r.text().then(async () => {
+          await alert("Document Deleted successfully");
           renderDocuments();
         })
         : console.log("Error:", r.error)
@@ -993,12 +993,12 @@ window.deleteDocument = async function (documentId) {
 };
 
 window.deleteReferredDocument = async function (documentId) {
-  if (!confirm("Are you sure to unrefer this document?")) return;
+  if (!await confirm("Are you sure to unrefer this document?")) return;
   fetch(`/faculty/batch_instructor_document/delete/${documentId}/`)
     .then((r) =>
       r.ok
-        ? r.text().then(() => {
-          alert("Document Unreffered successfully");
+        ? r.text().then(async () => {
+          await alert("Document Unreffered successfully");
           renderDocuments();
         })
         : console.log("Error:", r.error)

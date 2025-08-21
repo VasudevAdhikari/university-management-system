@@ -32,17 +32,16 @@ def show_assessment_submission(request, assessment_id):
     if student.pk not in assessment.assessment.get('students'):
         return render(request, 'htmls/access_denied.html', {'message': 'You cannot view or submit this assessment. This assessment is not assigned for you.'})
     
+    if type==AssessmentType.QUIZ:
+        return redirect(f'/students/academics/quiz/{assessment.id}')
+    
     if AssessmentResult.objects.filter(student__user=student,assessment=assessment).exists():
         return redirect(f'/students/academics/submitted_assessment/{assessment.id}')
-    
         # Due date check
     if assessment.due_date < now():
         return render(request, 'htmls/access_denied.html', {
             'message': f'You cannot view or submit this assessment. The assignment was due by {assessment.due_date.strftime("%d.%m.%Y (%H:%M)")}'
         })
-    
-    if type==AssessmentType.QUIZ:
-        return redirect(f'/students/academics/quiz/{assessment.id}')
     data = {
         'assessment': assessment,
     }
@@ -176,12 +175,12 @@ def show_all_assessment_results(request, batch_instructor_id):
     batch_instructor = BatchInstructor.objects.filter(
         pk=int(batch_instructor_id),
     ).select_related(
-        'instructor_user',
+        'instructor__user',
         'course',
-        'instructor_department',
-        'batch_term',
-        'batch_semester',
-        'batch_semester_degree'
+        'instructor__department',
+        'batch__term',
+        'batch__semester',
+        'batch__semester__degree'
     ).first()
 
     assessment_results = AssessmentResult.objects.filter(
@@ -190,9 +189,29 @@ def show_all_assessment_results(request, batch_instructor_id):
     ).select_related(
         'assessment'
     )
+    given_total = 0
+    marking_scheme = batch_instructor.course.marking_scheme
+    for assessment, percent in marking_scheme.items():
+        if assessment != "Final":
+            given_total+=percent
+
+    all_results = {}
+    for ar in assessment_results:
+        assessment_type = ar.assessment.get_assessment_type_display()
+        if all_results.get(assessment_type):
+            all_results[assessment_type]+=ar.mark
+        else:
+            all_results[assessment_type]=ar.mark
+
+    got_total = 0
+    for _, marks in all_results.items():
+        got_total+=marks
 
     data = {
         'batch_instructor': batch_instructor,
-        'assessment_results': assessment_results
+        'assessment_results': assessment_results,
+        'got_total': got_total,
+        'given_total': given_total,
+        'percentage': got_total * 100 / given_total,
     }
     return render(request, 'students/academic/all_results.html', context=data)
