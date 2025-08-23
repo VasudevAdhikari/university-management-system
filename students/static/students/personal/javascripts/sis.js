@@ -66,9 +66,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Prevent form submit for demo
   const sisForm = document.getElementById("multiStepForm")
-  sisForm.addEventListener("submit", function (e) {
+  sisForm.addEventListener("submit", async function (e) {
     e.preventDefault(); // Uncomment to prevent actual submission
-    if (!confirm('Are you sure to submit your sis form?')) return;
+    if (!await confirm('Are you sure to submit your sis form?')) return;
     sisForm.submit();
   });
 

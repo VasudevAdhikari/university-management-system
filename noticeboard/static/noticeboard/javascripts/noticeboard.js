@@ -45,7 +45,7 @@ console.log('DOM Elements Check:', {
 let selectedMedia = [];
 
 // Modal state
-let modalState = {
+var modalState = {
     images: [],
     current: 0
 };
@@ -655,7 +655,7 @@ function showModalImg(images, idx) {
     document.getElementById('modal-prev').style.display = idx > 0 ? 'block' : 'none';
     document.getElementById('modal-next').style.display = idx < images.length - 1 ? 'block' : 'none';
 }
-let modalState = { images: [], current: 0 };
+var modalState = { images: [], current: 0 };
 
 document.addEventListener('DOMContentLoaded', function() {
     fetchPosts();

@@ -51,6 +51,7 @@ input, textarea, select, button,
 body {
     height: 100vh;
     width: 100%;
+    background-color: var(--bg-gray);
 }
 
 
@@ -58,7 +59,7 @@ body {
 .container {
     border: 1px solid rgba(191, 155, 155, 0.6);
     box-shadow: 0 2px 4px rgba(228, 188, 195, 0.8), 0 4px 8px rgba(80, 80, 126, 0.4);
-    border-radius: 10px;
+    border-radius: 21px !important;
     margin-top: 90px;
     padding-left: 16px;
     padding-right: 16px;
@@ -68,6 +69,7 @@ body {
     margin-right: auto;
     background: #fff;
     box-sizing: border-box;
+    border-top: 5px solid var(--secondary) !important;
 }
 
 .info-title {
@@ -761,6 +763,98 @@ body {
 .btn i,
 .btn span {
   vertical-align: middle;
+}
+.info-social a {
+    margin-right: 10px;
+    color: #003366;
+    font-size: 1.5rem;
+}
+.info-social a:hover {
+    color: #FFD700;
+}
+
+/* Modern info-card */
+.info-card {
+    background: #fff;
+    border-radius: 1.5rem;
+    box-shadow: 0 2px 24px 0 rgba(0,0,0,0.07);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.uni-logo-modern {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 1rem;
+    border: 2px solid #f0f0f0;
+    background: #f9f9f9;
+}
+
+.info-card h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.info-card .info-social a {
+    color: #444;
+    transition: color 0.2s;
+}
+.info-card .info-social a:hover {
+    color: #0d6efd;
+}
+
+.info-card .expandable-text {
+    display: inline;
+    overflow: hidden;
+    white-space: pre-line;
+    word-break: break-word;
+    max-width: 100%;
+}
+
+.read-more-link {
+    color: #0d6efd;
+    cursor: pointer;
+    margin-left: 0.5em;
+    font-size: 0.95em;
+    text-decoration: none;
+}
+.read-more-link:hover {
+    text-decoration: underline;
+}
+
+/* Modern modal */
+.modal-content {
+    border-radius: 1.5rem;
+    box-shadow: 0 2px 24px 0 rgba(0,0,0,0.10);
+    border: none;
+}
+
+.modal-header {
+    border-bottom: none;
+}
+
+.modal-footer {
+    border-top: none;
+}
+
+.form-control, .form-label {
+    border-radius: 0.75rem !important;
+}
+
+@media (max-width: 768px) {
+    .info-card {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1rem;
+    }
+    .uni-logo-modern {
+        margin-bottom: 1rem;
+    }
 }
 
 

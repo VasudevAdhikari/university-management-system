@@ -47,10 +47,9 @@
 }
 
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
   background-color: #f6f8fb; /* 60% - soft neutral blue-gray */
   color: #1e293b;
-  transition: background 0.4s;
   padding-top: env(safe-area-inset-top);
   padding-right: env(safe-area-inset-right);
   padding-bottom: env(safe-area-inset-bottom);

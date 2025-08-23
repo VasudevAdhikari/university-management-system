@@ -296,7 +296,7 @@ if (postInput && postBtn) {
 
     postBtn.addEventListener('click', async () => {
         if (postInput.value.trim() === '') return;
-        if (!confirm('Are you sure you want to post this notice?')) return;
+        if (!await confirm('Are you sure you want to post this notice?')) return;
         // Use FormData to send files
         const formData = new FormData();
         formData.append('caption', postInput.value);
@@ -371,7 +371,7 @@ async function fetchMyPosts() {
 }
 
 async function deleteMyPost(id, rowEl) {
-    if (!confirm('Are you sure you want to delete this post?')) return;
+    if (!await confirm('Are you sure you want to delete this post?')) return;
     try {
         const res = await fetch(`/noticeboard/api/posts/${id}/delete/`, { method: 'DELETE', credentials: 'same-origin' });
         if (!res.ok) throw new Error();

@@ -58,8 +58,9 @@ class UserRoleMiddleware:
                 name='university_info'
             ).first()
             if uni_logo:
-                uni_logo = uni_logo.details.get('profile')
-            cache.set(cache_key, f"/media/{uni_logo}", 60*60)
+                uni_photo = uni_logo.details.get('profile')
+            cache.set(cache_key, f"/media/{uni_photo}", 60*60)
+            cache.set('uni_name_lagjagale', uni_logo.details.get('name'), 60*60*24)
             
         # Step 4: Store role in request
         request.user_role = role
@@ -94,11 +95,11 @@ class ImgFallbackMiddleware:
         if isinstance(response, TemplateResponse):
             response.add_post_render_callback(self.inject_script)
         elif isinstance(response, HttpResponse):
-            response = self.inject_script(response)
+            response = self.inject_script(response, request)
 
         return response
 
-    def inject_script(self, response):
+    def inject_script(self, response, request):
         content_type = response.get('Content-Type', '')
         if hasattr(response, 'content') and content_type.startswith('text/html'):
             content_lower = response.content.lower()
@@ -184,6 +185,7 @@ class ImgFallbackMiddleware:
                 });
                 </script>
                 """
+                script += f'<link rel="icon" type="image/jpeg" href="{request.uni_logo}">'.encode("utf-8")
                 response.content = (response.content[:insert_index] + script +
                                     response.content[insert_index:])
                 response['Content-Length'] = len(response.content)

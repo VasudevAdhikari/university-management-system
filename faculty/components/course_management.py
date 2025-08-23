@@ -1,7 +1,9 @@
 from django.shortcuts import render
 from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseNotAllowed
 from django.views.decorators.csrf import csrf_exempt
-from authorization.models import BatchInstructor, AssessmentType, AssessmentScheme, Assessment, Instructor, Document, AssessmentResult
+from authorization.models import BatchInstructor, AssessmentType, AssessmentScheme, Assessment, Instructor, Document, AssessmentResult, Student
+from django.db.models import Q
+from django.db import transaction
 import json
 from collections import defaultdict
 
@@ -130,12 +132,34 @@ def assessments_api(request, batch_id):
                 "title": f"{type_} {Assessment.objects.filter(assessment_scheme=scheme, assessment_type=assessment_type).count() + 1}"
             }
 
-            # Create new assessment
-            assessment = Assessment.objects.create(
-                assessment_scheme=scheme,
-                assessment_type=assessment_type,
-                assessment=assessment,
-            )
+            with transaction.atomic():
+                # Create new assessment
+                assessment = Assessment.objects.create(
+                    assessment_scheme=scheme,
+                    assessment_type=assessment_type,
+                    assessment=assessment,
+                )
+
+                batch_inst = assessment.assessment_scheme.batch_instructor
+                if assessment.assessment_type in (
+                    AssessmentType.CLASS_PARTICIPATION, 
+                    AssessmentType.FINAL_ONPAPER, 
+                    AssessmentType.MIDTERM, 
+                    AssessmentType.TUTORIAL
+                ):
+                    students = Student.objects.filter(
+                        Q(sisform__enrollment__enrollmentcourse__batch_instructor=batch_inst)
+                    ).distinct()
+                    assessment_results = []
+                    for student in students:
+                        assessment_results.append(AssessmentResult(
+                            assessment=assessment,
+                            student=student,
+                            answer={},
+                            mark=0,
+                        ))
+                    AssessmentResult.objects.bulk_create(assessment_results)
+                
             return JsonResponse({'success': True, 'id': assessment.id})
         except Exception as e:
             print(e)

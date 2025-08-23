@@ -112,8 +112,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    $submit.addEventListener('click', function() {
-        if (! confirm('Are you sure to submit the enrollment form?')) {
+    $submit.addEventListener('click', async function() {
+        if (! await confirm('Are you sure to submit the enrollment form?')) {
             return;
         }
         const termId = $term.value;
@@ -141,8 +141,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             return response.json();
         })
-        .then(result => {
-            alert('Enrollment Successful');
+        .then(async result => {
+            await alert('Enrollment Successful');
         })
         .catch(error => {
             console.error('Error:', error);

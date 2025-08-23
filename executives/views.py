@@ -90,6 +90,11 @@ def uni_info_edit(request):
             "facebook": request.POST.get("facebook", ""),
             "opening_time": request.POST.get("opening_time", ""),
             "description": request.POST.get("description", ""),
+            "mission": request.POST.get("mission", ""),
+            "vision": request.POST.get("vision", ""),
+            "linkedin": request.POST.get("linkedin", ""),
+            "twitter": request.POST.get("twitter", ""),
+            "instagram": request.POST.get("instagram", ""),
         }
 
         # Always update the first matching record, never create a new one if any exist

@@ -76,6 +76,8 @@ window.onclick = (e) => {
 // Handle submit
 submitMajorBatch.onclick = async () => {
     const major = majorSelect.value;
+    document.getElementById('majorModal').style.display='none';
+    document.getElementById('modalOverlay').style.display='none';
     const checkedSems = Array.from(semCheckboxList.querySelectorAll("input:checked")).map(cb => cb.value);
 
     if (!major) {
@@ -392,15 +394,11 @@ function showSubjectPopup(subjectBtn, semName, majorName) {
         classroom1Label.style.marginBottom = "6px";
         modal.appendChild(classroom1Label);
 
-        let classroom1Select = document.createElement('select');
+        let classroom1Select = document.createElement('input');
         classroom1Select.id = "classroom1ToSubmit"
-        rooms = ["Room A", "Room B", "Room C"];
-        rooms.forEach(r => {
-            let o = document.createElement('option');
-            o.value = r;
-            o.textContent = r;
-            classroom1Select.appendChild(o);
-        });
+        classroom1Select.type = "text";
+        classroom1Select.maxLength = 20;
+        classroom1Select.placeholder = "Enter classroom";
         classroom1Select.style.marginBottom = "8px";
         modal.appendChild(classroom1Select);
 
@@ -426,18 +424,11 @@ function showSubjectPopup(subjectBtn, semName, majorName) {
         classroom2Label.style.marginBottom = "6px";
         modal.appendChild(classroom2Label);
 
-        let classroom2Select = document.createElement('select');
+        let classroom2Select = document.createElement('input');
         classroom2Select.id = "classroom2ToSubmit";
-        let emptyOpt = document.createElement('option');
-        emptyOpt.value = "";
-        emptyOpt.textContent = "-- None --";
-        classroom2Select.appendChild(emptyOpt);
-        ["Room A", "Room B", "Room C"].forEach(r => {
-            let o = document.createElement('option');
-            o.value = r;
-            o.textContent = r;
-            classroom2Select.appendChild(o);
-        });
+        classroom2Select.type = "text";
+        classroom2Select.placeholder = "Another classroom (optional)";
+        classroom2Select.maxLength = 20;
         classroom2Select.style.marginBottom = "8px";
         modal.appendChild(classroom2Select);
 

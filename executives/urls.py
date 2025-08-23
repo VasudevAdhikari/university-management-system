@@ -120,4 +120,6 @@ urlpatterns = [
     path("instructor/<int:instructor_id>/transfer/", instructor_data_manager.transfer_instructor, name="transfer_instructor"),
     path("instructor/<int:instructor_id>/retire/", instructor_data_manager.retire_instructor, name="retire_instructor"),
     path("instructor/<int:instructor_id>/leave/", instructor_data_manager.leave_instructor, name="leave_instructor"),
+    path("instructor/<int:instructor_id>/active/", instructor_data_manager.approve_instructor, name="approve_instructor"),
+    path("change_instructor_department/<int:instructor_id>/<int:department_id>/", instructor_data_manager.change_instructor_department, name="change_instructor_department"),
 ]

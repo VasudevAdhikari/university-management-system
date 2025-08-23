@@ -1,7 +1,7 @@
 from PIL import Image, ImageDraw, ImageFont
-import os
-import uuid
+import os, uuid
 from django.conf import settings
+from django.core.cache import cache
 
 # Function to wrap text within a specified width
 def wrap_text(text, font, max_width, draw):
@@ -41,7 +41,8 @@ def create_result_image_dynamic(courses, student_name, student_id, degree, semes
 
     # University header
     # ============== TO FIX => Replace with original university name========================
-    draw.text((width/2, 50), "University of Computer Studies, Yangon", fill='navy', font=title_font, anchor='mm')
+    
+    draw.text((width/2, 50), cache.get('uni_name_lagjagale'), fill='navy', font=title_font, anchor='mm')
     draw.text((width/2, 120), degree.title(), fill='darkblue', font=header_font, anchor='mm')
     draw.text((width/2, 170), term.title(), fill='darkred', font=header_font, anchor='mm')
     

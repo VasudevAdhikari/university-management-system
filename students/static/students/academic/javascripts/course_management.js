@@ -245,7 +245,7 @@ function renderAssessmentsWithData(markingRows, assessmentsByType) {
   section.querySelectorAll(".add-card-btn").forEach((btn) => {
     btn.onclick = async function () {
       const type = btn.getAttribute("data-type");
-      if (!confirm(`Create a new assessment for "${type}"?`)) return;
+      if (!await confirm(`Create a new assessment for "${type}"?`)) return;
       const ok = await createAssessment(type);
       if (ok) renderAllSections();
     };
@@ -297,7 +297,7 @@ let activities = {
 };
 
 if (typeof pdfjsLib === "undefined") {
-  alert("PDF.js is not loaded! Please check your script order.");
+  await alert("PDF.js is not loaded! Please check your script order.");
 }
 
 if (window.pdfjsLib) {
@@ -328,10 +328,10 @@ function encodeSVG(svg) {
   return "data:image/svg+xml," + encodeURIComponent(svg);
 }
 
-function downloadDrDoc(idx) {
+async function downloadDrDoc(idx) {
   const doc = drDocs[idx];
   if (!doc.fileBlob) {
-    alert("No file available for download.");
+    await alert("No file available for download.");
     return;
   }
   const url = URL.createObjectURL(doc.fileBlob);
@@ -345,7 +345,7 @@ function downloadDrDoc(idx) {
 }
 
 async function fetchAssessments() {
-  // alert('fetchAssessment()');
+  // await alert('fetchAssessment()');
   const batchId = window.batch_instructor.id;
   try {
     const response = await fetch(`/faculty/api/assessments/${batchId}/`);
@@ -408,7 +408,7 @@ async function renderAssessments() {
   section.querySelectorAll(".add-card-btn").forEach((btn) => {
     btn.onclick = async function () {
       const type = btn.getAttribute("data-type");
-      if (!confirm(`Create a new assessment for "${type}"?`)) return;
+      if (!await confirm(`Create a new assessment for "${type}"?`)) return;
       const ok = await createAssessment(type);
       if (ok) renderAssessmentsx();
     };

@@ -3,10 +3,12 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from authorization.models import Assessment, AssessmentResult, Student, AssessmentType, User, BatchInstructor
-import json
-import os
+import json, os
 from datetime import datetime
 from django.utils.timezone import now
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+from datetime import datetime
 
 def show_assessment_submission(request, assessment_id):
     type = request.GET.get('type')
@@ -87,23 +89,17 @@ def submit_assessment(request):
             if key.startswith('images['):
                 file = request.FILES[key]
                 if file.content_type.startswith('image/'):
-                    # Save image to media/assessment_submissions/images/
-                    file_path = f'assessment_submissions/{assessment_id}_{student.pk}_{file.name.replace(" ", "")}'
-                    with open(f'media/{file_path}', 'wb+') as destination:
-                        for chunk in file.chunks():
-                            destination.write(chunk)
-                    uploaded_images.append(file_path)
+                    file_path = f'assessment_submissions/images/{assessment_id}_{student.pk}_{file.name.replace(" ", "")}'
+                    saved_path = default_storage.save(file_path, ContentFile(file.read()))
+                    uploaded_images.append(saved_path)
         
         # Process uploaded files
         for key in request.FILES:
             if key.startswith('files['):
                 file = request.FILES[key]
-                # Save file to media/assessment_submissions/files/
-                file_path = f'assessment_submissions/{assessment_id}_{student.pk}_{file.name.replace(" ","")}'
-                with open(f'media/{file_path}', 'wb+') as destination:
-                    for chunk in file.chunks():
-                        destination.write(chunk)
-                uploaded_files.append(file_path)
+                file_path = f'assessment_submissions/files/{assessment_id}_{student.pk}_{file.name.replace(" ", "")}'
+                saved_path = default_storage.save(file_path, ContentFile(file.read()))
+                uploaded_files.append(saved_path)
         
         # Create assessment result with timing data
         answer_data = {
@@ -139,7 +135,6 @@ def submit_assessment(request):
     except Exception as e:
         print(e)
         return JsonResponse({'success': False, 'message': f'Error: {str(e)}'})
-
 def formatTimeTaken(milliseconds):
     """Format time taken in milliseconds to human readable format"""
     if milliseconds < 60000:  # Less than 1 minute

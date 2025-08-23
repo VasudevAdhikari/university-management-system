@@ -267,10 +267,10 @@ function setupEventListeners() {
     });
 }
 
-function handleFormSubmission(event) {
+async function handleFormSubmission(event) {
     event.preventDefault();
     if (selectedStudents.length === 0) {
-        alert('Please select at least one student for the assignment.');
+        await alert('Please select at least one student for the assignment.');
         return;
     }
     const title = document.getElementById('assignmentTitle').value;
@@ -319,17 +319,17 @@ function handleFormSubmission(event) {
         body: formData
     })
     .then(response => response.json())
-    .then(data => {
+    .then(async data => {
         if (data.success) {
-            alert('Assignment created successfully');
+            await alert('Assignment created successfully');
             window.location.href = `/faculty/course_management/${window.BATCH_INSTRUCTOR_ID}`;
         } else {
             console.error('Server error:', data);
-            alert('Failed to create assignment: ' + (data.message || data.error || 'Unknown error'));
+            await alert('Failed to create assignment: ' + (data.message || data.error || 'Unknown error'));
         }
     })
-    .catch((error) => {
+    .catch(async (error) => {
         console.error('Error:', error);
-        alert('An error occurred while creating the assignment.');
+        await alert('An error occurred while creating the assignment.');
     });
 }

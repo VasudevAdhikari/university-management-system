@@ -517,7 +517,7 @@
     </script>
     
     <!-- Main JS -->
-    <script src="{% static 'noticeboard/javascripts/manage_post.js' %}"></script>
+    <script type="module" src="{% static 'noticeboard/javascripts/manage_post.js' %}"></script>
     <script>
 function createImageGrid(imgs, containerWidth) {
     if (imgs.length === 1) {
@@ -584,7 +584,7 @@ async function fetchMyPosts() {
     }
 }
 async function deleteMyPost(id, rowEl) {
-    if (!confirm('Are you sure you want to delete this post?')) return;
+    if (!await confirm('Are you sure you want to delete this post?')) return;
     try {
         const res = await fetch(`/noticeboard/api/posts/${id}/delete/`, { method: 'DELETE', credentials: 'same-origin' });
         if (!res.ok) throw new Error();

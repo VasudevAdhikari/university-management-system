@@ -464,6 +464,7 @@ document.getElementById('editForm').addEventListener('submit', function (e) {
     sendAjaxRequest(url, formData, async function (data) {
         if (data.success) {
             await alert(mode === 'edit'? "Certificate editing successful": "New Certificate Addition Successful");
+            window.location.reload();
         } else {
             await alert(`${url} Failed`);
             console.error(data.error);
@@ -655,12 +656,12 @@ if (uniInfoEditForm) {
         }
         console.log("going to submit the edited details");
 
-        const url = clone.getAttribute('action');
+        const url = '/executives/uni_info_edit/';
         const formData = new FormData(clone);
         fetch(url, {
             method: 'POST',
             headers: {
-                'X-CSRFToken': clone.querySelector('[name=csrfmiddlewaretoken]').value
+                'X-CSRFToken': window.csrf
             },
             body: formData
         })
@@ -677,6 +678,7 @@ if (uniInfoEditForm) {
                     successDiv.classList.remove('d-none');
                     setTimeout(() => successDiv.classList.add('d-none'), 1500);
                 }
+                window.location.reload();
             }
         });
     });
@@ -724,4 +726,45 @@ document.addEventListener('DOMContentLoaded', function () {
     // ...existing code...
     setupDescriptionTruncate();
     // ...existing code...
+});
+
+const labAddForm = document.getElementById('uploadLabForm');
+labAddForm.addEventListener('submit', async (e)=> {
+    e.stopPropagation();
+    e.preventDefault();
+    if (!await confirm('Are you sure to create this lab?')) return;
+    labAddForm.submit();
+});
+
+// Expandable text sections for description, mission, vision
+document.addEventListener('DOMContentLoaded', function () {
+    function setupExpandableText(id, limit) {
+        const textElem = document.getElementById(id);
+        const link = document.querySelector(`a.read-more-link[data-target="${id}"]`);
+        if (!textElem || !link) return;
+        const fullText = textElem.textContent.trim();
+        if (fullText.length <= limit) {
+            link.style.display = 'none';
+            return;
+        }
+        let expanded = false;
+        function update() {
+            if (expanded) {
+                textElem.textContent = fullText;
+                link.textContent = 'Read less';
+            } else {
+                textElem.textContent = fullText.slice(0, limit) + '...';
+                link.textContent = 'Read more';
+            }
+        }
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            expanded = !expanded;
+            update();
+        });
+        update();
+    }
+    setupExpandableText('desc-text', 180);
+    setupExpandableText('mission-text', 180);
+    setupExpandableText('vision-text', 180);
 });

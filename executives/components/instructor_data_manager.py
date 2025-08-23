@@ -1,5 +1,6 @@
+import json
 from django.shortcuts import render, redirect
-from authorization.models import Instructor, BatchInstructor, EnrollmentCourse, EmploymentStatus
+from authorization.models import Department, Instructor, BatchInstructor, EnrollmentCourse, EmploymentStatus
 from collections import defaultdict
 from django.shortcuts import get_object_or_404
 from django.contrib import messages
@@ -69,12 +70,21 @@ def show_instructor_data(request, instructor_id):
             'end_date': term.end_date,
             'courses': term_courses
         })
+        
+    departments = Department.objects.all()
+    department_data = []
+    for department in departments:
+        department_data.append({
+            "name": department.name,
+            "id": department.pk,
+        })
 
     data = {
         'instructor': instructor,
         'total_courses_taught': total_courses_taught,
         'total_students_taught': total_students_taught,
-        'terms': terms
+        'terms': terms,
+        'departments': json.dumps(department_data),
     }
 
     return render(request, 'executives/instructor_data.html', context=data)
@@ -89,6 +99,9 @@ def retire_instructor(request, instructor_id):
 
 def leave_instructor(request, instructor_id):
     return change_instructor_status(request, instructor_id, EmploymentStatus.ON_LEAVE)
+
+def approve_instructor(request, instructor_id):
+    return change_instructor_status(request, instructor_id, EmploymentStatus.ACTIVE)
 
 
 def change_instructor_status(request, instructor_id, status):
@@ -114,3 +127,11 @@ def change_instructor_status(request, instructor_id, status):
         print("Error:", e)
 
     return redirect(f"/executives/instructor_data/{instructor_id}/")
+
+def change_instructor_department(request, instructor_id, department_id):
+    instructor = Instructor.objects.filter(
+        user__id=instructor_id
+    ).first()
+    instructor.department=Department.objects.get(pk=department_id)
+    instructor.save()
+    return redirect(f'/executives/instructor_data/{instructor_id}')

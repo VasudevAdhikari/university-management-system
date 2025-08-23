@@ -9,10 +9,10 @@ fetch(url, {
     body: JSON.stringify(data),
 })
 .then((response) => response.json()) // parse JSON response
-.then((result) => {
+.then(async (result) => {
     console.log("Success:", result);
     if (result.success) {
-        alert(result.message);
+        await alert(result.message);
         window.location.reload();
     }
 })
@@ -29,13 +29,13 @@ document.getElementById('cancelReviewBtn').onclick = function () {
     document.getElementById('reviewPopup').style.display = 'none';
     document.getElementById('reviewText').value = '';
 };
-document.getElementById('submitReviewBtn').onclick = function () {
+document.getElementById('submitReviewBtn').onclick = async function () {
     var review = document.getElementById('reviewText').value.trim();
     if (!review) {
-        alert('Please enter your review.');
+        await alert('Please enter your review.');
         return;
     }
-    let check = confirm('Are you sure you want to submit this review?');
+    let check = await confirm('Are you sure you want to submit this review?');
     if (!check) {
         return;
     }
@@ -81,12 +81,12 @@ document.querySelectorAll('#starContainer .star').forEach(function (star) {
         setStars(selectedRating);
     };
 });
-document.getElementById('submitRatingBtn').onclick = function () {
+document.getElementById('submitRatingBtn').onclick = async function () {
     if (selectedRating === 0) {
-        alert('Please select a rating by clicking the stars.');
+        await alert('Please select a rating by clicking the stars.');
         return;
     }
-    let check = confirm('Are you sure you want to submit this rating?');
+    let check = await confirm('Are you sure you want to submit this rating?');
     if (!check) {
         return;
     }
